@@ -1,0 +1,69 @@
+:root
+{
+    --dark-color:       #0F0928;
+    --primary-color:    #2B00D4;
+    --primary-bright:   #411AD8;
+
+    --primary-font: 'Poppins', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    --accent-font: 'Averta', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+}
+
+@font-face {
+    font-family: 'Averta';
+    src: url('../fonts/AvertaStd-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('../fonts/Poppins-Regular.ttf');
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #FFFFFF;
+    color: var(--dark-color);
+    font-family: var(--primary-font);
+}
+
+.logo-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.logo-background 
+{
+    width: 55px;
+    height: 55px;
+    min-width: 55px;
+    min-height: 55px;
+    padding-top: 0.4375rem;
+    border-radius: 50%;
+    background-color: #E9E5FB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-text {
+    font-family: var(--accent-font);
+    font-weight: 500;
+}
+
+.logo-sub-text {
+    font-size: 12px;
+    opacity: 0.8;
+    letter-spacing: 1px;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

@@ -1,0 +1,15 @@
+.options-wrapper,.calendar-clock {
+    border-radius: 25px;
+    height: 36px;
+}
+
+.calendar-clock {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.options-wrapper {
+    background-color: #E9E5FB;
+    color: var(--primary-color);
+    width: 36px;
+}
