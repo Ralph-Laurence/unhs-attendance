@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ asset('css/lib/mdb/mdb.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/lib/simplebar/simplebar.min.css') }}">
 
+    <link rel="stylesheet" href="{{ asset('css/overrides/simplebar-overrides.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/main/main.css') }}">
 
     <!-- CHILD VIEW STYLES -->

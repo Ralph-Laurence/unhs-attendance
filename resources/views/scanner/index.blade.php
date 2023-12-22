@@ -1,7 +1,7 @@
 @extends('layouts.base')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/main/scanner-overrides.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/overrides/scanner-overrides.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/main/scanner-page.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/effects/slide-text.css') }}"/>
 @endpush
