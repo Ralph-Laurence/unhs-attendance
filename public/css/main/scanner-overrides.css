@@ -1,0 +1,30 @@
+/* Hide the SCAN IMAGE option */
+#html5-qrcode-anchor-scan-type-change {
+    display: none !important;
+}
+
+#html5-qrcode-button-camera-stop,
+#html5-qrcode-button-camera-start {
+    appearance: none;
+    border: none !important;
+    border-radius: 2rem !important;
+    padding: 0.25rem 0.75rem !important;
+    color: white;
+    margin-top: 0.5rem;
+}
+
+#html5-qrcode-button-camera-stop {
+    background-color: var(--danger-color);
+}
+
+#html5-qrcode-button-camera-start {
+    background-color: var(--primary-color);
+}
+
+#html5-qrcode-button-camera-start:hover {
+    background-color: var(--primary-bright);
+}
+
+#html5-qrcode-select-camera {
+    max-width: 200px;
+}

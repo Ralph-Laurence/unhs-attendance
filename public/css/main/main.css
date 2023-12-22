@@ -3,6 +3,10 @@
     --dark-color:       #0F0928;
     --primary-color:    #2B00D4;
     --primary-bright:   #411AD8;
+    --primary-lighter:  #E9E5FB;
+    --danger-color:     #FF2641;
+    --accent-color:     #1FC9A4;
+    --accent-bright:    #22DDB3;
 
     --primary-font: 'Poppins', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     --accent-font: 'Averta', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -24,10 +28,11 @@
 }
 
 html, body {
-    margin: 0;
+    margin: auto;
     width: 100%;
     height: 100%;
-    background-color: #FFFFFF;
+    max-width: 1400px;
+    background-color: #F8F8F9;
     color: var(--dark-color);
     font-family: var(--primary-font);
 }

@@ -29,3 +29,7 @@ Route::controller(ScannerController::class)->group(function()
 {
     Route::get('/dtr-scanner', 'index')->name(RouteNames::Scanner);
 });
+
+Route::get('/test', function() {
+    return view('tests.test');
+});
