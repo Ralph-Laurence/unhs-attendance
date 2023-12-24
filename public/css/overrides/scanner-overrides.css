@@ -3,6 +3,7 @@
     display: none !important;
 }
 
+#html5-qrcode-button-camera-permission,
 #html5-qrcode-button-camera-stop,
 #html5-qrcode-button-camera-start {
     appearance: none;
@@ -27,4 +28,9 @@
 
 #html5-qrcode-select-camera {
     max-width: 200px;
+}
+
+#html5-qrcode-button-camera-permission {
+    background-color: var(--primary-lighter);
+    color: var(--dark-color);
 }

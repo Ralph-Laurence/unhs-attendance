@@ -7,6 +7,7 @@
     --danger-color:     #FF2641;
     --accent-color:     #1FC9A4;
     --accent-bright:    #22DDB3;
+    --warning-color:    #FFAC34;
 
     --primary-font: 'Poppins', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     --accent-font: 'Averta', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -76,4 +77,43 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/*
+Button Overrides
+*/
+.flat-button {
+    appearance: none;
+    border: none !important;
+    border-radius: 2rem !important;
+    color: white;
+}
+
+.flat-button.btn-secondary {
+    color: var(--dark-color);
+}
+
+.flat-button.btn-primary {
+    background-color: var(--primary-color);
+}
+
+.flat-button.btn-primary:hover {
+    background-color: var(--primary-bright);
+}
+
+.flat-button.btn-danger {
+    background-color: var(--danger-color);
+}
+
+.flat-button.btn-danger:hover {
+    background-color: #FF3651;
+}
+
+.flat-button.btn-warning {
+    background-color: var(--warning-color);
+    color: var(--dark-color);
+}
+
+.flat-button.btn-warning:hover {
+    background-color: #F6BE48;
 }

@@ -63,6 +63,8 @@ function onScanSuccess(decodedText, decodedResult)
 
         // Play a beep sound after a successful scan
         playSound(beep_timeIn);
+
+        submitScanResult(decodedText);
     } 
     // Otherwise, ignore the scanned qr code
 }
@@ -122,6 +124,28 @@ function animateCalendar()
     let animation = new SlideText('.date-label');
 
     animation.items = [dayToday, dayName];
-    animation.slideDelay = 4000;                  // Every 3 seconds
+    animation.slideDelay = 4000;                  // Every 4 seconds
     animation.start();
+}
+//
+//
+//
+function submitScanResult(data) 
+{
+    var metaCSRF = $('meta[name="csrf-token"]').attr('content');
+
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': metaCSRF },
+        error: (xhr) => {
+            modal.showDanger('some message', 'Failure', function() { console.log('OK clicked'); }, function() { console.log('Cancel clicked'); });
+        }
+    });
+
+    // (url, data, success) <-- auto pass success 'response' param
+    $.post(scannerSubmitUrl, { hash: data }, (e) => {
+        if (e)
+        {
+            console.log(e);
+        }
+    });
 }

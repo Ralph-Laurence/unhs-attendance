@@ -8,5 +8,9 @@ class RouteNames
         'index' => 'backoffice.daily-time-record.index'
     ];
 
-    public const Scanner = 'dtr-scanner.index';
+    public const Scanner = [
+        'index'     => 'dtr-scanner.index',
+        'decode'    => 'dtr-scanner.decode'
+    ];
+
 }

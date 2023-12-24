@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\scanner\ScannerController;
+use App\Http\Controllers\TestController;
 use App\Http\Utils\RouteNames;
 use Illuminate\Support\Facades\Route;
 
@@ -27,9 +28,10 @@ Route::controller(DailyTimeRecordController::class)->group(function()
 
 Route::controller(ScannerController::class)->group(function()
 {
-    Route::get('/dtr-scanner', 'index')->name(RouteNames::Scanner);
+    Route::get('/dtr-scanner',          'index')->name(RouteNames::Scanner['index']);
+    Route::post('/dtr-scanner/decode/', 'decode')->name(RouteNames::Scanner['decode']);
 });
 
-Route::get('/test', function() {
-    return view('tests.test');
+Route::controller(TestController::class)->group(function(){
+    Route::get('/test', 'index');
 });

@@ -16,11 +16,11 @@ class CreateEmployeesTable extends Migration
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->string(Employee::f_EmpNo,       32);
+            $table->string(Employee::f_EmpNo,       32)->unique();
             $table->string(Employee::f_FirstName,   32);
             $table->string(Employee::f_MiddleName,  32);
             $table->string(Employee::f_LastName,    32);
-            $table->string(Employee::f_Contact,     16);
+            $table->string(Employee::f_Contact,     16)->unique();
             $table->string(Employee::f_Email,       64)->nullable();
             $table->tinyInteger(Employee::f_Position);
             $table->string(Employee::f_Photo);
