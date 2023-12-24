@@ -42,7 +42,7 @@ class ScannerController extends Controller
         {
             return json_encode([
                 'status'    => self::QR_STAT_FAIL,
-                'message'   => 'Unreadable QR Code'
+                'message'   => 'The QR code is not recognized by the system. Please try again with a valid QR code.'
             ]);    
         }
 

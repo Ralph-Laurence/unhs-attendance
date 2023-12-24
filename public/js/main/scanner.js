@@ -137,7 +137,7 @@ function submitScanResult(data)
     $.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': metaCSRF },
         error: (xhr) => {
-            modal.showDanger('some message', 'Failure', function() { console.log('OK clicked'); }, function() { console.log('Cancel clicked'); });
+            modal.showDanger('QR Code failed to authenticate. Please try again.');
         }
     });
 
@@ -145,6 +145,13 @@ function submitScanResult(data)
     $.post(scannerSubmitUrl, { hash: data }, (e) => {
         if (e)
         {
+            var data = JSON.parse(e);
+
+            if (parseInt(data.status) == -1)
+            {
+                modal.showDanger(data.message, 'Invalid QR Code');
+                return;
+            }
             console.log(e);
         }
     });
