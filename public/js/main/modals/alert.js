@@ -1,20 +1,23 @@
-var modal = {
+var alertModal = {
+    
+    iconDataset: document.querySelector('#alertModal .modal-icon').dataset,
     //
     // Modal Appearance by Type
     //
-    typeConfig:
-    {
-        'info':     { btnClass: 'btn-primary',  defaultTitle: 'Information' },
-        'danger':   { btnClass: 'btn-danger',   defaultTitle: 'Failure' },
-        'warn':     { btnClass: 'btn-warning',  defaultTitle: 'Warning' },
-        'default':  { btnClass: 'btn-primary',  defaultTitle: 'Notice' }
+    getTypeConfig: function() {
+        return {
+            'info':     { btnClass: 'btn-primary',  defaultTitle: 'Information', icon: this.iconDataset.iconDefault },
+            'danger':   { btnClass: 'btn-danger',   defaultTitle: 'Failure'    , icon: this.iconDataset.iconFailure },
+            'warn':     { btnClass: 'btn-warning',  defaultTitle: 'Warning'    , icon: this.iconDataset.iconWarning },
+            'default':  { btnClass: 'btn-primary',  defaultTitle: 'Notice'     , icon: this.iconDataset.iconDefault }
+        };
     },
     //
     // Powered by Bootstrap's Modal class; We will apply its custom appearance and behaviours
     //
     show: function (message, title, okClicked = function () { }, cancelClicked = function () { }, type) 
     {
-        var config = this.typeConfig[type] || this.typeConfig.default;
+        var config = this.getTypeConfig()[type] || this.getTypeConfig().default;
 
         // Use the provided title if it exists, otherwise use the default title
         $('#alertModalLabel').text(title || config.defaultTitle);
@@ -29,6 +32,9 @@ var modal = {
         // Set button click handlers
         $('#alertModal .btn.btn-ok').off('click').on('click', okClicked);
         $('#alertModal .btn.btn-cancel').off('click').on('click', cancelClicked);
+
+        // Set custom icon
+        $('#alertModal .modal-icon').attr('src', config.icon);
 
         // Show the modal
         var myModal = new mdb.Modal(document.getElementById('alertModal'));

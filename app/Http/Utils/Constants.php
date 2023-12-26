@@ -8,6 +8,6 @@ class Constants
     public const SystemName = 'Attendance Monitoring System';
     public const BuildVersion = 'Alpha v1.0.0';
 
-    public const QR_ERR_INVALID = 'QR Code is invalid';
-    public const QR_ERR_UNREADABLE = 'QR Code is unreadable';
+    public const BasicTimeFormat = 'g:i A';
+    public const TimestampFormat = 'Y-m-d H:i:s';
 }

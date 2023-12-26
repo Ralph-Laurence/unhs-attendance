@@ -12,7 +12,7 @@ class TestController extends Controller
         $qrcode = QRMaker::generate('80511');
         $hash = new Hashids();
 
-        $testDecode = $hash->decode('jR');
+        $testDecode = $hash->decode('vm');
 
         return view('tests.test')->with('qrcode', $qrcode)->with('decode', $testDecode[0]);
     }

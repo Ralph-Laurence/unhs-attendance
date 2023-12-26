@@ -31,7 +31,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'zelenskyy@ukraini.ur',
                 Employee::f_Position    => Employee::RoleTeacher,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00001'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],
@@ -44,7 +43,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'obama@washington.usa',
                 Employee::f_Position    => Employee::RoleTeacher,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00002'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],
@@ -57,7 +55,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'nuke@facility.nk',
                 Employee::f_Position    => Employee::RoleTeacher,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00003'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],
@@ -70,7 +67,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'political@snowman.usa',
                 Employee::f_Position    => Employee::RoleTeacher,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00004'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],
@@ -83,7 +79,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'ruskie@rusland.ru',
                 Employee::f_Position    => Employee::RoleTeacher,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00005'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],
@@ -99,7 +94,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'jeff@amazon.com',
                 Employee::f_Position    => Employee::RoleStaff,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00006'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],
@@ -112,7 +106,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'elon@tesla.motors',
                 Employee::f_Position    => Employee::RoleStaff,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00007'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],
@@ -125,7 +118,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'apple@ios.os',
                 Employee::f_Position    => Employee::RoleStaff,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00008'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],
@@ -138,7 +130,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'windows@microsoft.net',
                 Employee::f_Position    => Employee::RoleStaff,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00009'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],
@@ -151,7 +142,6 @@ class EmployeesSeeder extends Seeder
                 Employee::f_Email       => 'mark@fb.com',
                 Employee::f_Position    => Employee::RoleStaff,
                 Employee::f_Photo       => '',
-                Employee::f_QrData      => $hash->encode('00010'),
                 'created_at'            => now(),
                 'updated_at'            => now()
             ],

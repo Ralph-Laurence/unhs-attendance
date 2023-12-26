@@ -115,5 +115,6 @@
     <script>
         const scannerSubmitUrl = "{{ $scannerPostURL }}";
     </script>
-    <script src="{{ asset('js/main/scanner.js') }}"></script>
+    <script src="{{ asset('js/main/scanner-page/scanner.js') }}"></script>
+    <script src="{{ asset('js/main/scanner-page/calendar.js') }}"></script>
 @endpush

@@ -15,7 +15,7 @@ class QRMaker
 {
     public static function generate(string $content)
     {
-        $framePath  = public_path('images/internal/qr-frame.png');
+        $framePath  = public_path('images/internal/templates/qr-frame.png');
         $frame      = Image::make($framePath);
 
         $qrcode     = QrCode::create($content);

@@ -2,7 +2,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header py-2">
-                <h6 class="modal-title mb-0" id="alertModalLabel">Modal title</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <img src="{{ asset('images/internal/icons/modal_icon_default.png') }}" alt="icon" class="modal-icon"
+                    data-icon-default="{{ asset('images/internal/icons/modal_icon_default.png') }}"
+                    data-icon-warning="{{ asset('images/internal/icons/modal_icon_warning.png') }}"
+                    data-icon-failure="{{ asset('images/internal/icons/modal_icon_failure.png') }}">
+                    
+                    <h6 class="modal-title mb-0" id="alertModalLabel">Title</h6>
+                </div>
                 <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
                     aria-label="Close"></button>
             </div>
@@ -18,6 +25,10 @@
 </div>
 
 @once 
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('css/main/modals/alert-dialog.css') }}" />
+    @endpush
+
     @push('scripts')
         <script src="{{ asset('js/main/modals/alert.js') }}"></script>
     @endpush 

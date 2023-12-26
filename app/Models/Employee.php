@@ -9,6 +9,11 @@ class Employee extends Model
 {
     use HasFactory;
 
+    public const RoleToString = [
+        self::RoleTeacher   => 'Teacher',
+        self::RoleStaff     => 'Staff'
+    ];
+
     public const RoleTeacher    = 0;
     public const RoleStaff      = 1;
 

@@ -24,7 +24,6 @@ class CreateEmployeesTable extends Migration
             $table->string(Employee::f_Email,       64)->nullable();
             $table->tinyInteger(Employee::f_Position);
             $table->string(Employee::f_Photo);
-            $table->string(Employee::f_QrData);
 
             $table->timestamps();
         });
