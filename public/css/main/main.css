@@ -11,7 +11,7 @@
 
     --primary-font: 'Poppins', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     --accent-font: 'Averta', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-
+    --font-awesome: 'Font Awesome 6 Free';
 }
 
 ::selection {

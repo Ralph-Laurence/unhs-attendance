@@ -172,7 +172,19 @@ function bindDatatableData()
                 }
             },
             {data: 'duration', defaultContent: ''},
-            {data: 'status', defaultContent: ''},
+            {
+                data: 'status', 
+                defaultContent: '',
+                render: function(data, type, row) 
+                {
+                    var iconStyle = {
+                        'Present': 'present',
+                        'Break'  : 'break'
+                    };
+
+                    return `<div class="attendance-status ${iconStyle[data]}">${data}</div>`;
+                }
+            },
         ]
     };
 

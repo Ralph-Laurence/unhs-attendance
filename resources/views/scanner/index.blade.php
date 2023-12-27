@@ -54,33 +54,19 @@
         {{-- TABLE --}}
         <div class="attendance-table-wrapper shadow shadow-3-strong flex-fill position-relative">
             <div class="overflow-hidden w-100 h-100">
-                <div data-simplebar class="overflow-y-auto h-100 scrollbar-parent">
-                    <table class="table table-hover table-sm table-striped table-fixed attendance-table position-relative">
+                <div data-simplebar class="overflow-y-auto h-100 w-100 scrollbar-parent">
+                    <table class="table table-hover table-sm table-striped w-100 attendance-table position-relative">
                         <thead class="position-sticky top-0">
                             <tr>
                                 <th scope="col" style="min-width: 250px; width: 250px;" >Name</th>
                                 <th scope="col">Time In</th>
                                 <th scope="col">Time Out</th>
                                 <th scope="col">Duration</th>
-                                <th scope="col" style="max-width: 80px; width: 100px;">Status</th>
+                                <th scope="col" class="text-center" style="max-width: 80px; width: 100px;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {{-- @for ($i = 1; $i <= 30; $i++)
-                            <tr>
-                                <td class="text-truncate">
-                                    @if ($i % 2 == 0)
-                                        {{'Mark Cortes'}}
-                                    @else
-                                        {{'Jann Maglente'}}
-                                    @endif
-                                </td>
-                                <td>{{ date('g:i a') }}</td>
-                                <td></td>
-                                <td></td>
-                                <td scope="row">{{ 'Present' }}</td>
-                            </tr>
-                            @endfor --}}
+                            {{-- TO BE FILLED WITH AJAX --}}
                         </tbody>
                     </table>
                 </div>
