@@ -54,7 +54,7 @@
         {{-- TABLE --}}
         <div class="attendance-table-wrapper shadow shadow-3-strong flex-fill position-relative">
             <div class="overflow-hidden w-100 h-100">
-                <div data-simplebar class="overflow-y-auto h-100">
+                <div data-simplebar class="overflow-y-auto h-100 scrollbar-parent">
                     <table class="table table-hover table-sm table-striped table-fixed attendance-table position-relative">
                         <thead class="position-sticky top-0">
                             <tr>
@@ -66,7 +66,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @for ($i = 1; $i <= 30; $i++)
+                            {{-- @for ($i = 1; $i <= 30; $i++)
                             <tr>
                                 <td class="text-truncate">
                                     @if ($i % 2 == 0)
@@ -80,7 +80,7 @@
                                 <td></td>
                                 <td scope="row">{{ 'Present' }}</td>
                             </tr>
-                            @endfor
+                            @endfor --}}
                         </tbody>
                     </table>
                 </div>
@@ -109,6 +109,7 @@
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
     <script src="{{ asset('js/lib/html5-qrcode/html5-qrcode.min.v2.3.0.js') }}"></script>
     <script src="{{ asset('js/lib/momentjs/moment-with-locales.js') }}"></script>
     <script src="{{ asset('js/effects/slide-text.js') }}"></script>
@@ -117,4 +118,17 @@
     </script>
     <script src="{{ asset('js/main/scanner-page/scanner.js') }}"></script>
     <script src="{{ asset('js/main/scanner-page/calendar.js') }}"></script>
+    <script>
+        
+        /*
+        // Assuming 'table' is your DataTable instance
+        var data = table.row('#row-3').data(); // replace '#row-3' with the id of the row you want to move
+
+        // Remove the row from the table
+        table.row('#row-3').remove().draw();
+
+        // Add the row back at the beginning
+        table.row.add(data).draw();
+        */
+    </script>
 @endpush

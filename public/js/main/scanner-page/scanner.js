@@ -4,6 +4,10 @@ let beep_blip;
 
 let scanner;
 let lastScanned = {};
+
+let dataTable;
+const attendanceTable = '.attendance-table';
+
 const refractoryPeriod = 5000;
 
 $(document).ready(function() 
@@ -16,6 +20,10 @@ $(document).ready(function()
 //
 function initialize()
 {
+    // Initially load datatable data
+    bindDatatableData();
+
+    // Prepare the scanner beeps
     prepareSounds();
 
     // Prepare the scanner, with 250px scan area, and 10 frames per secs. scan rate
@@ -107,6 +115,8 @@ function submitScanResult(data)
                     showScanFailure(data.message);
                     return;
                 }
+
+                dataTable.ajax.reload();
             }
         },
         error: function(xhr, status, error)
@@ -121,4 +131,63 @@ function showScanFailure(message)
 {
     scanner.pause();
     alertModal.showDanger(message, 'Failure', () => scanner.resume());
+}
+
+function bindDatatableData()
+{
+    let options = {
+    
+        searching       : false,
+        lengthChange    : false,
+        ordering        : false,
+        ajax: {
+
+            url     : 'http://localhost:8000/dtr-scanner/history',
+            type    : 'GET',
+            dataType: 'JSON',
+
+            data: function (d) {
+                d.csrf_token = $('meta[name="csrf_token"]').attr('content');
+            }
+        },
+        columns: [
+            {
+                data: null,
+                render: function (data, type, row) {  
+                    return [data.fname, data.mname, data.lname].join(' ')
+                },
+                defaultContent: ''
+            },
+            {
+                data: 'timein',
+                render: function(data, type, row) {
+                    return data ? format12Hour(data) : ''
+                }
+            },
+            {
+                data: 'timeout', 
+                defaultContent: '',
+                render: function(data, type, row) {
+                    return data ? format12Hour(data) : ''
+                }
+            },
+            {data: 'duration', defaultContent: ''},
+            {data: 'status', defaultContent: ''},
+        ]
+    };
+
+    dataTable = $(attendanceTable).DataTable(options);
+}
+
+function format12Hour(timestamp) 
+{
+    var date    = new Date(timestamp);
+    var hours   = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm    = hours >= 12 ? 'pm' : 'am';
+    hours       = hours % 12;
+    hours       = hours ? hours : 12; // the hour '0' should be '12'
+    minutes     = minutes < 10 ? '0' + minutes : minutes;
+
+    return hours + ':' + minutes + ' ' + ampm;
 }

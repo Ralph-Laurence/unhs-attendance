@@ -10,7 +10,8 @@ class RouteNames
 
     public const Scanner = [
         'index'     => 'dtr-scanner.index',
-        'decode'    => 'dtr-scanner.decode'
+        'decode'    => 'dtr-scanner.decode',
+        'history'   => 'dtr-scanner.history'
     ];
 
 }

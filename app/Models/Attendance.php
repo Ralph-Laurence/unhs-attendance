@@ -36,6 +36,10 @@ class Attendance extends Model
         return $insert;
     }
 
+    public static function getTableName() : string {
+        return (new self)->getTable();
+    }
+
     protected $guarded = [
         'id'
     ];

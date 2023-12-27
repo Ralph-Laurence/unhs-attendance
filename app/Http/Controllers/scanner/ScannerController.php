@@ -5,6 +5,7 @@ namespace App\Http\Controllers\scanner;
 use App\Http\Controllers\Controller;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
+use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
 use App\Models\Attendance;
 use App\Models\Employee;
@@ -32,6 +33,43 @@ class ScannerController extends Controller
             ->with('scannerPostURL', route(RouteNames::Scanner['decode']));
     }
 
+    public function history()
+    {
+        // The current date
+        $currentDate = Carbon::now();
+
+        $attendanceFields = Extensions::prefixArray('a.', [
+            Attendance::f_TimeIn   . ' as timein',
+            Attendance::f_TimeOut  . ' as timeout',
+            Attendance::f_Duration . ' as duration',
+            Attendance::f_Status   . ' as status',
+        ]);
+
+        $employeeFields = Extensions::prefixArray('e.', [
+            Employee::f_FirstName  . ' as fname',
+            Employee::f_MiddleName . ' as mname',
+            Employee::f_LastName   . ' as lname',
+            Employee::f_Position   . ' as role',
+        ]);
+
+        $selectFields = array_merge($attendanceFields, $employeeFields);
+
+        $dataset = DB::table(Attendance::getTableName() . ' as a')
+        ->whereBetween('a.created_at', 
+        [
+            $currentDate->startOfDay()->format(Constants::TimestampFormat), 
+            $currentDate->endOfDay()->format(Constants::TimestampFormat)
+        ])
+        ->select($selectFields)
+        ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
+        ->orderBy('a.created_at', 'desc')
+        ->get();
+
+        return json_encode([
+            'data' => $dataset->toArray()
+        ]);
+    }
+
     /**
      * The QR codes contain a HASHED data which are the
      * database ids. We need to decode those data
@@ -52,7 +90,9 @@ class ScannerController extends Controller
 
     public function handleAttendance(int $empId)
     {
-        // To be added:
+        // Tasks to be added:
+        // A1 -> Prevent attendances 1hr before dismissal or after dismissal
+        // A2 -> Exclude Sundays and Holidays (Dont allow scans during those days)
 
         // Check first if the employee id exists
         if (!Employee::where('id', $empId)->exists())
@@ -75,6 +115,8 @@ class ScannerController extends Controller
             // If there's no existing record, insert a new one
             if (!$attendance) 
             {
+                // implement task A1 here ____
+
                 return $this->insertNewAttendance($empId);
             } 
             // If there's an existing record, update it

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Controllers\TestController;
@@ -29,8 +30,14 @@ Route::controller(DailyTimeRecordController::class)->group(function()
 Route::controller(ScannerController::class)->group(function()
 {
     Route::get('/dtr-scanner',          'index')->name(RouteNames::Scanner['index']);
+    Route::get('/dtr-scanner/history',  'history')->name(RouteNames::Scanner['history']);
     Route::post('/dtr-scanner/decode/', 'decode')->name(RouteNames::Scanner['decode']);
 });
+
+// Route::controller(AttendanceController::class)->group(function()
+// {
+    
+// });
 
 Route::controller(TestController::class)->group(function(){
     Route::get('/test', 'index');

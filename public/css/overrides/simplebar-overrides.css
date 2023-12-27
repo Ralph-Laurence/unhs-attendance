@@ -5,10 +5,10 @@
 
 .simplebar-scrollbar:before {
     background: repeating-linear-gradient(45deg,
-            #362B72,
-            #362B72 10px,
-            #4137D8 10px,
-            #4137D8 20px);
+            #39347C, /*#362B72 dark*/
+            #39347C 10px,
+            #544AB1 10px, /*4137D8*/
+            #544AB1 20px);
     width: 8px;
 }
 
