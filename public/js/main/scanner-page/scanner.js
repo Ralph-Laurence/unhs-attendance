@@ -6,8 +6,9 @@ let scanner;
 let lastScanned = {};
 
 let dataTable;
-const attendanceTable = '.attendance-table';
+let iconStyles;
 
+const attendanceTable  = '.attendance-table';
 const refractoryPeriod = 5000;
 
 $(document).ready(function() 
@@ -136,22 +137,33 @@ function showScanFailure(message)
 function bindDatatableData()
 {
     let options = {
-    
-        searching       : false,
-        lengthChange    : false,
-        ordering        : false,
+
+        'searching'    : false,
+        'lengthChange' : false,
+        'ordering'     : false,
+        'paging'       : false,
+        'info'         : false,
+        'bAutoWidth'   : false,
         ajax: {
 
             url     : 'http://localhost:8000/dtr-scanner/history',
             type    : 'GET',
             dataType: 'JSON',
+            dataSrc : function(json) {
 
+                if (iconStyles == undefined)
+                    iconStyles = json.icon;
+
+                return json.data;
+            },
             data: function (d) {
                 d.csrf_token = $('meta[name="csrf_token"]').attr('content');
             }
         },
         columns: [
             {
+                className: 'text-truncate',
+                width: '250px',
                 data: null,
                 render: function (data, type, row) {  
                     return [data.fname, data.mname, data.lname].join(' ')
@@ -159,30 +171,29 @@ function bindDatatableData()
                 defaultContent: ''
             },
             {
+                width: '100px',
                 data: 'timein',
                 render: function(data, type, row) {
                     return data ? format12Hour(data) : ''
-                }
+                },
+                defaultContent: ''
             },
             {
+                width: '100px',
                 data: 'timeout', 
                 defaultContent: '',
                 render: function(data, type, row) {
-                    return data ? format12Hour(data) : ''
+                    return data ? `<span class="text-darker">${format12Hour(data)}</span>` : ''
                 }
             },
             {data: 'duration', defaultContent: ''},
             {
+                width: '120px',
                 data: 'status', 
                 defaultContent: '',
                 render: function(data, type, row) 
                 {
-                    var iconStyle = {
-                        'Present': 'present',
-                        'Break'  : 'break'
-                    };
-
-                    return `<div class="attendance-status ${iconStyle[data]}">${data}</div>`;
+                    return `<div class="attendance-status ${iconStyles[data]}">${data}</div>`;
                 }
             },
         ]

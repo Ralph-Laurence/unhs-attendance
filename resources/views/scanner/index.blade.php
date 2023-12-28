@@ -55,14 +55,14 @@
         <div class="attendance-table-wrapper shadow shadow-3-strong flex-fill position-relative">
             <div class="overflow-hidden w-100 h-100">
                 <div data-simplebar class="overflow-y-auto h-100 w-100 scrollbar-parent">
-                    <table class="table table-hover table-sm table-striped w-100 attendance-table position-relative">
+                    <table class="table table-hover table-sm table-striped table-fixed w-100 attendance-table position-relative">
                         <thead class="position-sticky top-0">
                             <tr>
-                                <th scope="col" style="min-width: 250px; width: 250px;" >Name</th>
+                                <th scope="col">Name</th>
                                 <th scope="col">Time In</th>
                                 <th scope="col">Time Out</th>
                                 <th scope="col">Duration</th>
-                                <th scope="col" class="text-center" style="max-width: 80px; width: 100px;">Status</th>
+                                <th scope="col">Status</th>
                             </tr>
                         </thead>
                         <tbody>

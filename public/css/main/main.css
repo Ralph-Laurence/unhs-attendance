@@ -117,3 +117,8 @@ Button Overrides
 .flat-button.btn-warning:hover {
     background-color: #F6BE48;
 }
+
+/* Text Color Overrides */
+.text-darker {
+    color: var(--dark-color);
+}

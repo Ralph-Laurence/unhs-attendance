@@ -60,7 +60,7 @@
 }
 
 .attendance-status {
-    border-radius: 2rem;
+    /* border-radius: 2rem; */
     font-size: 14px;
 }
 
@@ -78,4 +78,14 @@
 .attendance-status.break::before {
     content: '\f28b';
     color: var(--warning-color);
+}
+
+.attendance-status.undertime::before {
+    content: '\e097';
+    color: var(--warning-color);
+}
+
+.attendance-status.overtime::before {
+    content: '\f1da';
+    color: var(--primary-color);
 }

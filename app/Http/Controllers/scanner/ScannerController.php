@@ -63,17 +63,22 @@ class ScannerController extends Controller
         ->select($selectFields)
         ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
         ->orderBy('a.created_at', 'desc')
+        ->limit(10)
         ->get();
 
         return json_encode([
-            'data' => $dataset->toArray()
+            'data'  => $dataset->toArray(),
+            'icon' => [
+                Attendance::STATUS_PRESENT     => 'present',
+                Attendance::STATUS_BREAK       => 'break',
+                Attendance::STATUS_UNDERTIME => 'undertime'
+            ]
         ]);
     }
 
     /**
-     * The QR codes contain a HASHED data which are the
-     * database ids. We need to decode those data
-     * and process it for attendance
+     * The QR codes contain a HASHED data which are the database ids. 
+     * We need to decode those data and process it for attendance
      */
     public function decode(Request $request)
     {
@@ -171,7 +176,7 @@ class ScannerController extends Controller
         ]);
 
         // Check if lunch started after 12:10 PM and add to overtime if so
-        $lunchStartOffset = Carbon::createFromTimeString('12:10:00');
+        $lunchStartOffset = Carbon::createFromTimeString(Attendance::$lunchOverTime);
 
         if ($lunchStart->gt($lunchStartOffset)) 
         {
@@ -196,8 +201,6 @@ class ScannerController extends Controller
     
     private function updateTimeOut(Attendance $attendance)
     {
-        $status = Attendance::STATUS_PRESENT;
-    
         // Set time_out first
         $timeOut = Carbon::now();
 
@@ -205,11 +208,23 @@ class ScannerController extends Controller
         $workHours  = Carbon::parse($attendance->time_in)->diffInSeconds($timeOut) / 3600;
         $lunchHours = Carbon::parse($attendance->lunch_start)->diffInSeconds(Carbon::parse($attendance->lunch_end)) / 3600;
         $duration   = $workHours - $lunchHours;
-    
-        $undertime  = $workHours < 8 ? 8 - $workHours : 0;
+
+        // Calculate undertime based on early dismissal time
+        $earlyDismissal = Carbon::parse(Attendance::$earlyDismissal);
+        $undertime  = $timeOut->lt($earlyDismissal) ? $earlyDismissal->diffInSeconds($timeOut) / 3600 : 0;
+
+        //$undertime  = $workHours < 8 ? 8 - $workHours : 0;
         $overtime   = $workHours > 8 ? $workHours - 8 : 0;
-        $late       = Carbon::parse($attendance->time_in)->gt(Carbon::parse('08:00:00')) ? Carbon::parse($attendance->time_in)->diffInSeconds(Carbon::parse('08:00:00')) / 3600 : 0;
-    
+
+        $workStart  = Carbon::parse(Attendance::$workStartTime);
+        $timeIn     = Carbon::parse($attendance->time_in);
+        $late       = $timeIn->gt($workStart) ? $timeIn->diffInSeconds($workStart) / 3600 : 0;
+
+        // Check if TimeOut is before dismissal time 4:50 PM
+        $status = $timeOut->lt(Carbon::parse(Attendance::$earlyDismissal)) ? 
+                  Attendance::STATUS_UNDERTIME : 
+                  Attendance::STATUS_PRESENT;
+
         $attendance->update([
             Attendance::f_TimeOut   => $timeOut,
             Attendance::f_Status    => $status,
@@ -218,10 +233,10 @@ class ScannerController extends Controller
             Attendance::f_OverTime  => $this->formatDuration($overtime),
             Attendance::f_Late      => $this->formatDuration($late),
         ]);
-    
+
         return $this->encodeSuccessMessage('Good Bye!', ['status' => $status]);
     }
-    
+
     private function formatDuration($duration)
     {
         $hours   = floor($duration);

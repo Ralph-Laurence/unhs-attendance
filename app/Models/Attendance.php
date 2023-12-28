@@ -24,6 +24,14 @@ class Attendance extends Model
     public const STATUS_PRESENT = 'Present';
     public const STATUS_BREAK   = 'Break';
     public const STATUS_ABSENT  = 'Absent';
+    
+    public const STATUS_UNDERTIME = 'Undertime';
+    public const STATUS_OVERTIME  = 'Overtime';
+
+    public static $workStartTime  = '07:30:00';     // 7:30 AM      -> All attendances must be made before this time
+    public static $lunchOverTime  = '12:10:00';     // 12:10 PM     -> Extra work after this time is added to overtime
+    public static $earlyDismissal = '16:50:00';     // 4:50 PM      -> Will not calculate undertime after this time
+    public static $workExitTime   = '17:30:00';     // 5:30 PM      -> All employees fully dismissed
 
     public static function createTimeIn(int $empId) : Attendance
     {
