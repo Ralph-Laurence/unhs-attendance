@@ -1,6 +1,7 @@
 @extends('layouts.base')
 
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('css/main/shared/attendance-common-styles.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/overrides/scanner-overrides.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/main/scanner-page.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/effects/slide-text.css') }}"/>
@@ -11,7 +12,7 @@
     <div class="row banner-wrapper px-5 mx-3 py-4">
         <div class="col px-3">
             <div class="logo-wrapper">
-                <div class="logo-background me-2">
+                <div class="logo-background logo-background-lg me-2">
                     <img src="{{ asset('images/logo.svg') }}" alt="logo" width="48" height="48" />
                 </div>
                 <div class="log-text-wrapper">
@@ -42,8 +43,17 @@
                 </h6>
             </div>
             {{-- MENU BUTTON --}}
-            <div class="options-wrapper flex-center">
-                <i class="fas fa-gear"></i>
+            <div class="dropdown">
+                <div class="options-wrapper flex-center dropdown-toggle" 
+                id="options-dropdown-button"
+                data-mdb-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-gear"></i>
+                </div>
+                <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
+                    <li><a class="dropdown-item" href="#">Manage Records</a></li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
             </div>
         </div>
     </div>
@@ -102,6 +112,7 @@
     <script>
         const scannerSubmitUrl = "{{ $scannerPostURL }}";
     </script>
+    <script src="{{ asset('js/main/utils.js') }}"></script>
     <script src="{{ asset('js/main/scanner-page/scanner.js') }}"></script>
     <script src="{{ asset('js/main/scanner-page/calendar.js') }}"></script>
     <script>

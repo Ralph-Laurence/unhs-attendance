@@ -23,7 +23,7 @@
 </head>
 <body>
     
-    <div class="container-fluid">
+    <div class="container-fluid h-100 overflow-hidden">
         @yield('content')
     </div>
 

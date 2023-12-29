@@ -30,14 +30,17 @@ Route::controller(DailyTimeRecordController::class)->group(function()
 Route::controller(ScannerController::class)->group(function()
 {
     Route::get('/dtr-scanner',          'index')->name(RouteNames::Scanner['index']);
+
+    // AJAX requests
     Route::get('/dtr-scanner/history',  'history')->name(RouteNames::Scanner['history']);
     Route::post('/dtr-scanner/decode/', 'decode')->name(RouteNames::Scanner['decode']);
 });
 
-// Route::controller(AttendanceController::class)->group(function()
-// {
-    
-// });
+Route::controller(AttendanceController::class)->group(function()
+{
+    Route::get('/backoffice/attendance',       'index')->name(RouteNames::Attendance['index']);
+    Route::get('/backoffice/attendance/daily', 'getDailyAttendances')->name(RouteNames::Attendance['daily']);
+});
 
 Route::controller(TestController::class)->group(function(){
     Route::get('/test', 'index');

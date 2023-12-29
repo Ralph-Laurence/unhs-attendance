@@ -59,33 +59,7 @@
     width: 36px;
 }
 
-.attendance-status {
-    /* border-radius: 2rem; */
-    font-size: 14px;
-}
-
-.attendance-status::before {
-    font-family: var(--font-awesome);
-    font-size: 12px;
-    margin-right: 4px;
-}
-
-.attendance-status.present::before {
-    content: '\f058';
-    color: var(--accent-color);
-}
-
-.attendance-status.break::before {
-    content: '\f28b';
-    color: var(--warning-color);
-}
-
-.attendance-status.undertime::before {
-    content: '\e097';
-    color: var(--warning-color);
-}
-
-.attendance-status.overtime::before {
-    content: '\f1da';
-    color: var(--primary-color);
+.options-wrapper.show {
+    background-color: var(--primary-color);
+    color: white;
 }

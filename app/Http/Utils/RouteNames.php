@@ -14,4 +14,8 @@ class RouteNames
         'history'   => 'dtr-scanner.history'
     ];
 
+    public const Attendance = [
+        'index'     => 'backoffice.attendance',
+        'daily'     => 'backoffice.attendance.daily'
+    ];
 }

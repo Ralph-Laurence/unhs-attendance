@@ -1,8 +1,12 @@
 :root
 {
     --dark-color:       #0F0928;
-    --primary-color:    #2B00D4;
+    /* --primary-color:    #2B00D4; */
+    --primary-dark:     #281E97;
+    --primary-color:    #3C2EE3;
     --primary-bright:   #411AD8;
+    --primary-600:      #473AE4;
+    --primary-400:      #7D73EC;
     --primary-lighter:  #E9E5FB;
     --danger-color:     #FF2641;
     --accent-color:     #1FC9A4;
@@ -10,7 +14,7 @@
     --warning-color:    #FFAC34;
 
     --primary-font: 'Poppins', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    --accent-font: 'Averta', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    --accent-font:  'Averta', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     --font-awesome: 'Font Awesome 6 Free';
 }
 
@@ -48,18 +52,31 @@ html, body {
     align-items: center;
 }
 
-.logo-background 
+.logo-background
+{
+    border-radius: 50%;
+    background-color: #E9E5FB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-background-lg
 {
     width: 55px;
     height: 55px;
     min-width: 55px;
     min-height: 55px;
     padding-top: 0.4375rem;
-    border-radius: 50%;
-    background-color: #E9E5FB;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+}
+
+.logo-background-sm
+{
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    min-height: 35px;
+    padding-top: 0.35rem;
 }
 
 .logo-text {

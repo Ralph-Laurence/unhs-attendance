@@ -48,6 +48,14 @@ class Attendance extends Model
         return (new self)->getTable();
     }
 
+    public static function getIconClasses() : array {
+        return [
+            Attendance::STATUS_PRESENT     => 'present',
+            Attendance::STATUS_BREAK       => 'break',
+            Attendance::STATUS_UNDERTIME   => 'undertime'
+        ];
+    }
+
     protected $guarded = [
         'id'
     ];
