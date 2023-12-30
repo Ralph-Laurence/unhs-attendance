@@ -1,5 +1,7 @@
 @extends('layouts.base')
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/main/components/loader.css') }}">
+@endpush
 @section('content')
-    <img src="{{ $qrcode }}" alt="" srcset=""/>
-    <h6>{{ $decode }}</h6>
+    <div class="loader hidden"></div>
 @endsection

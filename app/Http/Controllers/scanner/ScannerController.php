@@ -16,9 +16,6 @@ use Illuminate\Support\Facades\DB;
 
 class ScannerController extends Controller
 {
-    private const XHR_STAT_OK    = 0;
-    private const XHR_STAT_FAIL  = -1;
-
     public function index()
     {
         $layoutTitles = [
@@ -30,6 +27,7 @@ class ScannerController extends Controller
 
         return view('scanner.index')
             ->with('layoutTitles', $layoutTitles)
+            ->with('recordsManagementRoute', route(RouteNames::Attendance['index']))
             ->with('scannerPostURL', route(RouteNames::Scanner['decode']));
     }
 
@@ -87,7 +85,7 @@ class ScannerController extends Controller
         $decode  = $hashids->decode($hash);
 
         if (is_null($decode) || empty($decode)) {
-            return $this->encodeFailMessage( Messages::QR_CODE_UNREADABLE );
+            return Extensions::encodeFailMessage( Messages::QR_CODE_UNREADABLE );
         }
 
         return $this->handleAttendance($decode[0]);
@@ -101,7 +99,7 @@ class ScannerController extends Controller
 
         // Check first if the employee id exists
         if (!Employee::where('id', $empId)->exists())
-            return $this->encodeFailMessage(Messages::QR_CODE_NOT_RECOGNIZED);
+            return Extensions::encodeFailMessage(Messages::QR_CODE_NOT_RECOGNIZED);
 
         // The current date
         $currentDate = Carbon::now();
@@ -155,7 +153,7 @@ class ScannerController extends Controller
                         ->where('id', $empId)
                         ->first();
 
-            return $this->encodeSuccessMessage('Have a nice day!', [
+            return Extensions::encodeSuccessMessage('Have a nice day!', [
                 'name'      => implode(' ', [$empDetails->fname, $empDetails->lname]),
                 'role'      => Employee::RoleToString[$empDetails->role],
                 'timeIn'    => $insertAttendance->time_in->format( Constants::BasicTimeFormat )
@@ -184,7 +182,7 @@ class ScannerController extends Controller
             $attendance->increment(Attendance::f_OverTime, $overtime);
         }
 
-        return $this->encodeSuccessMessage('Out for lunch...', ['status'  => $status]);
+        return Extensions::encodeSuccessMessage('Out for lunch...', ['status'  => $status]);
     }
 
     private function updateLunchEnd(Attendance $attendance)
@@ -196,7 +194,7 @@ class ScannerController extends Controller
             Attendance::f_Status    => $status,
         ]);
 
-        return $this->encodeSuccessMessage('Welcome Back!', ['status'  => $status]);
+        return Extensions::encodeSuccessMessage('Welcome Back!', ['status'  => $status]);
     }
     
     private function updateTimeOut(Attendance $attendance)
@@ -234,7 +232,7 @@ class ScannerController extends Controller
             Attendance::f_Late      => $this->formatDuration($late),
         ]);
 
-        return $this->encodeSuccessMessage('Good Bye!', ['status' => $status]);
+        return Extensions::encodeSuccessMessage('Good Bye!', ['status' => $status]);
     }
 
     private function formatDuration($duration)
@@ -254,22 +252,6 @@ class ScannerController extends Controller
             $result .= $seconds . 'sec' . ($seconds > 1 ? 's' : '');
     
         return trim($result);
-    }
-    
-    private function encodeSuccessMessage($message, $extraRows = []) : string 
-    {
-        // Use the array union operator (+) to merge the arrays
-        $result = ['code' => self::XHR_STAT_OK, 'message' => $message] + $extraRows;
-    
-        return json_encode($result);
-    }
-
-    private function encodeFailMessage($message) : string 
-    {
-        return json_encode([
-            'code'    => self::XHR_STAT_FAIL,
-            'message' => $message
-        ]);
     }
 }
 

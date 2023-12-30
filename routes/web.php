@@ -38,8 +38,9 @@ Route::controller(ScannerController::class)->group(function()
 
 Route::controller(AttendanceController::class)->group(function()
 {
-    Route::get('/backoffice/attendance',       'index')->name(RouteNames::Attendance['index']);
-    Route::get('/backoffice/attendance/daily', 'getDailyAttendances')->name(RouteNames::Attendance['daily']);
+    Route::get('/backoffice/attendance',        'index')->name(RouteNames::Attendance['index']);
+    Route::post('/backoffice/attendance/daily', 'getDailyAttendances')->name(RouteNames::Attendance['daily']);
+    Route::post('/backoffice/attendance/delete','destroy')->name(RouteNames::Attendance['delete']);
 });
 
 Route::controller(TestController::class)->group(function(){

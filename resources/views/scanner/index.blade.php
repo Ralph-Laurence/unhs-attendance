@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="{{ asset('css/overrides/scanner-overrides.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/main/scanner-page.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/effects/slide-text.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/main/components/loader.css') }}"/>
 @endpush
 
 @section('content')
@@ -50,7 +51,7 @@
                     <i class="fas fa-gear"></i>
                 </div>
                 <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
-                    <li><a class="dropdown-item" href="#">Manage Records</a></li>
+                    <li><a class="dropdown-item" href="{{ $recordsManagementRoute }}">Manage Records</a></li>
                     <li><a class="dropdown-item" href="#">Another action</a></li>
                     <li><a class="dropdown-item" href="#">Something else here</a></li>
                 </ul>
@@ -101,7 +102,6 @@
         <audio src="{{ asset('audio/blip.mp3') }}" id="blip"></audio>
     </div>
 
-    @include('modals.alert')
 @endsection
 
 @push('scripts')

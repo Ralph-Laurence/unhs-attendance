@@ -1,48 +1,13 @@
 @extends('layouts.base')
-
+@section('title')
+{{'Attendance'}}
+@endsection
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('css/main/components/loader.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/main/shared/attendance-common-styles.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/main/backoffice/attendance-page.css') }}" />
     <style>
-        .sidenav {
-            width: 250px;
-            max-width: 250px;
-            background-color: var(--primary-color);
-        }
-
-        .sidenav .menu-items {
-            overflow-y: auto;
-        }
-
-        .sidenav .logo-wrapper {
-            flex: 0 0 auto; 
-            background-color: var(--primary-dark);
-            height: 68px;
-        }
-
-        .sidenav .nav-items-container .nav-items {
-            color: white;
-            opacity: 0.65;
-            width: 100%;
-            display: block;
-            font-weight: normal;
-            font-family: var(--accent-font);
-            transition: 0.18s background-color ease-in-out;
-        }
-
-        .sidenav .nav-items-container .nav-items:hover {
-            background-color: var(--primary-600);
-            opacity: 1;
-        }
-
-        .sidenav .nav-items-container .nav-items:active {
-            background-color: var(--primary-400);
-            opacity: 1;
-        }
-
-        .sidenav .nav-items-container .nav-items.active {
-            background-color: #FFFFFF;
-        }
+        
 
         .content-wrapper .title-banner {
             height: 68px;
@@ -73,7 +38,23 @@
 
             <div class="card content-card">
                 <div class="card-body">
-                    <h6 class="card-title">Daily Time Records</h6>
+
+                    <div class="d-flex align-items-center">
+                        <h6 class="card-title me-auto">Daily Time Records</h6>
+                        <div class="dropdown">
+                            <button class="btn btn-primary flat-button dropdown-toggle shadow-0" id="add-record-dropdown-button" data-mdb-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-plus"></i>
+                                <span class="ms-1">Add</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
+                                <li><a class="dropdown-item" href="{{ $scannerRoute }}">Scan QR Code</a></li>
+                                <li>
+                                    <a class="dropdown-item" data-mdb-toggle="modal" data-mdb-target="#attendanceFormModal" role="button">Create Manually</a>
+                                </li>
+                                <li><a class="dropdown-item" href="#">Import Sheet</a></li>
+                            </ul>
+                        </div>
+                    </div>
 
                     <table class="table table-striped table-sm table-hover table-fixed dtr-table" data-ajax-src="{{ $ajaxDataSource }}">
                         <thead class="user-select-none">
@@ -100,10 +81,17 @@
         </div> --}}
     </div>
 </div>
+
+@include('modals.attendance-form')
+
 @endsection
 
 @push('scripts')
+    <script>
+        const route_deleteRecord = "{{ $deleteRoute }}";
+    </script>
     <script src="{{ asset('js/main/utils.js') }}"></script>
     <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
+    <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
     <script src="{{ asset('js/main/backoffice/attendance-page.js') }}"></script>
 @endpush

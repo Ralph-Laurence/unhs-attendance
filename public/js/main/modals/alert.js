@@ -21,7 +21,7 @@ var alertModal = {
 
         // Use the provided title if it exists, otherwise use the default title
         $('#alertModalLabel').text(title || config.defaultTitle);
-        $('#alertModal .modal-body').text(message);
+        $('#alertModal .modal-body').html(message);
 
         // Remove all btn-* classes except 'btn-ok' and add the specific class to the 'btn-ok' button
         $('.btn.btn-ok').removeClass(function (index, className)

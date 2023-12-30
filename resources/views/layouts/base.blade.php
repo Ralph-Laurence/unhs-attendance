@@ -17,20 +17,35 @@
     <link rel="stylesheet" href="{{ asset('css/overrides/simplebar-overrides.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/main/main.css') }}">
 
+    <link rel="stylesheet" href="{{ asset('css/main/modals/alert-dialog.css') }}" />
+    
     <!-- CHILD VIEW STYLES -->
     @stack('styles')
 
 </head>
 <body>
     
+    @include('modals.alert')
+
     <div class="container-fluid h-100 overflow-hidden">
         @yield('content')
     </div>
 
     <!-- LIBRARY SCRIPTS -->
+    <script src="{{ asset('js/lib/dompurify/purify.min.js') }}"></script>
+    <script>
+        'use strict';
+
+        function sanitize(dirty) {
+            var clean = DOMPurify.sanitize(dirty);
+            return clean;
+        }
+    </script>
+
     <script src="{{ asset('js/lib/jquery/jquery-3.7.0.min.js') }}"></script>
     <script src="{{ asset('js/lib/simplebar/simplebar6.2.5.min.js') }}"></script>
     <script src="{{ asset('js/lib/mdb/mdb.min.js') }}"></script>
+    <script src="{{ asset('js/main/modals/alert.js') }}"></script>
 
     <!-- CHILD VIEW SCRIPTS -->
     @stack('scripts')

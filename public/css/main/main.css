@@ -90,12 +90,6 @@ html, body {
     letter-spacing: 1px;
 }
 
-.flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 /*
 Button Overrides
 */
@@ -135,7 +129,19 @@ Button Overrides
     background-color: #F6BE48;
 }
 
-/* Text Color Overrides */
+/* Text Color Utilities */
 .text-darker {
     color: var(--dark-color);
+}
+
+/* Text Size Utilities */
+.text-sm {
+    font-size: 12px;
+}
+
+/* Display Utilities */
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

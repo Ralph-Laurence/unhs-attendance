@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Attendance extends Model
 {
     use HasFactory;
+
+    private $hashids = null;
 
     public const f_Emp_FK_ID    = 'emp_fk_id';      // Employee Foreign Key ID
     public const f_TimeIn       = 'time_in';
@@ -20,6 +24,7 @@ class Attendance extends Model
     public const f_UnderTime    = 'undertime';
     public const f_OverTime     = 'overtime';
     public const f_Late         = 'late';
+    public const f_RowHash      = 'row_hash';
 
     public const STATUS_PRESENT = 'Present';
     public const STATUS_BREAK   = 'Break';
@@ -56,6 +61,8 @@ class Attendance extends Model
         ];
     }
 
+    protected $appends = ['hashid'];
+
     protected $guarded = [
         'id'
     ];
@@ -70,6 +77,14 @@ class Attendance extends Model
         // self::f_OverTime    => 'datetime',
         // self::f_Late        => 'datetime',
     ];
+
+    public function getHashidAttribute() {
+
+        if ( is_null($this->hashids) )
+            $hashids = new \Hashids\Hashids(); // Create a new instance of Hashids
+
+        return $hashids->encode($this->attributes['id']); // Use the instance to call the encode 
+    }
 }
 
 /**
