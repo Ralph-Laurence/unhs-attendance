@@ -1,0 +1,93 @@
+.snackbar-frame {
+    z-index: 1020;
+    padding-bottom: 20px;
+    padding-right: 20px;
+}
+
+.snackbar {
+    background-color: #FFFFFF;
+    color: var(--dark-color);
+    max-width: 350px;
+    width: 350px;
+    font-size: 0.875rem;
+    border-width: 1px;
+    border-color: rgb(0, 0, 0, 0.175);
+    border-radius: 4px;
+    box-shadow: 0 2px 15px -3px rgba(0,0,0,0.14),0 10px 20px -2px rgba(0,0,0,0.14);
+    position: relative;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+    display: flex;
+    user-select: none;
+    overflow: hidden;
+}
+
+/* SNACKBAR TIMER */
+.snackbar::after 
+{
+    content: '';        
+    animation: snackbar-timer 4s linear forwards;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+}
+
+@keyframes snackbar-timer {
+    100% {
+        width: 0;
+    }
+}
+
+.snackbar-body {
+    width: 100%;
+}
+
+.snackbar .snackbar-icon i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+.snackbar.success::after {
+    background-color: var(--accent-color);
+}
+
+.snackbar.success .snackbar-icon {
+    color: var(--accent-color);
+}
+
+.snackbar.info::after {
+    background-color: var(--primary-color);
+}
+
+.snackbar.info .snackbar-icon {
+    color: var(--primary-color);
+}
+
+.snackbar.danger .snackbar-icon {
+    color: var(--danger-color);
+}
+
+.snackbar.danger::after {
+    background-color: var(--danger-color);
+}
+
+.snackbar-body .snackbar-content {
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.snackbar-body .snackbar-title-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.snackbar .snackbar-body .snackbar-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+}

@@ -14,7 +14,7 @@ $(document).ready(function()
 function initialize()
 {
     csrfToken = $('meta[name="csrf-token"]').attr('content');
-    bindDatatableData();
+    bindTableDataSource();
 }
 //
 // Handle events here
@@ -33,17 +33,26 @@ function handleEvents()
 
         let message = sanitize(`You are about to delete the attendance record of <i><b>"${employeeName}"</b></i> which was created on ${recordDate}. Once deleted, it cannot be recovered.<br><br>Do you wish to proceed?`);
 
-        alertModal.showWarn(message, 'Warning', function() 
-        {
-            deleteRecord(row);
-        });
+        alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
+    });
+
+    $('.record-range-filter .daily').on('click', function() {
+        var url = $(dtrTable).data('src-default');
+        bindTableDataSource(url);
+    });
+
+    $('.record-range-filter .weekly').on('click', function() {
+        var url = $(dtrTable).data('src-weekly');
+        bindTableDataSource(url);
     });
     // $(document).on('click', '.row-actions')
     // $(document).on('click', '.row-actions')
 }
 
-function bindDatatableData()
+function bindTableDataSource(url)
 {
+    url = url || $(dtrTable).data('src-default');
+
     let options = {
         "deferRender"  : true,
         'searching'    : false,
@@ -51,7 +60,7 @@ function bindDatatableData()
         'bAutoWidth'   : false,
         ajax: {
 
-            url     : $(dtrTable).data('ajax-src'),
+            url     : url,
             type    : 'POST',
             dataType: 'JSON',
             dataSrc : function(json) {
@@ -152,6 +161,15 @@ function bindDatatableData()
         ]
     };
 
+    // If an instance of datatable has already been created,
+    // reload its data source with given url instead
+    if (dataTable != null)
+    {
+        dataTable.ajax.url(url).load();
+        return;
+    }
+    
+    // Initialize datatable if not yet created
     dataTable = $(dtrTable).DataTable(options);
 }
 

@@ -47,6 +47,7 @@ html, body {
     font-family: var(--primary-font);
 }
 
+/* LOGO */
 .logo-wrapper {
     display: flex;
     align-items: center;
@@ -102,6 +103,7 @@ Button Overrides
 
 .flat-button.btn-secondary {
     color: var(--dark-color);
+    opacity: .85;
 }
 
 .flat-button.btn-primary {

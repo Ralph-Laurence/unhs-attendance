@@ -24,7 +24,7 @@ class Attendance extends Model
     public const f_UnderTime    = 'undertime';
     public const f_OverTime     = 'overtime';
     public const f_Late         = 'late';
-    public const f_RowHash      = 'row_hash';
+    public const f_WeekNo       = 'week_no';
 
     public const STATUS_PRESENT = 'Present';
     public const STATUS_BREAK   = 'Break';

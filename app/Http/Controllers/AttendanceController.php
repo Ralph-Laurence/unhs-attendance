@@ -44,11 +44,16 @@ class AttendanceController extends Controller
 
     public function index()
     {
+        $routes = [
+            'filter_thisWeek' => route(RouteNames::Attendance['weekly']),
+            'filter_thisDay'  => route(RouteNames::Attendance['daily'])
+        ];
+
         return view('backoffice.attendance.index')
+            ->with('routes'             , $routes)
             ->with('deleteRoute'        , route(RouteNames::Attendance['delete']))
             ->with('scannerRoute'       , route(RouteNames::Scanner['index']))
-            ->with('organizationName'   , Constants::OrganizationName)
-            ->with('ajaxDataSource'     , route(RouteNames::Attendance['daily']));
+            ->with('organizationName'   , Constants::OrganizationName);
     }
 
     public function destroy(Request $request) 
@@ -75,31 +80,72 @@ class AttendanceController extends Controller
     /**
      * Retrieve all attendances that were made today
      */
-    public function getDailyAttendances(Request $request)
+    public function getDailyAttendances()
     {
         // The current timestamp
         $currentDate = Carbon::now();
 
-        $fields  = array_merge($this->attendanceFields, $this->employeeFields);
-        $dataset = DB::table(Attendance::getTableName() . ' as a')
         // Instead of whereDate($today), we will use where between
-        ->whereBetween('a.created_at', 
-        [
-            $currentDate->startOfDay()->format(Constants::TimestampFormat), 
-            $currentDate->endOfDay()->format(Constants::TimestampFormat)
-        ])
+        $dataset = $this->buildAttendanceQuery()
+            ->whereBetween('a.created_at', 
+            [
+                $currentDate->startOfDay()->format(Constants::TimestampFormat), 
+                $currentDate->endOfDay()->format(Constants::TimestampFormat)
+            ])
+            ->get();
+
+        $this->hashRowIds($dataset);
+        
+        return $this->makeAttendanceData($dataset);
+    }
+
+    /**
+     * Retrieve all attendances this week
+     */
+    public function getWeeklyAttendances()
+    {
+        $currentWeek = Extensions::getCurrentWeek();
+
+        $dataset = $this->buildAttendanceQuery()
+            ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek)
+            ->get();
+
+        $this->hashRowIds($dataset);
+
+        return $this->makeAttendanceData($dataset);
+    }
+
+    /**
+    * Base query builder for retrieving attendances 
+    */
+    private function buildAttendanceQuery()
+    {
+        $fields  = array_merge($this->attendanceFields, $this->employeeFields);
+        $query = DB::table(Attendance::getTableName() . ' as a')
         ->select($fields)
         ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
-        ->orderBy('a.created_at', 'desc')
-        ->get();
+        ->orderBy('a.created_at', 'desc');
 
+        return $query;
+    }
+
+    /**
+     * Loop through the dataset and replace each id with its hashed equivalent
+    */
+    private function hashRowIds($dataset)
+    {
         $hashids = new Hashids();
 
-        // Loop through the dataset and replace each id with its hashed equivalent
         foreach ($dataset as $data) {
             $data->id = $hashids->encode($data->id);
         }
-        
+    }
+
+    /**
+     * Encode the datasets into JSON that will be sent as AJAX response
+     */
+    private function makeAttendanceData($dataset)
+    {
         return json_encode([
             'data' => $dataset->toArray(),
             'icon' => Attendance::getIconClasses()

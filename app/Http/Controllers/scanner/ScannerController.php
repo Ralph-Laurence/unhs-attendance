@@ -210,8 +210,6 @@ class ScannerController extends Controller
         // Calculate undertime based on early dismissal time
         $earlyDismissal = Carbon::parse(Attendance::$earlyDismissal);
         $undertime  = $timeOut->lt($earlyDismissal) ? $earlyDismissal->diffInSeconds($timeOut) / 3600 : 0;
-
-        //$undertime  = $workHours < 8 ? 8 - $workHours : 0;
         $overtime   = $workHours > 8 ? $workHours - 8 : 0;
 
         $workStart  = Carbon::parse(Attendance::$workStartTime);
@@ -254,6 +252,3 @@ class ScannerController extends Controller
         return trim($result);
     }
 }
-
-// https://www.simplesoftware.io/#/docs/simple-qrcode
-// https://github.com/vinkla/hashids

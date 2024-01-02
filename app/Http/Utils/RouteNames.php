@@ -17,6 +17,7 @@ class RouteNames
     public const Attendance = [
         'index'     => 'backoffice.attendance',
         'daily'     => 'backoffice.attendance.daily',
+        'weekly'    => 'backoffice.attendance.weekly',
         'delete'    => 'backoffice.attendance.delete'
     ];
 }

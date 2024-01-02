@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Utils\Extensions;
 use App\Models\Attendance;
+use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +30,7 @@ class CreateAttendancesTable extends Migration
             $table->string(Attendance::f_UnderTime  ,24)->nullable();
             $table->string(Attendance::f_OverTime   ,24)->nullable();
             $table->string(Attendance::f_Late       ,24)->nullable();
+            $table->integer(Attendance::f_WeekNo       )->default(Extensions::getCurrentWeek());
 
             $defaultTimestamp = DB::raw('CURRENT_TIMESTAMP');
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Utils;
 
+use Carbon\Carbon;
+
 class Extensions
 {
     private const XHR_STAT_OK    = 0;
@@ -10,6 +12,11 @@ class Extensions
     public static function prefixArray($prefix, $array) : array
     {
         return preg_filter('/^/', $prefix, $array);
+    }
+
+    public static function getCurrentWeek()
+    {
+        return Carbon::now()->weekOfYear;
     }
 
     public static function encodeSuccessMessage($message, $extraRows = []) : string 
