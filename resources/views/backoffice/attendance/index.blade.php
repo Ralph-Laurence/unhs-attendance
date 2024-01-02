@@ -110,9 +110,7 @@
                 <small>&copy; {{ date('Y') .' '. $organizationName }}</small>
             </div>
         </div>
-        {{-- <div class="sticky-bottom bg-white">
-            
-        </div> --}}
+        
     </div>
 </div>
 

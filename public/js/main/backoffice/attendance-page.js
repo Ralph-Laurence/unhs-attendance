@@ -28,6 +28,8 @@ function handleEvents()
         let employeeName = row.find('.td-employee-name').text();
         let recordDate   = row.find('.date-tile').attr('data-date-attr');
 
+        recordDate = convertToFullMonth(recordDate);
+
         if (employeeName)
             employeeName = employeeName.trim();
 
@@ -191,10 +193,24 @@ function deleteRecord(row)
         },
         success: function(response) 
         {
-            console.warn(response);
-
-            dataTable.row(row).remove().draw();
+            if (response)
+            {
+                response = JSON.parse(response);
                 
+                console.log(response);
+                console.log(response.code == 0);
+                console.log(typeof (response.code));
+
+                if (response.code == 0)
+                {
+                    snackbar.showSuccess(response.message);
+                    dataTable.row(row).remove().draw();
+                }
+                else
+                    snackbar.showDanger(response.message);
+            }
+            else
+                alertModal.showDanger('Something went wrong while trying to delete the record');
         },
         error: function(xhr, status, error) 
         {
@@ -203,4 +219,29 @@ function deleteRecord(row)
             showRowActionButtons(true, rowActionsDiv);
         }
     })
+}
+
+// We assume that the input has a format like "Jan 02".
+// Then we will convert the Three-letter month into
+// its full month equivalent
+function convertToFullMonth(dateString)
+{
+    // Parse the date string
+    var date = new Date(dateString);
+
+    // Check if the date is valid
+    if (isNaN(date.getTime()))
+    {
+        // Not a valid date
+        return '(Unknown date)';
+    }
+
+    // Get the full month name
+    var fullMonth = date.toLocaleString('default', { month: 'long' });
+
+    // Get the day
+    var day = date.getDate();
+
+    // Return the full month name and day
+    return fullMonth + ' ' + day;
 }

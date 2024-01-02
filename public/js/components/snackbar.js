@@ -3,9 +3,10 @@ var snackbar = {
     getTypeConfig: function () {  
 
         return {
-            'default'   : { icon: 'fa-circle-info', },
-            'info'      : { icon: 'fa-circle-info', },
-            'success'   : { icon: 'fa-circle-check',}
+            'default'   : { defaultTitle: 'Notice'      , icon: 'fa-circle-info'},
+            'info'      : { defaultTitle: 'Information' , icon: 'fa-circle-info'},
+            'success'   : { defaultTitle: 'Success'     , icon: 'fa-circle-check'},
+            'danger'    : { defaultTitle: 'Failure'     , icon: 'fa-circle-check'},
         }
     },
 
@@ -40,7 +41,7 @@ var snackbar = {
         var titleText = document.createElement('h6');
         titleText.classList.add('snackbar-title');
         titleText.classList.add('me-auto');
-        titleText.innerText = title;
+        titleText.innerText = title || config.defaultTitle;
 
         var timeLabel = document.createElement('small');
         timeLabel.classList.add('snackbar-time');
@@ -67,7 +68,7 @@ var snackbar = {
         // initially set its left position to be equal to its width
         $(root).css('left', $(root).width()).animate({
             'left': 0
-        }, 400);
+        }, 600);
 
         // Wait 4 seconds before removing the snackbar
         setTimeout(() => {
@@ -75,7 +76,7 @@ var snackbar = {
             $(root).animate({
                 left: '+=500'
             }, 
-            1000, 
+            600, 
             function() {
                 $(this).remove();
             });
@@ -107,4 +108,5 @@ EXPECTED STRUCTURE:
         <p class="snackbar-content"></p>
     </div>
 </div>
+
 */
