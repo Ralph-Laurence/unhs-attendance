@@ -80,7 +80,7 @@
         </div>
 
         {{-- DATASET TABLE --}}
-        <table class="table table-striped table-sm table-hover table-fixed dataset-table dtr-table"
+        <table class="table table-striped table-sm table-hover table-fixed dataset-table"
             data-src-default="{{ $routes['filter_thisDay'] }}" data-src-weekly="{{ $routes['filter_thisWeek'] }}">
             <thead class="user-select-none">
                 <tr>

@@ -40,6 +40,8 @@ Route::controller(ScannerController::class)->group(function()
 Route::controller(AttendanceController::class)->group(function()
 {
     Route::get('/backoffice/attendance',             'index')->name(RouteNames::Attendance['index']);
+
+    // This will be exectued by CRON JOB
     Route::get('/backoffice/attendance/auto-absent', 'autoAbsentEmployees')->name(RouteNames::Attendance['autoAbsent']);
 
     Route::post('/backoffice/attendance/this-week',  'getWeeklyAttendances')->name(RouteNames::Attendance['weekly']);

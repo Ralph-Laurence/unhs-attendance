@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\DB;
 
 class TeachersController extends Controller
 {
+    private Employee $employeeModel;
+
+    public function __construct() {
+        $this->employeeModel = new Employee();
+    }
+
     public function index()
     {
         $routes = [
@@ -21,32 +27,9 @@ class TeachersController extends Controller
 
     public function getTeachers() 
     {
-        $dataset = $this->buildQueryGetTeachers()->get();
+        $dataset = $this->employeeModel->getTeachers();
 
-        Extensions::hashRowIds($dataset);
-
-        return json_encode([
-            'data' => $dataset->toArray(),
-        ]);
-    }
-
-    private function buildQueryGetTeachers()
-    {
-        $employeeFields = Extensions::prefixArray('e.', [
-            Employee::f_EmpNo      . ' as idno',
-            Employee::f_FirstName  . ' as fname',
-            Employee::f_MiddleName . ' as mname',
-            Employee::f_LastName   . ' as lname',
-            Employee::f_Position   . ' as role',
-        ]);
-
-        //$fields  = array_merge($this->attendanceFields, $this->employeeFields);
-        $query = DB::table(Employee::getTableName() . ' as e')
-        ->select($employeeFields)
-        //->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
-        ->orderBy('e.fname', 'asc');
-        
-        return $query; 
+        return $dataset;
     }
 }
 /** 

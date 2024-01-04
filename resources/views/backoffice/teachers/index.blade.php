@@ -29,7 +29,7 @@
         </div>
 
         {{-- DATASET TABLE --}}
-        <table class="table table-striped table-sm table-hover table-fixed dataset-table"
+        <table class="table table-striped table-sm table-hover dataset-table"
             data-src-default="{{ $routes['defaultDataSource'] }}">
             <thead class="user-select-none">
                 <tr class="border-top">
@@ -43,7 +43,7 @@
                 <tr>
                     <th>#</th>
                     <th>ID no.</th>
-                    <th>Name</th>
+                    <th>Faculty Name</th>
                     <th>Status</th>
                     <th style="background-color: #FADCB7;">Late</th>
                     <th>Leave</th>

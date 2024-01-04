@@ -1,4 +1,4 @@
-let dtrTable = '.dtr-table';
+let datasetTable = '.dataset-table';
 let dataTable;
 let iconStyles;
 let csrfToken;
@@ -39,12 +39,12 @@ function handleEvents()
     });
 
     $('.record-range-filter .daily').on('click', function() {
-        var url = $(dtrTable).data('src-default');
+        var url = $(datasetTable).data('src-default');
         bindTableDataSource(url);
     });
 
     $('.record-range-filter .weekly').on('click', function() {
-        var url = $(dtrTable).data('src-weekly');
+        var url = $(datasetTable).data('src-weekly');
         bindTableDataSource(url);
     });
 
@@ -58,7 +58,7 @@ function handleEvents()
 
 function bindTableDataSource(url)
 {
-    url = url || $(dtrTable).data('src-default');
+    url = url || $(datasetTable).data('src-default');
 
     let options = {
         "deferRender"  : true,
@@ -177,7 +177,7 @@ function bindTableDataSource(url)
     }
     
     // Initialize datatable if not yet created
-    dataTable = $(dtrTable).DataTable(options);
+    dataTable = $(datasetTable).DataTable(options);
 }
 
 function deleteRecord(row) 

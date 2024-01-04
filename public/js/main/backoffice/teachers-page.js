@@ -1,4 +1,4 @@
-let dtrTable = '.dtr-table';
+let datasetTable = '.dataset-table';
 let dataTable;
 let csrfToken;
 
@@ -42,7 +42,7 @@ function handleEvents()
 
 function bindTableDataSource(url)
 {
-    url = url || $(dtrTable).data('src-default');
+    url = url || $(datasetTable).data('src-default');
 
     let options = {
         "deferRender"  : true,
@@ -54,13 +54,11 @@ function bindTableDataSource(url)
             url     : url,
             type    : 'POST',
             dataType: 'JSON',
-            dataSrc : null,
             data: {
                 '_token' : csrfToken
             }
         },
         columns: [
-
             // First Column -> Record Counter
             {
                 width: '50px',
@@ -70,10 +68,16 @@ function bindTableDataSource(url)
                     return meta.row + 1;
                 }
             },
+            {
+                width: '120px',
+                className: 'text-truncate',
+                data: 'emp_num',
+                defaultContent: ''
+            },
             // Second Column -> Names
             {
                 className: 'td-employee-name text-truncate',
-                width: '280px',
+                width: '300px',
                 data: null,
                 render: function (data, type, row) {  
                     return `<span class="text-darker">${[data.fname, data.mname, data.lname].join(' ')}</span>`;
@@ -83,42 +87,16 @@ function bindTableDataSource(url)
             // Third Column -> Status
             {
                 width: '120px',
-                data: 'status', 
+                data: 'emp_status', 
                 defaultContent: '',
                 render: function(data, type, row) {
-                    return `<div class="attendance-status ${iconStyles[data]}">${data}</div>`;
-                }
-            },
-            // Fourth Column -> Employee Name
-            {
-                className: 'td-employee-name text-truncate',
-                width: '280px',
-                data: null,
-                render: function (data, type, row) {  
-                    return `<span class="text-darker">${[data.fname, data.mname, data.lname].join(' ')}</span>`;
-                },
-                defaultContent: ''
-            },
-            // Fifth Column -> Clockin Time
-            {
-                width: '100px',
-                data: 'timein',
-                render: function(data, type, row) {
-                    return data ? format12Hour(data) : ''
-                },
-                defaultContent: ''
-            },
-            // Sixth Column -> Clockout Time
-            {
-                width: '100px',
-                data: 'timeout', 
-                defaultContent: '',
-                render: function(data, type, row) {
-                    return data ? `<span class="text-darker">${format12Hour(data)}</span>` : ''
+                    return data; //`<div class="attendance-status ${iconStyles[data]}">${data}</div>`;
                 }
             },
             // Seventh Column -> Work Hours (Duration)
-            {data: 'duration', defaultContent: ''},
+            { width: '80px', data: 'total_lates', defaultContent: ''},
+            { width: '80px', data: 'total_leave', defaultContent: ''},
+            { width: '80px', data: 'total_absents', defaultContent: ''},
 
             // Eighth Column -> Actions
             {
@@ -142,7 +120,7 @@ function bindTableDataSource(url)
     }
     
     // Initialize datatable if not yet created
-    dataTable = $(dtrTable).DataTable(options);
+    dataTable = $(datasetTable).DataTable(options);
 }
 
 function deleteRecord(row) 

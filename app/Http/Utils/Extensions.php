@@ -23,12 +23,17 @@ class Extensions
     //
     // Dataset Utilities
     //
-    public static function hashRowIds($dataset)
+    public static function hashRowIds($dataset, $salt = null)
     {
         // Loop through the dataset and replace each id with its hashed equivalent
 
-        $hashids = new Hashids();
+        $hashids = null;
 
+        if (!is_null($salt) || !empty($salt))
+            $hashids = new Hashids($salt, 10);
+        else
+            $hashids = new Hashids();
+        
         foreach ($dataset as $data) {
             $data->id = $hashids->encode($data->id);
         }
