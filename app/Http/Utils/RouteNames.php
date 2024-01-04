@@ -15,9 +15,15 @@ class RouteNames
     ];
 
     public const Attendance = [
-        'index'     => 'backoffice.attendance',
-        'daily'     => 'backoffice.attendance.daily',
-        'weekly'    => 'backoffice.attendance.weekly',
-        'delete'    => 'backoffice.attendance.delete'
+        'index'      => 'backoffice.attendance',
+        'daily'      => 'backoffice.attendance.daily',
+        'weekly'     => 'backoffice.attendance.weekly',
+        'delete'     => 'backoffice.attendance.delete',
+        'autoAbsent' => 'backoffice.attendance.auto-absent'
+    ];
+
+    public const Teachers = [
+        'index'     => 'backoffice.teachers',
+        'all'       => 'backoffice.teachers.all',
     ];
 }

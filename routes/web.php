@@ -3,6 +3,7 @@
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\scanner\ScannerController;
+use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\TestController;
 use App\Http\Utils\RouteNames;
 use Illuminate\Support\Facades\Route;
@@ -38,10 +39,19 @@ Route::controller(ScannerController::class)->group(function()
 
 Route::controller(AttendanceController::class)->group(function()
 {
-    Route::get('/backoffice/attendance',            'index')->name(RouteNames::Attendance['index']);
-    Route::post('/backoffice/attendance/daily',     'getDailyAttendances')->name(RouteNames::Attendance['daily']);
-    Route::post('/backoffice/attendance/this-week', 'getWeeklyAttendances')->name(RouteNames::Attendance['weekly']);
-    Route::post('/backoffice/attendance/delete',    'destroy')->name(RouteNames::Attendance['delete']);
+    Route::get('/backoffice/attendance',             'index')->name(RouteNames::Attendance['index']);
+    Route::get('/backoffice/attendance/auto-absent', 'autoAbsentEmployees')->name(RouteNames::Attendance['autoAbsent']);
+
+    Route::post('/backoffice/attendance/this-week',  'getWeeklyAttendances')->name(RouteNames::Attendance['weekly']);
+    Route::post('/backoffice/attendance/delete',     'destroy')->name(RouteNames::Attendance['delete']);
+
+    Route::post('/backoffice/attendance/daily/{employeeFilter?}', 'getDailyAttendances')->name(RouteNames::Attendance['daily']);
+});
+
+Route::controller(TeachersController::class)->group(function()
+{
+    Route::get('/backoffice/employees/teachers', 'index')->name(RouteNames::Teachers['index']);
+    Route::post('/backoffice/employees/teachers/get', 'getTeachers')->name(RouteNames::Teachers['all']);
 });
 
 Route::controller(TestController::class)->group(function(){

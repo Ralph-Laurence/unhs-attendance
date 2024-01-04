@@ -58,6 +58,7 @@ class ScannerController extends Controller
             $currentDate->startOfDay()->format(Constants::TimestampFormat), 
             $currentDate->endOfDay()->format(Constants::TimestampFormat)
         ])
+        ->where('a.' . Attendance::f_Status, '!=', Attendance::STATUS_ABSENT)
         ->select($selectFields)
         ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
         ->orderBy('a.created_at', 'desc')
@@ -66,11 +67,7 @@ class ScannerController extends Controller
 
         return json_encode([
             'data'  => $dataset->toArray(),
-            'icon' => [
-                Attendance::STATUS_PRESENT     => 'present',
-                Attendance::STATUS_BREAK       => 'break',
-                Attendance::STATUS_UNDERTIME => 'undertime'
-            ]
+            'icon' => Attendance::getIconClasses()
         ]);
     }
 
@@ -212,10 +209,6 @@ class ScannerController extends Controller
         $undertime  = $timeOut->lt($earlyDismissal) ? $earlyDismissal->diffInSeconds($timeOut) / 3600 : 0;
         $overtime   = $workHours > 8 ? $workHours - 8 : 0;
 
-        $workStart  = Carbon::parse(Attendance::$workStartTime);
-        $timeIn     = Carbon::parse($attendance->time_in);
-        $late       = $timeIn->gt($workStart) ? $timeIn->diffInSeconds($workStart) / 3600 : 0;
-
         // Check if TimeOut is before dismissal time 4:50 PM
         $status = $timeOut->lt(Carbon::parse(Attendance::$earlyDismissal)) ? 
                   Attendance::STATUS_UNDERTIME : 
@@ -224,31 +217,11 @@ class ScannerController extends Controller
         $attendance->update([
             Attendance::f_TimeOut   => $timeOut,
             Attendance::f_Status    => $status,
-            Attendance::f_Duration  => $this->formatDuration($duration),
-            Attendance::f_UnderTime => $this->formatDuration($undertime),
-            Attendance::f_OverTime  => $this->formatDuration($overtime),
-            Attendance::f_Late      => $this->formatDuration($late),
+            Attendance::f_Duration  => Attendance::formatTimeDuration($duration),
+            Attendance::f_UnderTime => Attendance::formatTimeDuration($undertime),
+            Attendance::f_OverTime  => Attendance::formatTimeDuration($overtime),
         ]);
 
         return Extensions::encodeSuccessMessage('Good Bye!', ['status' => $status]);
-    }
-
-    private function formatDuration($duration)
-    {
-        $hours   = floor($duration);
-        $minutes = floor(($duration - $hours) * 60);
-        $seconds = floor((($duration - $hours) * 60 - $minutes) * 60);
-    
-        $result = '';
-        if ($hours > 0)
-            $result .= $hours . 'Hr' . ($hours > 1 ? 's' : '') . ' ';
-        
-        if ($minutes > 0)
-            $result .= $minutes . 'min' . ($minutes > 1 ? 's' : '') . ' ';
-        
-        if ($seconds > 0)
-            $result .= $seconds . 'sec' . ($seconds > 1 ? 's' : '');
-    
-        return trim($result);
     }
 }

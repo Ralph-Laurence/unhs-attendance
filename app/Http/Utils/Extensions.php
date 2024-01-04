@@ -3,6 +3,7 @@
 namespace App\Http\Utils;
 
 use Carbon\Carbon;
+use Hashids\Hashids;
 
 class Extensions
 {
@@ -19,6 +20,23 @@ class Extensions
         return Carbon::now()->weekOfYear;
     }
 
+    //
+    // Dataset Utilities
+    //
+    public static function hashRowIds($dataset)
+    {
+        // Loop through the dataset and replace each id with its hashed equivalent
+
+        $hashids = new Hashids();
+
+        foreach ($dataset as $data) {
+            $data->id = $hashids->encode($data->id);
+        }
+    }
+    
+    //
+    //  JSON RESPONSE BUILDERS
+    //
     public static function encodeSuccessMessage($message, $extraRows = []) : string 
     {
         // Use the array union operator (+) to merge the arrays

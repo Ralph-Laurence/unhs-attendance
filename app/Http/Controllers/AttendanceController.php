@@ -46,14 +46,22 @@ class AttendanceController extends Controller
     {
         $routes = [
             'filter_thisWeek' => route(RouteNames::Attendance['weekly']),
-            'filter_thisDay'  => route(RouteNames::Attendance['daily'])
+            'filter_thisDay'  => route(RouteNames::Attendance['daily']),
+            'deleteRoute'     => route(RouteNames::Attendance['delete']),
+            'scannerRoute'    => route(RouteNames::Scanner['index'])
         ];
+
+        $roleFilters = [];
+
+        foreach (Employee::RoleToString as $k => $v) 
+        {
+            $hashKey = $this->hashids->encode($k);
+            $roleFilters[$hashKey] = $v;
+        }
 
         return view('backoffice.attendance.index')
             ->with('routes'             , $routes)
-            ->with('deleteRoute'        , route(RouteNames::Attendance['delete']))
-            ->with('scannerRoute'       , route(RouteNames::Scanner['index']))
-            ->with('organizationName'   , Constants::OrganizationName);
+            ->with('roleFilters'        , $roleFilters);
     }
 
     public function destroy(Request $request) 
@@ -80,7 +88,7 @@ class AttendanceController extends Controller
     /**
      * Retrieve all attendances that were made today
      */
-    public function getDailyAttendances()
+    public function getDailyAttendances($employeeType = null)
     {
         // The current timestamp
         $currentDate = Carbon::now();
@@ -91,10 +99,14 @@ class AttendanceController extends Controller
             [
                 $currentDate->startOfDay()->format(Constants::TimestampFormat), 
                 $currentDate->endOfDay()->format(Constants::TimestampFormat)
-            ])
-            ->get();
+            ]);
 
-        $this->hashRowIds($dataset);
+        if ($employeeType)
+                $dataset->where('e.role', '=', $employeeType);
+
+        $dataset = $dataset->get();
+
+        Extensions::hashRowIds($dataset);
         
         return $this->makeAttendanceData($dataset);
     }
@@ -110,9 +122,14 @@ class AttendanceController extends Controller
             ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek)
             ->get();
 
-        $this->hashRowIds($dataset);
+        Extensions::hashRowIds($dataset);
 
         return $this->makeAttendanceData($dataset);
+    }
+
+    public function autoAbsentEmployees() 
+    {
+        Attendance::autoAbsentEmployees();
     }
 
     /**
@@ -127,18 +144,6 @@ class AttendanceController extends Controller
         ->orderBy('a.created_at', 'desc');
 
         return $query;
-    }
-
-    /**
-     * Loop through the dataset and replace each id with its hashed equivalent
-    */
-    private function hashRowIds($dataset)
-    {
-        $hashids = new Hashids();
-
-        foreach ($dataset as $data) {
-            $data->id = $hashids->encode($data->id);
-        }
     }
 
     /**
@@ -165,3 +170,18 @@ if ($user->trashed()) {
 * in our Laravel application. If we’re not using soft deletes, we can 
 * ignore this part.
  */
+
+ /**
+  * To show all employees including their total ‘late’ timestamps, you can use the following query:
+SELECT
+	CONCAT(e.firstname,' ', e.middlename,' ', e.lastname) as 'name',
+    COUNT(a.late) as 'late_count',
+    GROUP_CONCAT(a.late SEPARATOR ', ') as 'late_timestamps'
+FROM employees as e
+LEFT JOIN attendances as a ON a.emp_fk_id = e.id
+GROUP BY e.id```
+
+This query will return the name of each employee, the number of times they were late, and a comma-separated list of all the late timestamps for each employee [^1^][1].
+
+I hope this helps!
+  */

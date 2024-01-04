@@ -23,6 +23,7 @@ class CreateEmployeesTable extends Migration
             $table->string(Employee::f_Contact,     16)->unique();
             $table->string(Employee::f_Email,       64)->nullable();
             $table->tinyInteger(Employee::f_Position);
+            $table->string(Employee::f_Status,      16)->default(Employee::ON_STATUS_DUTY);
             $table->string(Employee::f_Photo);
 
             $table->timestamps();

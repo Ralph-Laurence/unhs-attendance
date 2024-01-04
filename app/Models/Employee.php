@@ -17,6 +17,9 @@ class Employee extends Model
     public const RoleTeacher    = 0;
     public const RoleStaff      = 1;
 
+    public const ON_STATUS_LEAVE = 'Leave';
+    public const ON_STATUS_DUTY  = 'On Duty';
+
     public const f_EmpNo        = 'emp_no';         // -> Employee Number
     public const f_FirstName    = 'firstname';
     public const f_MiddleName   = 'middlename';
@@ -25,6 +28,7 @@ class Employee extends Model
     public const f_Email        = 'email';
     public const f_Contact      = 'contact';
     public const f_Photo        = 'photo';
+    public const f_Status       = 'status';         // -> Status: On Duty | Leave
     public const f_QrSecLevel   = 'qr_sec_level';   // -> Security Levels: None, Medium, High
                                                     // -> None   - No security
                                                     // -> Medium - PIN Code

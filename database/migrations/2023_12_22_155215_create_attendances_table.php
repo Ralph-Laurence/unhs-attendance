@@ -21,7 +21,7 @@ class CreateAttendancesTable extends Migration
         {
             $table->id();
             $table->integer(Attendance::f_Emp_FK_ID);
-            $table->string(Attendance::f_TimeIn     ,24);
+            $table->string(Attendance::f_TimeIn     ,24)->nullable();
             $table->string(Attendance::f_LunchStart ,24)->nullable();
             $table->string(Attendance::f_LunchEnd   ,24)->nullable();
             $table->string(Attendance::f_TimeOut    ,24)->nullable();
@@ -30,7 +30,7 @@ class CreateAttendancesTable extends Migration
             $table->string(Attendance::f_UnderTime  ,24)->nullable();
             $table->string(Attendance::f_OverTime   ,24)->nullable();
             $table->string(Attendance::f_Late       ,24)->nullable();
-            $table->integer(Attendance::f_WeekNo       )->default(Extensions::getCurrentWeek());
+            $table->integer(Attendance::f_WeekNo       )->default(date('W'));
 
             $defaultTimestamp = DB::raw('CURRENT_TIMESTAMP');
 

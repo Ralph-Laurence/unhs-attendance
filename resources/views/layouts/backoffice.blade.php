@@ -1,3 +1,8 @@
+@php
+    use App\Http\Utils\Constants;
+    $organizationName = Constants::OrganizationName;
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,10 +20,13 @@
     <link rel="stylesheet" href="{{ asset('css/lib/simplebar/simplebar.min.css') }}">
 
     <!-- MAIN STYLES -->
-    <link rel="stylesheet" href="{{ asset('css/overrides/simplebar-overrides.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/main/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/main/backoffice/sidenav.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/main/modals/alert-dialog.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/main/components/snackbar.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/main/components/loader.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/main/components/row-action-buttons.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/overrides/simplebar-overrides.css') }}"/>
 
     <!-- CHILD VIEW STYLES -->
     @stack('styles')
@@ -27,12 +35,33 @@
 <body>
 
     @include('modals.alert')
+    @stack('dialogs')
     
     {{-- SNACKBAR HOLDER --}}
     <div class="snackbar-frame position-fixed bottom-0 end-0 flex-column-reverse d-flex gap-2"></div>
 
     <div class="container-fluid h-100 overflow-hidden">
-        @yield('content')
+
+        <div class="row">
+    
+            @include('layouts.backoffice.sidenav')
+        
+            <div class="col content-wrapper overflow-hidden d-flex flex-column px-0 vh-100">
+                <div data-simplebar class="overflow-y-auto nav-items-container px-3 h-100">
+                    
+                    @include('layouts.backoffice.header-bannder')
+        
+                    {{-- CONTENT --}}
+                    @yield('content')
+        
+                    <div class="footer text-center opacity-65 p-2">
+                        <small>&copy; {{ date('Y') .' '. $organizationName }}</small>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
     </div>
 
     <!-- LIBRARY SCRIPTS -->

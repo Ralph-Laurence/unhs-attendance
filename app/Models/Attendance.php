@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Attendance extends Model
@@ -38,13 +39,35 @@ class Attendance extends Model
     public static $earlyDismissal = '16:50:00';     // 4:50 PM      -> Will not calculate undertime after this time
     public static $workExitTime   = '17:30:00';     // 5:30 PM      -> All employees fully dismissed
 
+    // public static function createTimeIn(int $empId) : Attendance
+    // {
+    //     $insert = Attendance::create([
+    //         self::f_Emp_FK_ID   => $empId,
+    //         self::f_TimeIn      => Carbon::now(),
+    //         self::f_Status      => self::STATUS_PRESENT,
+    //     ]);
+
+    //     return $insert;
+    // }
     public static function createTimeIn(int $empId) : Attendance
     {
-        $insert = Attendance::create([
+        $timeIn = Carbon::now();
+
+        $data = [
             self::f_Emp_FK_ID   => $empId,
-            self::f_TimeIn      => Carbon::now(),
+            self::f_TimeIn      => $timeIn,
             self::f_Status      => self::STATUS_PRESENT,
-        ]);
+        ];
+
+        $workStart  = Carbon::parse(Attendance::$workStartTime);
+
+        if ($timeIn->gt(Attendance::$workStartTime))
+        {
+            $late = $timeIn->diffInSeconds($workStart) / 3600;
+            $data[Attendance::f_Late] = self::formatTimeDuration($late);
+        }
+
+        $insert = Attendance::create($data);
 
         return $insert;
     }
@@ -57,7 +80,8 @@ class Attendance extends Model
         return [
             Attendance::STATUS_PRESENT     => 'present',
             Attendance::STATUS_BREAK       => 'break',
-            Attendance::STATUS_UNDERTIME   => 'undertime'
+            Attendance::STATUS_UNDERTIME   => 'undertime',
+            Attendance::STATUS_ABSENT      => 'absent'
         ];
     }
 
@@ -84,6 +108,61 @@ class Attendance extends Model
             $hashids = new \Hashids\Hashids(); // Create a new instance of Hashids
 
         return $hashids->encode($this->attributes['id']); // Use the instance to call the encode 
+    }
+    /** 
+     * Will output something like 1H 30mins 2secs
+    */
+    public static function formatTimeDuration($duration)
+    {
+        $hours   = floor($duration);
+        $minutes = floor(($duration - $hours) * 60);
+        $seconds = floor((($duration - $hours) * 60 - $minutes) * 60);
+    
+        $result = '';
+        if ($hours > 0)
+            $result .= $hours . 'Hr' . ($hours > 1 ? 's' : '') . ' ';
+        
+        if ($minutes > 0)
+            $result .= $minutes . 'min' . ($minutes > 1 ? 's' : '') . ' ';
+        
+        if ($seconds > 0)
+            $result .= $seconds . 'sec' . ($seconds > 1 ? 's' : '');
+    
+        return trim($result);
+    }
+
+    /**
+     * Select all employees who do not have an attendance record for the current day, 
+     * then insert an “Absent” record for each of them in the attendance table.
+     */
+    public static function autoAbsentEmployees()
+    {
+        $tblAttendance = Attendance::getTableName();
+
+        // Get today's date
+        $today = Carbon::today();
+
+        // Get all employees who do not have an attendance record 
+        // for today and are not on leave
+        $employees = DB::table(Employee::getTableName() . ' as e')
+            ->leftJoin("$tblAttendance as a", function ($join) use ($today) 
+            {
+                $join->on('e.id', '=', 'a.' . Attendance::f_Emp_FK_ID)
+                ->whereDate('a.created_at', '=', $today);
+            })
+        ->whereNull('a.id')
+        ->where('e.'.Employee::f_Status, '!=', Employee::ON_STATUS_LEAVE)
+        ->select('e.id')
+        ->get();
+
+        // For each employee without an attendance record, insert an "Absent" record
+        foreach ($employees as $employee) 
+        {
+            DB::table($tblAttendance)->insert([
+                Attendance::f_Emp_FK_ID => $employee->id,
+                Attendance::f_Status    => Attendance::STATUS_ABSENT
+            ]);
+        }
     }
 }
 

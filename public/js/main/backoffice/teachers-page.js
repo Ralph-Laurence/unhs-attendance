@@ -1,6 +1,5 @@
 let dtrTable = '.dtr-table';
 let dataTable;
-let iconStyles;
 let csrfToken;
 
 $(document).ready(function() 
@@ -21,37 +20,22 @@ function initialize()
 //
 function handleEvents() 
 {
-    $(document).on('click', '.row-actions .btn-delete', function() 
-    {
-        let row = $(this).closest('tr');
+    // $(document).on('click', '.row-actions .btn-delete', function() 
+    // {
+    //     let row = $(this).closest('tr');
         
-        let employeeName = row.find('.td-employee-name').text();
-        let recordDate   = row.find('.date-tile').attr('data-date-attr');
+    //     let employeeName = row.find('.td-employee-name').text();
+    //     let recordDate   = row.find('.date-tile').attr('data-date-attr');
 
-        recordDate = convertToFullMonth(recordDate);
+    //     recordDate = convertToFullMonth(recordDate);
 
-        if (employeeName)
-            employeeName = employeeName.trim();
+    //     if (employeeName)
+    //         employeeName = employeeName.trim();
 
-        let message = sanitize(`You are about to delete the attendance record of <i><b>"${employeeName}"</b></i> which was created on ${recordDate}. Once deleted, it cannot be recovered.<br><br>Do you wish to proceed?`);
+    //     let message = sanitize(`You are about to delete the attendance record of <i><b>"${employeeName}"</b></i> which was created on ${recordDate}. Once deleted, it cannot be recovered.<br><br>Do you wish to proceed?`);
 
-        alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
-    });
-
-    $('.record-range-filter .daily').on('click', function() {
-        var url = $(dtrTable).data('src-default');
-        bindTableDataSource(url);
-    });
-
-    $('.record-range-filter .weekly').on('click', function() {
-        var url = $(dtrTable).data('src-weekly');
-        bindTableDataSource(url);
-    });
-
-    $('.role-filters .dropdown-item').on('click', function() {
-        var role = $(this).data('role');
-        alert(role);
-    });
+    //     alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
+    // });
     // $(document).on('click', '.row-actions')
     // $(document).on('click', '.row-actions')
 }
@@ -70,13 +54,7 @@ function bindTableDataSource(url)
             url     : url,
             type    : 'POST',
             dataType: 'JSON',
-            dataSrc : function(json) {
-
-                if (iconStyles == undefined)
-                    iconStyles = json.icon;
-
-                return json.data;
-            },
+            dataSrc : null,
             data: {
                 '_token' : csrfToken
             }
@@ -92,26 +70,13 @@ function bindTableDataSource(url)
                     return meta.row + 1;
                 }
             },
-            // Second Column -> Date
+            // Second Column -> Names
             {
-                className: 'text-truncate text-center',
-                width: '80px',
-                data: 'created_at',
-                render: function (data, type, row) 
-                {
-                    if (data == '' || data == undefined)
-                        return '';
-
-                    var date = extractDate(data);
-                    var dateAttr = `${date.month} ${date.day}`;
-                    var dateTile = 
-                    `<div class="date-tile" data-date-attr="${dateAttr}">
-                        <div class="month">${date.month}</div>
-                        <div class="day mb-0">${date.day}</div>
-                        <div class="dayname">${date.dayName}</div>
-                    </div>`;
-
-                    return dateTile;
+                className: 'td-employee-name text-truncate',
+                width: '280px',
+                data: null,
+                render: function (data, type, row) {  
+                    return `<span class="text-darker">${[data.fname, data.mname, data.lname].join(' ')}</span>`;
                 },
                 defaultContent: ''
             },
@@ -225,54 +190,3 @@ function deleteRecord(row)
         }
     })
 }
-
-// We assume that the input has a format like "Jan 02".
-// Then we will convert the Three-letter month into
-// its full month equivalent
-function convertToFullMonth(dateString)
-{
-    // Parse the date string
-    var date = new Date(dateString);
-
-    // Check if the date is valid
-    if (isNaN(date.getTime()))
-    {
-        // Not a valid date
-        return '(Unknown date)';
-    }
-
-    // Get the full month name
-    var fullMonth = date.toLocaleString('default', { month: 'long' });
-
-    // Get the day
-    var day = date.getDate();
-
-    // Return the full month name and day
-    return fullMonth + ' ' + day;
-}
-
-
-
-/*
-NEXT TASK:
-
----------------------------
-CREATE ATTENDANCE MAPPING
----------------------------
-
-In DB, Add a table called 'Attendance Mapping'
-This will hold the attendance status of all employees
-_____________________________________________________
-id | employee_fk | status | flag | created_at
------------------------------------------------------
-
-Newly inserted attendances will update this table and
-mark the status 'Present'. However, deleting a record
-from the 'Attendances' table will mark the status as
-'Absent'
-
-id          -> primary key
-employee_fk -> foreign key
-status      -> PRESENT , ABSENT , DAY OFF
-flag        -> REGULAR | HOLIDAY | REST DAY (Weekends) | EVENT
-*/

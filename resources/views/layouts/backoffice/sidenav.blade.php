@@ -1,6 +1,3 @@
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/main/backoffice/sidenav.css') }}" />
-@endpush
 <div class="col sidenav shadow-4-strong user-select-none d-flex flex-column vh-100 px-0">
     <div class="logo-wrapper p-3 shadow-3-strong">
         <div class="logo-background logo-background-sm me-2">
@@ -25,6 +22,22 @@
                 </div>
                 <div class="ms-2">Attendance</div>
             </a>
+
+            <div class="ps-4">
+                <a class="nav-items p-2 rounded-2">
+                    <div class="nav-item-icon">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
+                    <div class="ms-2">Absence</div>
+                </a>
+                <a class="nav-items p-2 rounded-2">
+                    <div class="nav-item-icon">
+                        <i class="fa-solid fa-calendar-minus"></i>
+                    </div>
+                    <div class="ms-2">Tardiness</div>
+                </a>
+            </div>
+            
             <a class="nav-items p-2 rounded-2">
                 <div class="nav-item-icon">
                     <i class="fa-solid fa-person-chalkboard"></i>
@@ -37,6 +50,14 @@
                 </div>
                 <div class="ms-2">Staffs</div>
             </a>
+            {{-- <div class="list-group list-group-light">
+                <a href="#" class="list-group-item list-group-item-action px-3 border-0 active" aria-current="true">
+                    The current link item</a>
+                  <a href="#" class="list-group-item list-group-item-action px-3 border-0">A second link item</a>
+                  <a href="#" class="list-group-item list-group-item-action px-3 border-0">A third link item</a>
+                  <a href="#" class="list-group-item list-group-item-action px-3 border-0">A fourth link item</a>
+                  <a class="list-group-item list-group-item-action px-3 border-0 disabled">A disabled link item</a>
+              </div> --}}
        </div>
     </div>
 </div>

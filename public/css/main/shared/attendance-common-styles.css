@@ -29,3 +29,8 @@
     content: '\f058';
     color: var(--primary-color);
 }
+
+.attendance-status.absent::before {
+    content: '\f057';
+    color: var(--danger-color);
+}
