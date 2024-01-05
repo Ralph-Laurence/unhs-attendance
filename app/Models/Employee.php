@@ -73,7 +73,7 @@ class Employee extends Model
         ]);
     }
 
-    public function getStaffs()
+    public function getStaff()
     {
         $dataset = $this->getEmployees(Employee::RoleStaff);
 

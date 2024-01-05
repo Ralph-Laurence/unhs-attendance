@@ -3,6 +3,7 @@
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\scanner\ScannerController;
+use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\TestController;
 use App\Http\Utils\RouteNames;
@@ -54,6 +55,14 @@ Route::controller(TeachersController::class)->group(function()
 {
     Route::get('/backoffice/employees/teachers', 'index')->name(RouteNames::Teachers['index']);
     Route::post('/backoffice/employees/teachers/get', 'getTeachers')->name(RouteNames::Teachers['all']);
+});
+
+Route::controller(StaffController::class)->group(function()
+{
+    Route::get('/backoffice/employees/staff', 'index')->name(RouteNames::Staff['index']);
+
+    // AJAX
+    Route::post('/backoffice/employees/staff/get', 'getStaff')->name(RouteNames::Staff['all']);
 });
 
 Route::controller(TestController::class)->group(function(){

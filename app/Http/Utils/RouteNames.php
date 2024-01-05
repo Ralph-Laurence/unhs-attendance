@@ -26,4 +26,9 @@ class RouteNames
         'index'     => 'backoffice.teachers',
         'all'       => 'backoffice.teachers.all',
     ];
+
+    public const Staff = [
+        'index'     => 'backoffice.staff',
+        'all'       => 'backoffice.staff.all',
+    ];
 }

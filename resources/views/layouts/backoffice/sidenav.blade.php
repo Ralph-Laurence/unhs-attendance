@@ -1,3 +1,18 @@
+@php
+use \App\Http\Utils\RouteNames; 
+
+$routeItems = 
+[
+    ['wildcard' => '',      'icon' => 'fa-chart-pie',    'text' => 'Dashboard',      'target' => ''], //route(RouteNames::DASHBOARD['index'])
+    ['wildcard' => 'backoffice.attendance',     'icon' => 'fa-calendar-check',          'text' => 'Attendance',     'target' => route(RouteNames::Attendance['index'])],
+    ['wildcard' => 'backoffice.attendance.absence',     'icon' => 'fa-calendar-xmark',          'text' => 'Absence',     'target' => '', 'menu_type' => 'sub'],
+    ['wildcard' => 'backoffice.attendance.tardiness',     'icon' => 'fa-calendar-minus',          'text' => 'Tardiness',     'target' => '', 'menu_type' => 'sub' ],
+    ['wildcard' => 'backoffice.attendance.tardiness',     'icon' => 'fa-calendar-week',          'text' => 'Leave',     'target' => '', 'menu_type' => 'sub' ],
+    ['wildcard' => 'backoffice.teachers',       'icon' => 'fa-person-chalkboard',           'text' => 'Teachers',       'target' => route(RouteNames::Teachers['index'])],
+    ['wildcard' => 'backoffice.staff', 'icon' => 'fa-people-carry-box',           'text' => 'Staffs',       'target' => route(RouteNames::Staff['index'])],
+    ['wildcard' => '', /*backoffice.teachers*/      'icon' => 'fa-users-gear',           'text' => 'Users',       'target' => ''], // route(RouteNames::Staffs['index'])
+];
+@endphp
 <div class="col sidenav shadow-4-strong user-select-none d-flex flex-column vh-100 px-0">
     <div class="logo-wrapper p-3 shadow-3-strong">
         <div class="logo-background logo-background-sm me-2">
@@ -10,54 +25,28 @@
     </div>
     <div class="flex-grow-1 overflow-hidden">
         <div data-simplebar class="overflow-y-auto nav-items-container p-2 h-100">
-            <a class="nav-items p-2 rounded-2">
-                <div class="nav-item-icon">
-                    <i class="fa-solid fa-chart-pie"></i>
-                </div>
-                <div class="ms-2">Dashboard</div>
-            </a>
-            <a class="nav-items p-2 rounded-2">
-                <div class="nav-item-icon">
-                    <i class="fa-solid fa-calendar-check"></i>
-                </div>
-                <div class="ms-2">Attendance</div>
-            </a>
 
-            <div class="ps-4">
-                <a class="nav-items p-2 rounded-2">
+            @foreach ($routeItems as $obj)
+                @php
+                    $wildcard    = $obj['wildcard'];
+                    $isCurrent   = ( Request::routeIs($wildcard) || Request::routeIs("$wildcard.*") );
+                    $marginStart = (array_key_exists('menu_type', $obj) && $obj['menu_type'] == 'sub') 
+                                 ? 'ms-4'
+                                 : '';
+                @endphp
+                @if ($isCurrent)
+                    <a class="nav-items p-2 rounded-2 {{ $marginStart }} current">
+                @else
+                    <a class="nav-items p-2 rounded-2 {{ $marginStart }}" href="{{ $obj['target'] }}">
+                @endif
+                
                     <div class="nav-item-icon">
-                        <i class="fa-solid fa-calendar-xmark"></i>
+                        <i class="fa-solid {{ $obj['icon'] }}"></i>
                     </div>
-                    <div class="ms-2">Absence</div>
+                    <div class="ms-2">{{ $obj['text'] }}</div>
                 </a>
-                <a class="nav-items p-2 rounded-2">
-                    <div class="nav-item-icon">
-                        <i class="fa-solid fa-calendar-minus"></i>
-                    </div>
-                    <div class="ms-2">Tardiness</div>
-                </a>
-            </div>
-            
-            <a class="nav-items p-2 rounded-2">
-                <div class="nav-item-icon">
-                    <i class="fa-solid fa-person-chalkboard"></i>
-                </div>
-                <div class="ms-2">Teachers</div>
-            </a>
-            <a class="nav-items p-2 rounded-2">
-                <div class="nav-item-icon">
-                    <i class="fa-solid fa-people-carry-box"></i>
-                </div>
-                <div class="ms-2">Staffs</div>
-            </a>
-            {{-- <div class="list-group list-group-light">
-                <a href="#" class="list-group-item list-group-item-action px-3 border-0 active" aria-current="true">
-                    The current link item</a>
-                  <a href="#" class="list-group-item list-group-item-action px-3 border-0">A second link item</a>
-                  <a href="#" class="list-group-item list-group-item-action px-3 border-0">A third link item</a>
-                  <a href="#" class="list-group-item list-group-item-action px-3 border-0">A fourth link item</a>
-                  <a class="list-group-item list-group-item-action px-3 border-0 disabled">A disabled link item</a>
-              </div> --}}
+                
+            @endforeach
        </div>
     </div>
 </div>
