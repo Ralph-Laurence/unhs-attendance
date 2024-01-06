@@ -22,21 +22,20 @@ function handleEvents()
 {
     $(document).on('employeeFormInsertSuccess', function (event, data) 
     { 
-        console.warn(data)
-
         if (data && data.code == 0)
         {
-            // {code: 0, message: 'Success!', idNo: '11', name: 'Apollo Buzz Aldrin', rowKey: 'e5oLyp3k19'}
             var rowNode = dataTable.row.add({
-                emp_num: data.emp_num,
-                fname: data.fname,
-                mname: data.mname,
-                lname: data.lname,
-                emp_status: data.emp_status,
-                total_lates: 0,
-                total_leave: 0,
-                total_absents: 0,
-                id: data.id
+
+                emp_num         : data.emp_num,
+                fname           : data.fname,
+                mname           : data.mname,
+                lname           : data.lname,
+                emp_status      : data.emp_status,
+                total_lates     : 0,
+                total_leave     : 0,
+                total_absents   : 0,
+                id              : data.id
+
             }).draw().node();
 
              // Add classes to the new row
@@ -45,7 +44,12 @@ function handleEvents()
             $(rowNode).find('td').eq(2).addClass('td-employee-name text-truncate');
             $(rowNode).find('td').eq(7).addClass('text-center');
         }
+        else
+        {
+            snackbar.showWarn('Action completed successfully with minor problems');
+        }
     });
+
     // $(document).on('click', '.row-actions .btn-delete', function() 
     // {
     //     let row = $(this).closest('tr');

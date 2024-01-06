@@ -78,8 +78,6 @@ function handleFormSubmit()
         },
         success: function(response)
         {
-            console.warn(response)
-
             if (response)
             {
                 var data = JSON.parse(response);
@@ -102,8 +100,9 @@ function handleFormSubmit()
                 $(document).trigger('employeeFormInsertSuccess', [data]);
             }
         },
-        error: function(xhr, status, error) {
-            console.warn(xhr.responseText)
+        error: function(xhr, status, error) 
+        {
+            alertModal.showDanger("The requested action cannot be processed because of an error. Please try again later.", "Failure");
         },
         complete: function() {
             // Enable the Submit (save) button when the operation
@@ -121,7 +120,7 @@ function handleFormClosed()
             // OK CLICKED
             () => clearForm(),
 
-            // CANCELLED
+            // CANCELLED, show the form again
             () => formModal.show());
     }
 }

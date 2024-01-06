@@ -6,7 +6,8 @@ var snackbar = {
             'default'   : { defaultTitle: 'Notice'      , icon: 'fa-circle-info'},
             'info'      : { defaultTitle: 'Information' , icon: 'fa-circle-info'},
             'success'   : { defaultTitle: 'Success'     , icon: 'fa-circle-check'},
-            'danger'    : { defaultTitle: 'Failure'     , icon: 'fa-circle-check'},
+            'danger'    : { defaultTitle: 'Failure'     , icon: 'fa-circle-exclamation'},
+            'warning'   : { defaultTitle: 'Warning'     , icon: 'fa-triangle-exclamation'},
         }
     },
 
@@ -91,6 +92,9 @@ var snackbar = {
     },
     showDanger(message, title) {
         this.show(message, title, 'danger');
+    },
+    showWarn(message, title) {
+        this.show(message, title, 'warning');
     }
 };
 

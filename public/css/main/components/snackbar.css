@@ -80,6 +80,14 @@
     background-color: var(--danger-color);
 }
 
+.snackbar.warning .snackbar-icon {
+    color: var(--warning-color);
+}
+
+.snackbar.warning::after {
+    background-color: var(--warning-color);
+}
+
 .snackbar-body .snackbar-content {
     margin-bottom: 0;
     font-size: 14px;

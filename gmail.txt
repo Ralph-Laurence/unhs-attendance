@@ -1,0 +1,14 @@
+Firstname: Web App Test Mailer
+Birthday: Jan 7, 1999
+Username: laramailer.dev@gmail.com
+Password: laravel-smtp01
+
+
+Gmail App Passwords section
+App name: Laravel Test Mailer
+16-digit password: dhct cgcu cmlv eovt
+
+laravel env params:
+mail_password: dhctcgcucmlveovt
+mail_host: smtp.gmail.com
+mail_port: 587

@@ -7,6 +7,7 @@ use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\TestController;
 use App\Http\Utils\RouteNames;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -68,4 +69,11 @@ Route::controller(StaffController::class)->group(function()
 
 Route::controller(TestController::class)->group(function(){
     Route::get('/test', 'index');
+});
+
+Route::get('/test-email', function()
+{
+    Mail::raw('Hello, this is a test mail!', function ($message) {
+        $message->to('bluescreen512@gmail.com')->subject('Test Mail');
+    });
 });
