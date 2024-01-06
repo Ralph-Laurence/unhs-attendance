@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Utils\Constants;
 use Carbon\Carbon;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -141,14 +142,20 @@ class Attendance extends Model
 
         // Get today's date
         $today = Carbon::today();
+        $currentDate = Carbon::now();
 
         // Get all employees who do not have an attendance record 
         // for today and are not on leave
         $employees = DB::table(Employee::getTableName() . ' as e')
-            ->leftJoin("$tblAttendance as a", function ($join) use ($today) 
+            ->leftJoin("$tblAttendance as a", function ($join) use ($today, $currentDate) 
             {
                 $join->on('e.id', '=', 'a.' . Attendance::f_Emp_FK_ID)
-                ->whereDate('a.created_at', '=', $today);
+                //->whereDate('a.created_at', '=', $today);
+                ->whereBetween('a.created_at', 
+                [
+                    $currentDate->startOfDay()->format(Constants::TimestampFormat), 
+                    $currentDate->endOfDay()->format(Constants::TimestampFormat)
+                ]);
             })
         ->whereNull('a.id')
         ->where('e.'.Employee::f_Status, '!=', Employee::ON_STATUS_LEAVE)

@@ -141,11 +141,19 @@ Button Overrides
     font-size: 12px;
 }
 
+.text-xs {
+    font-size: 0.75rem;
+}
+
 /* Display Utilities */
 .flex-center {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.d-hidden {
+    display: none;
 }
 
 /* TABLE UTILITIES */
@@ -161,4 +169,13 @@ Button Overrides
     padding-top: 6px;
     padding-bottom: 6px;
     vertical-align: middle;
+}
+
+/* Bootstrap Overrides */
+.error-box {
+    color: #aa2436;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    font-size: 14px;
+    border-radius: 4px;
 }

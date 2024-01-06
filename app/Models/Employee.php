@@ -42,6 +42,10 @@ class Employee extends Model
         return (new self)->getTable();
     }
 
+    protected $guarded = [
+        'id'
+    ];
+
     /**
         SELECT 
             e.id, 

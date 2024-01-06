@@ -31,7 +31,7 @@ var alertModal = {
 
         // Set button click handlers
         $('#alertModal .btn.btn-ok').off('click').on('click', okClicked);
-        $('#alertModal .btn.btn-cancel').off('click').on('click', cancelClicked);
+        $('#alertModal .btn.btn-cancel, #alertModal .btn-close').off('click').on('click', cancelClicked);
 
         // Set custom icon
         $('#alertModal .modal-icon').attr('src', config.icon);
@@ -51,7 +51,10 @@ var alertModal = {
     showWarn: function (message, title, okClicked, cancelClicked)
     {
         this.show(message, title, okClicked, cancelClicked, 'warn');
-    }
+    },
+    // set onClosed(fn) {
+    //     $('#alertModal').on('hidden.bs.modal', fn);
+    // }
 };
 
 

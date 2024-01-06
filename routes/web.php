@@ -53,8 +53,9 @@ Route::controller(AttendanceController::class)->group(function()
 
 Route::controller(TeachersController::class)->group(function()
 {
-    Route::get('/backoffice/employees/teachers', 'index')->name(RouteNames::Teachers['index']);
-    Route::post('/backoffice/employees/teachers/get', 'getTeachers')->name(RouteNames::Teachers['all']);
+    Route::get('/backoffice/employees/teachers',        'index')->name(RouteNames::Teachers['index']);
+    Route::post('/backoffice/employees/teachers/get',   'getTeachers')->name(RouteNames::Teachers['all']);
+    Route::post('/backoffice/employees/teachers/create','store')->name(RouteNames::Teachers['create']);
 });
 
 Route::controller(StaffController::class)->group(function()

@@ -25,6 +25,7 @@ class RouteNames
     public const Teachers = [
         'index'     => 'backoffice.teachers',
         'all'       => 'backoffice.teachers.all',
+        'create'    => 'backoffice.teachers.create',
     ];
 
     public const Staff = [

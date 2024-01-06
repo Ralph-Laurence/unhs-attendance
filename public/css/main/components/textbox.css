@@ -1,0 +1,54 @@
+.textbox {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.textbox .input-wrapper {
+    background-color: #F1F2F3;
+    box-shadow: 0 0 0 1px #d8d8d8;
+    height: 36px;
+    max-height: 36px;
+    overflow: hidden;
+    border-radius: 2rem;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.textbox input {
+    background: none;
+    border: none;
+    outline: none !important;
+    height: 100%;
+    width: 100%;
+    font-size: 0.9375rem;
+    padding-bottom: 2px;
+}
+
+.textbox.has-error input::placeholder {
+    color: #FF3651;
+}
+
+.textbox.has-error .input-wrapper {
+    background-color: #FBD3D4;
+    box-shadow: 0 0 0 1px #FA8E96;
+}
+
+.textbox.has-error .error-icon {
+    display: inline;
+    color: #FF283D;
+}
+
+.textbox:not(.has-error) .error-icon {
+    display: none;
+}
+
+.textbox.required .input-wrapper::after {
+    font-family: var(--font-awesome);
+    content: '\2a';
+    font-size: 9px;
+    color: var(--primary-dark);
+}
