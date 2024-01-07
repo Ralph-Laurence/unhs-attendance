@@ -78,7 +78,7 @@ class ScannerController extends Controller
     public function decode(Request $request)
     {
         $hash    = $request->input('hash');
-        $hashids = new Hashids();
+        $hashids = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
         $decode  = $hashids->decode($hash);
 
         if (is_null($decode) || empty($decode)) {

@@ -3,9 +3,9 @@ let formModal = null;
 let employeeFormModal = '#employeeFormModal';
 let employeeForm = undefined;
 let formSubmitButton = undefined;
-let metaCSRF = undefined;
+let formCancelButton = undefined;
 
-const errorBox = '.error-box';
+let metaCSRF = undefined;
 
 $(document).ready(function ()
 {
@@ -15,6 +15,7 @@ $(document).ready(function ()
     employeeForm = $(`${employeeFormModal} form`);
 
     formSubmitButton = $(`${employeeFormModal} .btn-save`);
+    formCancelButton = $(`${employeeFormModal} .btn-cancel, #employeeFormModal .btn-close`);
 
     bindEvents();
 });
@@ -37,7 +38,7 @@ function bindEvents()
     
     $(employeeFormModal).on('hidden.bs.modal', () => handleFormClosed());
 
-    $(`${employeeFormModal} .btn-cancel, #employeeFormModal .btn-close`).on('click', () => formModal.hide());
+    formCancelButton.on('click', () => formModal.hide());
 }
 
 function clearForm()
@@ -60,7 +61,8 @@ function handleFormSubmit()
     if (!validateForm())
         return;
 
-    formSubmitButton.prop('disabled', true);
+    showProgressLoader(true);
+    disableControls();
 
     let submitTarget = employeeForm.attr('data-post-create-target');
 
@@ -75,6 +77,7 @@ function handleFormSubmit()
             'input-lname'  : $("#input-lname").val(),
             'input-email'  : $("#input-email").val(),
             'input-contact': $("#input-contact-no").val(),
+            'save_qr_copy' : $('#optionSaveQRLocalCopy').is(':checked')
         },
         success: function(response)
         {
@@ -105,9 +108,10 @@ function handleFormSubmit()
             alertModal.showDanger("The requested action cannot be processed because of an error. Please try again later.", "Failure");
         },
         complete: function() {
-            // Enable the Submit (save) button when the operation
+            // Enable the control buttons when the operation
             // has completed either successfully or not
-            formSubmitButton.prop('disabled', false);
+            enableControls();
+            showProgressLoader(false);
         }
     });
 }
@@ -147,4 +151,26 @@ function validateForm()
     });
 
     return valid;
+}
+
+function enableControls()
+{
+    formSubmitButton.prop('disabled', false);
+    formCancelButton.prop('disabled', false);
+}
+
+function disableControls()
+{
+    formSubmitButton.prop('disabled', true);
+    formCancelButton.prop('disabled', true);
+}
+
+function showProgressLoader(show) 
+{
+    if (show) {
+        $('.progress-loader-wrapper').fadeIn('fast');
+        return;
+    }
+
+    $('.progress-loader-wrapper').hide();
 }

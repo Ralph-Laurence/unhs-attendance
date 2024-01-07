@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Text\Messages;
+use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
+use App\Http\Utils\QRMaker;
 use App\Http\Utils\RegexPatterns;
 use App\Http\Utils\RouteNames;
 use App\Http\Utils\ValidationMessages;
 use App\Models\Employee;
+use Exception;
 use Hashids\Hashids;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class TeachersController extends Controller
@@ -21,14 +26,15 @@ class TeachersController extends Controller
     {
         $this->employeeModel = new Employee();
 
-        $this->hashids = new Hashids(Employee::HASH_SALT, 10);
+        $this->hashids = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
     }
 
     public function index()
     {
         $routes = [
             'defaultDataSource'  => route(RouteNames::Teachers['all']),
-            'POST_CreateTeacher' => route(RouteNames::Teachers['create'])
+            'POST_CreateTeacher' => route(RouteNames::Teachers['create']),
+            'DELETE_Teacher'     => route(RouteNames::Teachers['destroy'])
         ];
 
         $role = Employee::RoleToString[Employee::RoleTeacher];
@@ -60,14 +66,17 @@ class TeachersController extends Controller
 
         try 
         {
+            // Save the newly created teacher into database
             $insert = DB::transaction(function () use ($data) 
             {
                 return Employee::create($data);
             });
 
+            // Convert the collection to array so that we can use
+            // these into the frontend such as adding a new row to
+            // the datatable
             $employeeData = $insert->toArray();
-
-            return Extensions::encodeSuccessMessage("Success!", [
+            $rowData = [
                 'emp_num'       => $employeeData[Employee::f_EmpNo],
                 'fname'         => $employeeData[Employee::f_FirstName],
                 'mname'         => $employeeData[Employee::f_MiddleName],
@@ -77,14 +86,71 @@ class TeachersController extends Controller
                 'total_leave'   => 0,
                 'total_absents' => 0,
                 'id'            => $this->hashids->encode($employeeData['id'])
-            ]);
+            ];
+
+            // Send the QR code into their email
+            $email = $data[Employee::f_Email];
+
+            // The content of QR code is the hashed record id.
+            // Also, we will return the path to the generated
+            // image file so that we can use it as download link
+            $qrCodePathAsset = null;
+            $qrcode = QRMaker::generateTempFile($rowData['id'], $qrCodePathAsset);
+
+            // When the checkbox "save qr code local copy" is checked,
+            // we will send a download link to the qr code. Otherwise
+            // send the code via email if it exists. If email was not 
+            // provided, we must send a download link anyway
+            if ($request->input('save_qr_copy') || empty($email))
+            {
+                $rowData['qrcode_download'] = [
+                    'fileName' => $rowData['emp_num'] . '.png',
+                    'url'      => $qrCodePathAsset
+                ];
+            }
+            else
+            {
+                // Replace the #recipient# with firstname
+                $mailMessage = str_replace('#recipient#', $employeeData[Employee::f_FirstName], Messages::EMAIL_REGISTER_EMPLOYEE);
+
+                // Build the email then send it
+                Mail::raw($mailMessage, function ($message) use ($qrcode, $email) {
+
+                    // Attach the QR code image into the mail. 
+                    $message->to($email)->subject(Messages::EMAIL_SUBJECT_QRCODE);
+                    $message->embed($qrcode);
+                });
+            }
+
+            // Return AJAX response
+            return Extensions::encodeSuccessMessage("Success!", $rowData);
         } 
         catch (\Exception $ex) 
         {    
             return Extensions::encodeFailMessage("Failed " . $ex->getMessage());
         }
+    }
 
-        return json_encode($input);
+    public function destroy(Request $request)
+    {
+        $recordId = $request->input('rowKey');
+        $failMessage = Extensions::encodeFailMessage(Messages::TEACHER_DELETE_FAIL);
+
+        try
+        {
+            $id = $this->hashids->decode($recordId);
+
+            $rowsDeleted = Employee::where('id', '=', $id)->delete();
+
+            if ($rowsDeleted > 0)
+                return Extensions::encodeSuccessMessage(Messages::TEACHER_DELETE_OK);
+            else
+                return $failMessage;
+        }
+        catch (Exception $ex) 
+        {
+            return $failMessage;
+        }
     }
 
     public function getTeachers() 
@@ -129,11 +195,11 @@ class TeachersController extends Controller
         $validator = Validator::make($request->all(), $validationFields, $validationMessages);
 
         if ($validator->fails())
-            //return redirect()->back()->withErrors($validator)->withInput();
-            //return response()->json(['errors' => $validator->errors()], 400);
-            return ['validation_stat' => 400] + ['errors' => $validator->errors()];
+            return ['validation_stat' => Constants::ValidationStat_Failed] + 
+                   ['errors' => $validator->errors()];
         
-        $inputData = ['validation_stat' => 200] + ['errors' => $validator->validated()] + $validator->validated();
+        $inputData = ['validation_stat' => Constants::ValidationStat_Success] + 
+                     ['errors' => $validator->validated()] + $validator->validated();
 
         return $inputData;
     }

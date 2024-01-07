@@ -92,6 +92,24 @@ html, body {
 }
 
 /*
+Checkbox Overrides
+*/
+
+.form-check-input[type=checkbox]:checked {
+    background-image: none;
+    background-color: var(--primary-color);
+}
+
+.form-check-input[type=checkbox]:checked:focus {
+    background-color: var(--primary-color);
+}
+
+.form-check-input:checked,
+.form-check-input:checked:focus {
+    border-color: var(--primary-color);
+}
+
+/*
 Button Overrides
 */
 .flat-button {
@@ -141,6 +159,10 @@ Button Overrides
     font-size: 12px;
 }
 
+.text-14 {
+    font-size: 14px;
+}
+
 .text-xs {
     font-size: 0.75rem;
 }
@@ -169,13 +191,4 @@ Button Overrides
     padding-top: 6px;
     padding-bottom: 6px;
     vertical-align: middle;
-}
-
-/* Bootstrap Overrides */
-.error-box {
-    color: #aa2436;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-    font-size: 14px;
-    border-radius: 4px;
 }

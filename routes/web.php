@@ -6,9 +6,10 @@ use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\TestController;
-use App\Http\Utils\QRMaker;
+// use App\Http\Text\Messages;
+// use App\Http\Utils\QRMaker;
 use App\Http\Utils\RouteNames;
-use Illuminate\Support\Facades\Mail;
+//use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -55,9 +56,10 @@ Route::controller(AttendanceController::class)->group(function()
 
 Route::controller(TeachersController::class)->group(function()
 {
-    Route::get('/backoffice/employees/teachers',        'index')->name(RouteNames::Teachers['index']);
-    Route::post('/backoffice/employees/teachers/get',   'getTeachers')->name(RouteNames::Teachers['all']);
-    Route::post('/backoffice/employees/teachers/create','store')->name(RouteNames::Teachers['create']);
+    Route::get('/backoffice/employees/teachers',            'index')->name(RouteNames::Teachers['index']);
+    Route::post('/backoffice/employees/teachers/get',       'getTeachers')->name(RouteNames::Teachers['all']);
+    Route::post('/backoffice/employees/teachers/create',    'store')->name(RouteNames::Teachers['create']);
+    Route::post('/backoffice/employees/teachers/delete',    'destroy')->name(RouteNames::Teachers['destroy']);
 });
 
 Route::controller(StaffController::class)->group(function()
@@ -72,13 +74,13 @@ Route::controller(TestController::class)->group(function(){
     Route::get('/test', 'index');
 });
 
-Route::get('/test-email', function()
-{
-    Mail::raw('Hello, this is a test mail!', function ($message) {
+// Route::get('/test-email', function()
+// {
+//     Mail::raw(Messages::EMAIL_REGISTER_EMPLOYEE, function ($message) {
 
-        $qrcode = QRMaker::generateTempFile('test');
+//         $qrcode = QRMaker::generateTempFile('test');
 
-        $message->to('bluescreen512@gmail.com')->subject('Test Mail');
-        $message->embed($qrcode);
-    });
-});
+//         $message->to('bluescreen512@gmail.com')->subject('Test Mail');
+//         $message->embed($qrcode);
+//     });
+// });

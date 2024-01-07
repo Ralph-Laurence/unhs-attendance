@@ -13,6 +13,7 @@ class Employee extends Model
     use HasFactory;
 
     public const HASH_SALT = 'EB7A1F'; // Just random string, nothing special
+    public const MIN_HASH_LENGTH = 10;
 
     public const RoleToString = [
         self::RoleTeacher   => 'Teacher',
@@ -119,15 +120,6 @@ class Employee extends Model
             ->where('e.' . Employee::f_Position, '=', $role)
             ->groupBy('e.id', "e.$empNo", "e.$fname", "e.$mname", "e.$lname", "e.$status")
             ->get();
-
-        // $hashids = new Hashids; //(self::HASH_SALT, 10);
-
-        // // Hash the employee id
-        // $results->map(function ($item) use ($hashids) 
-        // {
-        //     $item->id = $hashids->encode($item->id);
-        //     return $item;
-        // });
 
         return $results;
     }

@@ -4,13 +4,14 @@ use \App\Http\Utils\RouteNames;
 $routeItems = 
 [
     ['wildcard' => '',      'icon' => 'fa-chart-pie',    'text' => 'Dashboard',      'target' => ''], //route(RouteNames::DASHBOARD['index'])
-    ['wildcard' => 'backoffice.attendance',     'icon' => 'fa-calendar-check',          'text' => 'Attendance',     'target' => route(RouteNames::Attendance['index'])],
-    ['wildcard' => 'backoffice.attendance.absence',     'icon' => 'fa-calendar-xmark',          'text' => 'Absence',     'target' => '', 'menu_type' => 'sub'],
-    ['wildcard' => 'backoffice.attendance.tardiness',     'icon' => 'fa-calendar-minus',          'text' => 'Tardiness',     'target' => '', 'menu_type' => 'sub' ],
-    ['wildcard' => 'backoffice.attendance.tardiness',     'icon' => 'fa-calendar-week',          'text' => 'Leave',     'target' => '', 'menu_type' => 'sub' ],
-    ['wildcard' => 'backoffice.teachers',       'icon' => 'fa-person-chalkboard',           'text' => 'Teachers',       'target' => route(RouteNames::Teachers['index'])],
-    ['wildcard' => 'backoffice.staff', 'icon' => 'fa-people-carry-box',           'text' => 'Staffs',       'target' => route(RouteNames::Staff['index'])],
-    ['wildcard' => '', /*backoffice.teachers*/      'icon' => 'fa-users-gear',           'text' => 'Users',       'target' => ''], // route(RouteNames::Staffs['index'])
+    ['wildcard' => 'backoffice.attendance',             'icon' => 'fa-calendar-check',      'text' => 'Attendance',     'target' => route(RouteNames::Attendance['index'])],
+    ['wildcard' => 'backoffice.attendance.absence',     'icon' => 'fa-calendar-xmark',      'text' => 'Absence',        'target' => '', 'menu_type' => 'sub'],
+    ['wildcard' => 'backoffice.attendance.tardiness',   'icon' => 'fa-calendar-minus',      'text' => 'Tardiness',      'target' => '', 'menu_type' => 'sub' ],
+    ['wildcard' => 'backoffice.attendance.tardiness',   'icon' => 'fa-calendar-week',       'text' => 'Leave',          'target' => '', 'menu_type' => 'sub' ],
+    ['wildcard' => 'backoffice.attendance.tardiness',   'icon' => 'fa-qrcode',              'text' => 'Scanner',        'target' => route(RouteNames::Scanner['index']), 'menu_type' => 'sub' ],
+    ['wildcard' => 'backoffice.teachers',               'icon' => 'fa-person-chalkboard',   'text' => 'Teachers',       'target' => route(RouteNames::Teachers['index'])],
+    ['wildcard' => 'backoffice.staff',                  'icon' => 'fa-people-carry-box',    'text' => 'Staffs',         'target' => route(RouteNames::Staff['index'])],
+    ['wildcard' => '', /*backoffice.teachers*/          'icon' => 'fa-users-gear',          'text' => 'Users',          'target' => ''], // route(RouteNames::Staffs['index'])
 ];
 @endphp
 <div class="col sidenav shadow-4-strong user-select-none d-flex flex-column vh-100 px-0">

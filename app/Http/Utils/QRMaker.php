@@ -40,8 +40,9 @@ class QRMaker
 
     /**
      * Generates a QR code file into temporary directory
+     * then returns the path
      */
-    public static function generateTempFile(string $content) : string
+    public static function generateTempFile(string $content, &$pathToAsset = null) : string
     {
         $framePath  = public_path('images/internal/templates/qr-frame.png');
         $frame      = Image::make($framePath);
@@ -62,6 +63,8 @@ class QRMaker
         $fileName = 'temp_qr_' . Str::random(10) . '.png';
         $path = storage_path("app/public/temp/qrcodes/$fileName");
 
+        $pathToAsset = asset("storage/temp/qrcodes/$fileName");
+        
         $frame->save($path);
 
         return $path;

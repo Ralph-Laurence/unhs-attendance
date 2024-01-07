@@ -2,6 +2,7 @@
 
 use App\Http\Utils\Extensions;
 use App\Models\Attendance;
+use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -20,7 +21,13 @@ class CreateAttendancesTable extends Migration
         Schema::create('attendances', function (Blueprint $table) 
         {
             $table->id();
-            $table->integer(Attendance::f_Emp_FK_ID);
+            // $table->integer(Attendance::f_Emp_FK_ID);
+
+            $table->foreignId(Attendance::f_Emp_FK_ID)
+                  ->constrained(Employee::getTableName())
+                  ->onUpdate('cascade')
+                  ->onDelete('cascade');
+
             $table->string(Attendance::f_TimeIn     ,24)->nullable();
             $table->string(Attendance::f_LunchStart ,24)->nullable();
             $table->string(Attendance::f_LunchEnd   ,24)->nullable();

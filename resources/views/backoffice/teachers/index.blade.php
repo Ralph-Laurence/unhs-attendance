@@ -68,9 +68,9 @@
 @endsection
 
 @push('scripts')
-{{-- <script>
-    const route_deleteRecord = "{{ $routes['deleteRoute'] }}";
-</script> --}}
+<script>
+    const route_deleteRecord = "{{ $routes['DELETE_Teacher'] }}";
+</script>
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
