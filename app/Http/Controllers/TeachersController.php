@@ -14,8 +14,10 @@ use Exception;
 use Hashids\Hashids;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class TeachersController extends Controller
 {
@@ -101,7 +103,11 @@ class TeachersController extends Controller
             // we will send a download link to the qr code. Otherwise
             // send the code via email if it exists. If email was not 
             // provided, we must send a download link anyway
-            if ($request->input('save_qr_copy') || empty($email))
+
+            // convert the checkbox value to boolean
+            $option_saveQR_localCopy = filter_var($request->input('save_qr_copy'), FILTER_VALIDATE_BOOLEAN);
+
+            if ($option_saveQR_localCopy || empty($email))
             {
                 $rowData['qrcode_download'] = [
                     'fileName' => $rowData['emp_num'] . '.png',
@@ -118,8 +124,20 @@ class TeachersController extends Controller
 
                     // Attach the QR code image into the mail. 
                     $message->to($email)->subject(Messages::EMAIL_SUBJECT_QRCODE);
-                    $message->embed($qrcode);
+                    $message->embed($qrcode, "qrcode.png");
                 });
+
+                // The Mail::failures() method returns an array of addresses 
+                // that failed during the last operation performed. If the 
+                // array is empty, it means that the email was sent successfully 
+                // to all recipients
+                if (!Mail::failures()) {
+                   
+                    // Delete the file after sending
+                    if (File::exists($qrcode)) {
+                        File::delete($qrcode);
+                    }
+                }
             }
 
             // Return AJAX response
@@ -127,6 +145,11 @@ class TeachersController extends Controller
         } 
         catch (\Exception $ex) 
         {    
+            // if (Str::contains($ex->getMessage(), "for key 'employees_emp_no_unique'") )
+            // {
+            //     return ['validation_stat' => Constants::ValidationStat_Failed] + 
+            //            ['errors' => $validator->errors()];
+            // }
             return Extensions::encodeFailMessage("Failed " . $ex->getMessage());
         }
     }
@@ -164,8 +187,9 @@ class TeachersController extends Controller
     {
         $validationMessages = 
         [
-            'input-id-no.required'  => ValidationMessages::required('ID Number'),
-            'input-id-no.regex'  => ValidationMessages::numericDash('ID Number'),
+            'input-id-no.required' => ValidationMessages::required('ID Number'),
+            'input-id-no.regex'    => ValidationMessages::numericDash('ID Number'),
+            'input-id-no.unique'   => ValidationMessages::unique('ID Number'),
 
             'input-fname.required' => ValidationMessages::required('Firstname'),
             'input-fname.max'      => ValidationMessages::maxLength(32, 'Firstname'),
@@ -182,8 +206,10 @@ class TeachersController extends Controller
             'input-email.required' => ValidationMessages::required('Email'),
         ];
 
+        $employeesUnique = '|unique:' . Employee::getTableName();
+
         $validationFields = array(
-            'input-id-no'   => 'required|regex:'        . RegexPatterns::NUMERIC_DASH,
+            'input-id-no'   => 'required|regex:'        . RegexPatterns::NUMERIC_DASH,// . $employeesUnique,
             'input-fname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-mname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-lname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
@@ -204,3 +230,5 @@ class TeachersController extends Controller
         return $inputData;
     }
 }
+
+// {"validation_stat":400,"errors":{"input-id-no":["ID Number may only contain numbers and dashes."]}}

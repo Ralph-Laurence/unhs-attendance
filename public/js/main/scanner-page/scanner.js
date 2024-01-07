@@ -100,6 +100,7 @@ function submitScanResult(data)
     $.ajax({
         type: 'POST',
         url: scannerSubmitUrl,
+        //url: "https://cors-anywhere.herokuapp.com/" + scannerSubmitUrl,
         data: { hash: data },
         headers: { 'X-CSRF-TOKEN': metaCSRF },
         //dataType: "json",

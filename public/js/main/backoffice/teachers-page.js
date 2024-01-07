@@ -22,7 +22,10 @@ function handleEvents()
 {
     $(document).on('employeeFormInsertSuccess', function (event, data) 
     { 
-        if (data && data.code == 0)
+        if (!data)
+            return;
+
+        if (data.code == 0)
         {
             var rowNode = dataTable.row.add({
 
@@ -54,7 +57,7 @@ function handleEvents()
                 var a  = document.createElement('a');
                 a.href = dl.url;
                 a.download = dl.fileName;
-                
+
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -62,7 +65,7 @@ function handleEvents()
         }
         else
         {
-            snackbar.showWarn('Action completed successfully with minor problems');
+            snackbar.showWarn('Action completed with problems');
         }
     });
 
