@@ -32,5 +32,7 @@ class RouteNames
     public const Staff = [
         'index'     => 'backoffice.staff',
         'all'       => 'backoffice.staff.all',
+        'create'    => 'backoffice.staff.create',
+        'destroy'   => 'backoffice.staff.destroy',
     ];
 }

@@ -10,7 +10,7 @@ class TestController extends Controller
 {
     public function index()
     {
-        $qrcode = QRMaker::generateTempFile('test');
+        //$qrcode = QRMaker::generateTempFile('test');
         // $hash = new Hashids();
 
         // $testDecode = $hash->decode('vm');
@@ -21,6 +21,8 @@ class TestController extends Controller
         // $enc = encrypt($raw);
         // $dec = decrypt($enc);
 
-        return view('tests.test')->with('qr', $qrcode); //->with('raw', $raw)->with('enc', $enc)->with('dec', $dec);
+        $fileName = 'x.png';
+        $fileExists = file_exists(storage_path("app/public/temp/qrcodes/$fileName")) ? 'yes' : 'no';
+        return view('tests.test')->with('exists', $fileExists); //->with('raw', $raw)->with('enc', $enc)->with('dec', $dec);
     }
 }

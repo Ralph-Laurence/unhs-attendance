@@ -42,11 +42,13 @@ class QRMaker
      * Generates a QR code file into temporary directory
      * then returns the path
      */
-    public static function generateTempFile(string $content, &$pathToAsset = null) : string
+    public static function generateTempFile(string $content, &$pathToAsset = null, &$downloadUrl = null) : string
     {
+        // Load the QR Code frame template image
         $framePath  = public_path('images/internal/templates/qr-frame.png');
         $frame      = Image::make($framePath);
 
+        // Generate a 200x200 QR code image
         $qrcode     = QrCode::create($content);
         $pngWriter  = new PngWriter;
 
@@ -58,14 +60,26 @@ class QRMaker
         $generated  = $pngWriter->write($qrcode);
         $qrImage    = Image::make($generated->getString());
     
+        // Overlay the generated qr code in front of the frame
+        // positioned at the center
         $frame->insert($qrImage, 'center');
 
+        // Generate a filename and file path
         $fileName = 'temp_qr_' . Str::random(10) . '.png';
         $path = storage_path("app/public/temp/qrcodes/$fileName");
 
-        $pathToAsset = asset("storage/temp/qrcodes/$fileName");
-        
+        // Save the generated image into the file path
         $frame->save($path);
+
+        // This will get the readable path of the qr code which
+        // will be used to embed as an email attachment
+        $pathToAsset = asset("storage/temp/qrcodes/$fileName");
+
+        // Generate a downloadable QR code url
+        $downloadUrl = route('qr-download', [ $fileName ]);
+
+        if (!file_exists($path))
+            $downloadUrl = '404';
 
         return $path;
     }

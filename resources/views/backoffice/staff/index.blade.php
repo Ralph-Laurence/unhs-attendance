@@ -9,7 +9,7 @@
     <div class="card-body">
         {{-- TABLE TITLE HEADER --}}
         <div class="d-flex align-items-center gap-1 mb-3">
-            <h6 class="card-title me-auto">Staff Directory</h6>
+            <h6 class="card-title me-auto">Staff</h6>
 
             {{-- ADD BUTTON --}}
             <div class="dropdown">
@@ -20,7 +20,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
                     <li>
-                        <a class="dropdown-item" data-mdb-togglex="modal" data-mdb-targetx="#staffFormModal"
+                        <a class="dropdown-item" data-mdb-toggle="modal" data-mdb-target="#employeeFormModal"
                             role="button">Create Manually</a>
                     </li>
                     <li><a class="dropdown-item" href="#">Import Sheet</a></li>
@@ -55,12 +55,22 @@
         </table>
     </div>
 </div>
+
+@push('dialogs')
+    @include('modals.employee-form', [
+        'role'         => $descriptiveRole,
+        'employeeType' => $empType,
+        'requireEmail' => false,
+        'postCreate'   => $routes['POST_CreateStaff'] // Route for create
+    ])
+@endpush
+
 @endsection
 
 @push('scripts')
-{{-- <script>
-    const route_deleteRecord = "{{ $routes['deleteRoute'] }}";
-</script> --}}
+<script>
+    const route_deleteRecord = "{{ $routes['DELETE_Staff'] }}";
+</script>
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>

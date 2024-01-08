@@ -20,22 +20,74 @@ function initialize()
 //
 function handleEvents() 
 {
-    // $(document).on('click', '.row-actions .btn-delete', function() 
-    // {
-    //     let row = $(this).closest('tr');
+    $(document).on('employeeFormInsertSuccess', function (event, data) 
+    { 
+        if (!data)
+            return;
+
+        if (data.code == 0)
+        {
+            var rowNode = dataTable.row.add({
+
+                emp_num       : data.emp_num,
+                fname         : data.fname,
+                mname         : data.mname,
+                lname         : data.lname,
+                emp_status    : data.emp_status,
+                total_lates   : data.total_lates,
+                total_leave   : data.total_leave,
+                total_absents : data.total_absents,
+                id            : data.id
+
+            }).draw().node();
+
+             // Add classes to the new row
+            $(rowNode).find('td').eq(0).addClass('record-counter text-truncate opacity-45');
+            $(rowNode).find('td').eq(1).addClass('text-truncate');
+            $(rowNode).find('td').eq(2).addClass('td-employee-name text-truncate');
+            $(rowNode).find('td').eq(7).addClass('text-center');
+
+            snackbar.showSuccess('Employee successfully added.');
+
+            // Check for download link
+            if ('qrcode_download' in data) 
+            {
+                var dl = data.qrcode_download;
+
+                if (dl.url == '404')
+                {
+                    alertModal.showDanger('Could not download the generated QR Code.');
+                    return;
+                }
+
+                var a  = document.createElement('a');
+                a.href = dl.url;
+                a.download = dl.fileName;
+
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        }
+        else
+        {
+            snackbar.showWarn('Action completed with problems');
+        }
+    });
+
+    $(document).on('click', '.row-actions .btn-delete', function() 
+    {
+        let row = $(this).closest('tr');
         
-    //     let employeeName = row.find('.td-employee-name').text();
-    //     let recordDate   = row.find('.date-tile').attr('data-date-attr');
+        let name = row.find('.td-employee-name').text();
 
-    //     recordDate = convertToFullMonth(recordDate);
+        if (name)
+            name = name.trim();
 
-    //     if (employeeName)
-    //         employeeName = employeeName.trim();
+        let message = sanitize(`You are about to remove the employee <i><b>"${name}"</b></i> from the staff records. This action will also erase all attendance data associated with this employee.<br><br>Are you sure you want to proceed?`);
 
-    //     let message = sanitize(`You are about to delete the attendance record of <i><b>"${employeeName}"</b></i> which was created on ${recordDate}. Once deleted, it cannot be recovered.<br><br>Do you wish to proceed?`);
-
-    //     alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
-    // });
+        alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
+    });
     // $(document).on('click', '.row-actions')
     // $(document).on('click', '.row-actions')
 }
@@ -145,9 +197,9 @@ function deleteRecord(row)
             {
                 response = JSON.parse(response);
                 
-                console.log(response);
-                console.log(response.code == 0);
-                console.log(typeof (response.code));
+                // console.log(response);
+                // console.log(response.code == 0);
+                // console.log(typeof (response.code));
 
                 if (response.code == 0)
                 {

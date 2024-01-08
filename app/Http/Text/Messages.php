@@ -13,6 +13,9 @@ class Messages
     public const TEACHER_DELETE_OK       = 'Faculty member successfully removed from records.';
     public const TEACHER_DELETE_FAIL     = 'Failed to remove faculty member from the records.';
 
+    public const STAFF_DELETE_OK         = 'Employee successfully removed from staff records.';
+    public const STAFF_DELETE_FAIL       = 'Failed to remove employee from the staff records.';
+
     public const EMAIL_REGISTER_EMPLOYEE = 
     "Hello #recipient#, this QR code will be used for your authentication in our Attendance Monitoring System.\n\nTo use it, simply present the QR code at the attendance scanner. This will automatically log your attendance in our system.";
     // 

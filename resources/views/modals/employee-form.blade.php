@@ -2,14 +2,13 @@
 $type = 'Employee';
 
 if (!empty($role))
-$type = $role;
+    $type = $role;
 
 $icons = [
-'Employee' => 'modal_icon_employee.png',
-'Staff' => 'modal_icon_staff.png',
-'Teacher' => 'modal_icon_teacher.png',
+    'Employee'  => 'modal_icon_employee.png',
+    'Staff'     => 'modal_icon_staff.png',
+    'Teacher'   => 'modal_icon_teacher.png',
 ];
-
 @endphp
 
 <div class="modal fade" data-mdb-backdrop="static" id="employeeFormModal" tabindex="-1"
@@ -67,8 +66,10 @@ $icons = [
                         </div>
                         <div class="col">
                             <div class="form-check d-flex align-items-center">
-                                <input class="form-check-input" type="checkbox" name="optionSaveQRLocalCopy" id="optionSaveQRLocalCopy" />
-                                <label class="form-check-label text-14" for="optionSaveQRLocalCopy">Save QR code local copy</label>
+                                <input class="form-check-input" type="checkbox" name="optionSaveQRLocalCopy"
+                                    id="optionSaveQRLocalCopy" />
+                                <label class="form-check-label text-14" for="optionSaveQRLocalCopy">Save QR code local
+                                    copy</label>
                             </div>
                         </div>
                     </div>

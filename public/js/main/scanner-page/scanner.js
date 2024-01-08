@@ -95,14 +95,18 @@ function playSound(soundSource)
 //
 function submitScanResult(data) 
 {
+    console.log(data);
+
     var metaCSRF = $('meta[name="csrf-token"]').attr('content');
 
     $.ajax({
         type: 'POST',
         url: scannerSubmitUrl,
         //url: "https://cors-anywhere.herokuapp.com/" + scannerSubmitUrl,
-        data: { hash: data },
-        headers: { 'X-CSRF-TOKEN': metaCSRF },
+        data: {
+            '_token' : metaCSRF, 
+            hash: data 
+        },
         //dataType: "json",
         success: function(response) 
         {

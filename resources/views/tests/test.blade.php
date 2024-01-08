@@ -1,5 +1,5 @@
 @extends('layouts.base')
 
 @section('content')
-<img src="{{ $qr }}" alt="">
+<h6>{{ $exists }}</h6>
 @endsection

@@ -96,25 +96,61 @@ class TeachersController extends Controller
             // The content of QR code is the hashed record id.
             // Also, we will return the path to the generated
             // image file so that we can use it as download link
+            // $qrCodePathAsset = null;
+            // $qrcode = QRMaker::generateTempFile($rowData['id'], $qrCodePathAsset);
+
+            // // When the checkbox "save qr code local copy" is checked,
+            // // we will send a download link to the qr code. Otherwise
+            // // send the code via email if it exists. If email was not 
+            // // provided, we must send a download link anyway
+
+            // // convert the checkbox value to boolean
+            // $option_saveQR_localCopy = filter_var($request->input('save_qr_copy'), FILTER_VALIDATE_BOOLEAN);
+
+            // if ($option_saveQR_localCopy || empty($email))
+            // {
+            //     $rowData['qrcode_download'] = [
+            //         'fileName' => $rowData['emp_num'] . '.png',
+            //         'url'      => $qrCodePathAsset
+            //     ];
+            // }
+            // else
+            // {
+            //     // Replace the #recipient# with firstname
+            //     $mailMessage = str_replace('#recipient#', $employeeData[Employee::f_FirstName], Messages::EMAIL_REGISTER_EMPLOYEE);
+
+            //     // Build the email then send it
+            //     Mail::raw($mailMessage, function ($message) use ($qrcode, $email) {
+
+            //         // Attach the QR code image into the mail. 
+            //         $message->to($email)->subject(Messages::EMAIL_SUBJECT_QRCODE);
+            //         $message->embed($qrcode, "qrcode.png");
+            //     });
+
+            //     // The Mail::failures() method returns an array of addresses 
+            //     // that failed during the last operation performed. If the 
+            //     // array is empty, it means that the email was sent successfully 
+            //     // to all recipients
+            //     if (!Mail::failures()) {
+                   
+            //         // Delete the file after sending
+            //         if (File::exists($qrcode)) {
+            //             File::delete($qrcode);
+            //         }
+            //     }
+            // }
+
             $qrCodePathAsset = null;
-            $qrcode = QRMaker::generateTempFile($rowData['id'], $qrCodePathAsset);
+            $downloadUrl = null;
+
+            $qrcode = QRMaker::generateTempFile($rowData['id'], $qrCodePathAsset, $downloadUrl);
 
             // When the checkbox "save qr code local copy" is checked,
             // we will send a download link to the qr code. Otherwise
             // send the code via email if it exists. If email was not 
             // provided, we must send a download link anyway
 
-            // convert the checkbox value to boolean
-            $option_saveQR_localCopy = filter_var($request->input('save_qr_copy'), FILTER_VALIDATE_BOOLEAN);
-
-            if ($option_saveQR_localCopy || empty($email))
-            {
-                $rowData['qrcode_download'] = [
-                    'fileName' => $rowData['emp_num'] . '.png',
-                    'url'      => $qrCodePathAsset
-                ];
-            }
-            else
+            if (!empty($email))
             {
                 // Replace the #recipient# with firstname
                 $mailMessage = str_replace('#recipient#', $employeeData[Employee::f_FirstName], Messages::EMAIL_REGISTER_EMPLOYEE);
@@ -126,20 +162,23 @@ class TeachersController extends Controller
                     $message->to($email)->subject(Messages::EMAIL_SUBJECT_QRCODE);
                     $message->embed($qrcode, "qrcode.png");
                 });
-
-                // The Mail::failures() method returns an array of addresses 
-                // that failed during the last operation performed. If the 
-                // array is empty, it means that the email was sent successfully 
-                // to all recipients
-                if (!Mail::failures()) {
-                   
-                    // Delete the file after sending
-                    if (File::exists($qrcode)) {
-                        File::delete($qrcode);
-                    }
-                }
             }
 
+            // convert the checkbox value to boolean
+            $option_saveQR_localCopy = filter_var($request->input('save_qr_copy'), FILTER_VALIDATE_BOOLEAN);
+
+            if ($option_saveQR_localCopy || empty($email))
+            {
+                // $rowData['qrcode_download'] = [
+                //     'fileName' => $rowData['emp_num'] . '.png',
+                //     'url'      => $qrCodePathAsset
+                // ];
+                $rowData['qrcode_download'] = [
+                    'fileName' => $rowData['emp_num'] . '.png',
+                    'url'      => $downloadUrl
+                ];
+            }
+            
             // Return AJAX response
             return Extensions::encodeSuccessMessage("Success!", $rowData);
         } 

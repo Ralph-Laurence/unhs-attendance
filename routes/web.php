@@ -9,6 +9,8 @@ use App\Http\Controllers\TestController;
 // use App\Http\Text\Messages;
 // use App\Http\Utils\QRMaker;
 use App\Http\Utils\RouteNames;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 //use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
@@ -64,23 +66,29 @@ Route::controller(TeachersController::class)->group(function()
 
 Route::controller(StaffController::class)->group(function()
 {
-    Route::get('/backoffice/employees/staff', 'index')->name(RouteNames::Staff['index']);
+    Route::get('/backoffice/employees/staff',           'index')->name(RouteNames::Staff['index']);
 
     // AJAX
-    Route::post('/backoffice/employees/staff/get', 'getStaff')->name(RouteNames::Staff['all']);
+    Route::post('/backoffice/employees/staff/get',      'getStaff')->name(RouteNames::Staff['all']);
+    Route::post('/backoffice/employees/staff/create',   'store')->name(RouteNames::Staff['create']);
+    Route::post('/backoffice/employees/staff/delete',   'destroy')->name(RouteNames::Staff['destroy']);
 });
 
 Route::controller(TestController::class)->group(function(){
     Route::get('/test', 'index');
 });
 
-// Route::get('/test-email', function()
-// {
-//     Mail::raw(Messages::EMAIL_REGISTER_EMPLOYEE, function ($message) {
+Route::get('/download/qr-code/{filename}/{outputname?}', function($filename)
+{
+    // Define the file path
+    $path = storage_path("app/public/temp/qrcodes/$filename");
 
-//         $qrcode = QRMaker::generateTempFile('test');
+    // Download the file
+    $file = response()->download($path, 'qr-code.png');
 
-//         $message->to('bluescreen512@gmail.com')->subject('Test Mail');
-//         $message->embed($qrcode);
-//     });
-// });
+    // Delete the file after download
+    $file->deleteFileAfterSend(true);
+
+    return $file;
+
+})->name('qr-download');
