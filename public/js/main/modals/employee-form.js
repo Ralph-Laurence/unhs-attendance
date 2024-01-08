@@ -4,6 +4,7 @@ let formMode = undefined;
 let formCancelled = false;
 let FormMode_Create = 1;
 let FormMode_Edit = 2;
+let selectedRowForEdit = null;
 
 let employeeFormModal = '#employeeFormModal';
 let employeeForm = undefined;
@@ -39,7 +40,7 @@ function bindEvents()
             hideTextboxError(`#${inputField.attr('id')}`);
     });
 
-    formSubmitButton.off('click').on('click', () => handleFormSubmit()); 
+    formSubmitButton.on('click', () => handleFormSubmit()); 
     
     $(employeeFormModal).on('hidden.bs.modal', () => handleFormClosed());
 
@@ -51,6 +52,8 @@ function bindEvents()
 
 function openEditForm(row)
 {
+    selectedRowForEdit = row;
+
     formCancelled = false;
 
     let formTitle = $('#employeeFormModalLabel').data('form-title-update');
@@ -58,15 +61,10 @@ function openEditForm(row)
     $('#employeeFormModalLabel').text(formTitle);
     $('#optionSaveQRLocalCopy').prop('disabled', true);
 
-   // clearForm();
     formMode = FormMode_Edit;
 
     loadEmployeeDetails(row, (data) => 
     {
-        console.warn(data);
-
-        //var data = JSON.parse(response);
-
         if (data.code == 0)
         {
             $('#input-fname').val(data.fname);
@@ -114,6 +112,7 @@ function clearForm()
 
     dirty = false;
     formMode = undefined;
+    selectedRowForEdit = null;
 }
 
 function loadEmployeeDetails(row, onSuccess)
@@ -182,13 +181,13 @@ function handleFormSubmit()
     {
         case FormMode_Edit:
             submitTarget = employeeForm.attr('data-post-update-target');
+            postData['row-key'] = $('#record-key').val();
             break;
 
         default:
-        case FormMode_Edit:
+        case FormMode_Create:
             submitTarget = employeeForm.attr('data-post-create-target');
             postData['save_qr_copy'] = $('#optionSaveQRLocalCopy').is(':checked');
-            postData
             break;
     }
 
@@ -213,20 +212,22 @@ function handleFormSubmit()
                     return;
                 }
 
-                // Server Error
-                if ('code' in data && data.code == 410)
+                if ('code' in data && data.code != 0)
                 {
                     closeForm();
-                    
                     let message = data.message.replace(/\r?\n/g, '<br>');
                     alertModal.showDanger(message);
+
                     return;
                 }
 
-                closeForm();
-
                 // Successful inserts; display newly added record
-                $(document).trigger('employeeFormInsertSuccess', [data]);
+                if (formMode == FormMode_Edit)
+                    $(document).trigger('employeeFormUpdateSuccess', [data, selectedRowForEdit]);
+                else
+                    $(document).trigger('employeeFormInsertSuccess', [data]);
+
+                closeForm();    
             }
         },
         error: function(xhr, status, error) 

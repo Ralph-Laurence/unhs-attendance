@@ -184,14 +184,14 @@ class TeachersController extends Controller
     // Performs a database update
     public function update(Request $request)
     {
-        $key = $request->input('key');
+        $key = $request->input('row-key');
 
         if (empty($key))
         {
             $code = Constants::RecordId_Empty;
-            $msg = "Failed to update the record because it cannot be identified.\n\n(Error Code $code)";
+            $msg = Messages::UPDATE_FAIL_CANT_IDENTIFY_RECORD;
 
-            return Extensions::encodeFailMessage($msg, $code);
+            return Extensions::encodeFailMessage("$msg\n\n(Error Code $code)", $code);
         }
 
         $input = $this->validateFields($request);
@@ -212,17 +212,32 @@ class TeachersController extends Controller
         try 
         {
             // Save the newly created teacher into database
-            $insert = DB::transaction(function () use ($data, $key) 
+            $update = DB::transaction(function () use ($data, $key) 
             {
                 $id = $this->hashids->decode($key);
+                $employee = Employee::where('id', '=', $id)->first();
 
-                return Employee::where('id', '=', $id)->update($data);
+                if ($employee)
+                {
+                    $employee->update($data);
+                    return $employee;
+                }
+                else
+                    return -1;
             });
+
+            if (is_int($update) && $update == -1)
+            {
+                $code = Constants::RecordNotFound;
+                $msg = Messages::UPDATE_FAIL_NON_EXISTENT_RECORD;
+
+                return Extensions::encodeFailMessage("$msg.\n\n(Error Code $code)", $code);
+            }
 
             // Convert the collection to array so that we can use
             // these into the frontend such as adding a new row to
             // the datatable
-            $employeeData = $insert->toArray();
+            $employeeData = $update->toArray();
             $rowData = [
                 'emp_num'       => $employeeData[Employee::f_EmpNo],
                 'fname'         => $employeeData[Employee::f_FirstName],
@@ -236,7 +251,8 @@ class TeachersController extends Controller
         } 
         catch (\Exception $ex) 
         {    
-            return Extensions::encodeFailMessage("Failed " . $ex->getMessage());
+            //return Extensions::encodeFailMessage("Failed " . $ex->getMessage());
+            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED, Constants::InternalServerError);
         }
     }
 
@@ -265,7 +281,7 @@ class TeachersController extends Controller
         catch (Exception $ex)
         {
             // error_log($ex->getMessage());
-            return Extensions::encodeFailMessage('Unable to read the record. Please try again.');
+            return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
         }
     }
 

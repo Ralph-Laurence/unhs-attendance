@@ -14,6 +14,8 @@ class Constants
     public const ValidationStat_Failed  = 400;
     public const ValidationStat_Success = 200;
     public const RecordId_Empty         = 410;
-    
+    public const RecordNotFound         = 405;
+    public const InternalServerError    = 500;
+
     public const AttendancePageTitle    = 'Attendance';
 }
