@@ -26,6 +26,8 @@ class RouteNames
         'index'     => 'backoffice.teachers',
         'all'       => 'backoffice.teachers.all',
         'create'    => 'backoffice.teachers.create',
+        'update'    => 'backoffice.teachers.update',
+        'details'   => 'backoffice.teachers.details',
         'destroy'    => 'backoffice.teachers.destroy',
     ];
 

@@ -90,7 +90,6 @@ class ScannerController extends Controller
 
     public function handleAttendance(int $empId)
     {
-        error_log('employee ' . $empId);
         // Tasks to be added:
         // A1 -> Prevent attendances 1hr before dismissal or after dismissal
         // A2 -> Exclude Sundays and Holidays (Dont allow scans during those days)

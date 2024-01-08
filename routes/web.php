@@ -58,10 +58,12 @@ Route::controller(AttendanceController::class)->group(function()
 
 Route::controller(TeachersController::class)->group(function()
 {
-    Route::get('/backoffice/employees/teachers',            'index')->name(RouteNames::Teachers['index']);
-    Route::post('/backoffice/employees/teachers/get',       'getTeachers')->name(RouteNames::Teachers['all']);
-    Route::post('/backoffice/employees/teachers/create',    'store')->name(RouteNames::Teachers['create']);
-    Route::post('/backoffice/employees/teachers/delete',    'destroy')->name(RouteNames::Teachers['destroy']);
+    Route::get('/backoffice/employees/teachers',             'index')->name(RouteNames::Teachers['index']);
+    Route::post('/backoffice/employees/teachers/get',        'getTeachers')->name(RouteNames::Teachers['all']);
+    Route::post('/backoffice/employees/teachers/create',     'store')->name(RouteNames::Teachers['create']);
+    Route::post('/backoffice/employees/teachers/delete',     'destroy')->name(RouteNames::Teachers['destroy']);
+    Route::post('/backoffice/employees/teachers/details',    'details')->name(RouteNames::Teachers['details']);
+    Route::post('/backoffice/employees/teachers/update',     'update')->name(RouteNames::Teachers['update']);
 });
 
 Route::controller(StaffController::class)->group(function()

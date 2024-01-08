@@ -50,10 +50,10 @@ class Extensions
         return json_encode($result);
     }
 
-    public static function encodeFailMessage($message) : string 
+    public static function encodeFailMessage($message, $code = null) : string 
     {
         return json_encode([
-            'code'    => self::XHR_STAT_FAIL,
+            'code'    => !is_null($code) ? $code : self::XHR_STAT_FAIL,
             'message' => $message
         ]);
     }

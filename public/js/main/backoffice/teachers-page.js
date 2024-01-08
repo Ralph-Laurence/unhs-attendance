@@ -54,13 +54,22 @@ function handleEvents()
             {
                 var dl = data.qrcode_download;
 
-                var a  = document.createElement('a');
-                a.href = dl.url;
-                a.download = dl.fileName;
+                if (dl.url == '404')
+                {
+                    alertModal.showDanger('Could not download the generated QR Code.');
+                    return;
+                }
+                
+                let link        = document.createElement('a');
+                link.href       = dl.url;
+                link.download   = dl.fileName;
 
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                document.body.appendChild(link);
+
+                // Programmatically click the 'a' element to start the download
+                link.click();
+
+                document.body.removeChild(link);
             }
         }
         else
@@ -82,8 +91,15 @@ function handleEvents()
 
         alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
     });
+    
+    $(document).on('click', '.row-actions .btn-edit', function()
+    {
+        let row = $(this).closest('tr');
+        openEditForm(row);
+    });
     // $(document).on('click', '.row-actions')
-    // $(document).on('click', '.row-actions')
+
+    $('.btn-add-record').on('click', () => openCreateForm());
 }
 
 function bindTableDataSource(url)

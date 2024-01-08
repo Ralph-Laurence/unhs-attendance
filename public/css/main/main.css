@@ -192,3 +192,8 @@ Button Overrides
     padding-bottom: 6px;
     vertical-align: middle;
 }
+
+table td {
+    min-height: 40px;
+    height: 40px;
+}

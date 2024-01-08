@@ -124,26 +124,23 @@ class StaffController extends Controller
 
             if ($option_saveQR_localCopy || empty($email))
             {
-                // $rowData['qrcode_download'] = [
-                //     'fileName' => $rowData['emp_num'] . '.png',
-                //     'url'      => $qrCodePathAsset
-                // ];
                 $rowData['qrcode_download'] = [
                     'fileName' => $rowData['emp_num'] . '.png',
                     'url'      => $downloadUrl
                 ];
             }
+
             // The Mail::failures() method returns an array of addresses 
             // that failed during the last operation performed. If the 
             // array is empty, it means that the email was sent successfully 
             // to all recipients
-            // if (!Mail::failures()) {
+            if (!$option_saveQR_localCopy && !Mail::failures()) {
                
-            //     // Delete the file after sending
-            //     if (File::exists($qrcode)) {
-            //         File::delete($qrcode);
-            //     }
-            // }
+                // Delete the file after sending
+                if (File::exists($qrcode)) {
+                    File::delete($qrcode);
+                }
+            }
 
             // Return AJAX response
             return Extensions::encodeSuccessMessage("Success!", $rowData);

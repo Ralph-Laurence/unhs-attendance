@@ -20,7 +20,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
                     <li>
-                        <a class="dropdown-item" data-mdb-toggle="modal" data-mdb-target="#employeeFormModal"
+                        <a class="dropdown-item btn-add-record" {{-- data-mdb-toggle="modal" data-mdb-target="#employeeFormModal" --}}
                             role="button">Create Manually</a>
                     </li>
                     <li><a class="dropdown-item" href="#">Import Sheet</a></li>
@@ -61,7 +61,8 @@
         'role'         => $descriptiveRole,
         'employeeType' => $empType,
         'requireEmail' => $requireEmail,
-        'postCreate'   => $routes['POST_CreateTeacher'] // Route for create
+        'postCreate'   => $routes['POST_CreateTeacher'], // Route for create
+        'postUpdate'   => $routes['POST_UpdateTeacher']  // Route for update
     ])
 @endpush
 
@@ -69,7 +70,8 @@
 
 @push('scripts')
 <script>
-    const route_deleteRecord = "{{ $routes['DELETE_Teacher'] }}";
+    const route_deleteRecord  = "{{ $routes['DELETE_Teacher'] }}";
+    const route_detailsRecord = "{{ $routes['DETAILS_Teacher'] }}";
 </script>
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>

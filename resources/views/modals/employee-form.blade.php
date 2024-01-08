@@ -19,7 +19,9 @@ $icons = [
                 <div class="d-flex align-items-center gap-2">
                     <img src="{{ asset('images/internal/icons/' . $icons[$type]) }}" width="24" height="24" alt="icon"
                         class="modal-icon" />
-                    <h6 class="modal-title mb-0" id="employeeFormModalLabel">Add New {{ $type }}</h6>
+                    <h6 class="modal-title mb-0" id="employeeFormModalLabel"
+                        data-form-title-create="Add New {{ $type }}"
+                        data-form-title-update="Update {{ $type }} Details"></h6>
                 </div>
                 <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismissx="modal"
                     aria-label="Close"></button>
@@ -27,9 +29,10 @@ $icons = [
             <div class="modal-body opacity-75 py-2">
                 <small class="text-sm d-block mb-2">Please fill out all fields with an asterisk(*) as they are
                     required.</small>
-                <form data-post-create-target="{{ $postCreate }}" data-post-update-target="" method="post">
+                <form data-post-create-target="{{ $postCreate }}" data-post-update-target="{{ $postUpdate }}" method="post">
                     @csrf
                     <input type="hidden" name="roleKey" value="{{ $empType }}" />
+                    <input type="text" class="d-none" name="record-key" id="record-key" value=""/>
                     <div class="row mb-2">
                         <div class="col">
                             <x-text-box as="input-id-no" placeholder="ID Number" maxlength="32" class="numeric-dash"

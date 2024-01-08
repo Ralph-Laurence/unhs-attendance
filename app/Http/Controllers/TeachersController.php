@@ -36,7 +36,9 @@ class TeachersController extends Controller
         $routes = [
             'defaultDataSource'  => route(RouteNames::Teachers['all']),
             'POST_CreateTeacher' => route(RouteNames::Teachers['create']),
-            'DELETE_Teacher'     => route(RouteNames::Teachers['destroy'])
+            'POST_UpdateTeacher' => route(RouteNames::Teachers['update']),
+            'DELETE_Teacher'     => route(RouteNames::Teachers['destroy']),
+            'DETAILS_Teacher'    => route(RouteNames::Teachers['details'])
         ];
 
         $role = Employee::RoleToString[Employee::RoleTeacher];
@@ -96,60 +98,12 @@ class TeachersController extends Controller
             // The content of QR code is the hashed record id.
             // Also, we will return the path to the generated
             // image file so that we can use it as download link
-            // $qrCodePathAsset = null;
-            // $qrcode = QRMaker::generateTempFile($rowData['id'], $qrCodePathAsset);
-
-            // // When the checkbox "save qr code local copy" is checked,
-            // // we will send a download link to the qr code. Otherwise
-            // // send the code via email if it exists. If email was not 
-            // // provided, we must send a download link anyway
-
-            // // convert the checkbox value to boolean
-            // $option_saveQR_localCopy = filter_var($request->input('save_qr_copy'), FILTER_VALIDATE_BOOLEAN);
-
-            // if ($option_saveQR_localCopy || empty($email))
-            // {
-            //     $rowData['qrcode_download'] = [
-            //         'fileName' => $rowData['emp_num'] . '.png',
-            //         'url'      => $qrCodePathAsset
-            //     ];
-            // }
-            // else
-            // {
-            //     // Replace the #recipient# with firstname
-            //     $mailMessage = str_replace('#recipient#', $employeeData[Employee::f_FirstName], Messages::EMAIL_REGISTER_EMPLOYEE);
-
-            //     // Build the email then send it
-            //     Mail::raw($mailMessage, function ($message) use ($qrcode, $email) {
-
-            //         // Attach the QR code image into the mail. 
-            //         $message->to($email)->subject(Messages::EMAIL_SUBJECT_QRCODE);
-            //         $message->embed($qrcode, "qrcode.png");
-            //     });
-
-            //     // The Mail::failures() method returns an array of addresses 
-            //     // that failed during the last operation performed. If the 
-            //     // array is empty, it means that the email was sent successfully 
-            //     // to all recipients
-            //     if (!Mail::failures()) {
-                   
-            //         // Delete the file after sending
-            //         if (File::exists($qrcode)) {
-            //             File::delete($qrcode);
-            //         }
-            //     }
-            // }
-
             $qrCodePathAsset = null;
             $downloadUrl = null;
 
             $qrcode = QRMaker::generateTempFile($rowData['id'], $qrCodePathAsset, $downloadUrl);
 
-            // When the checkbox "save qr code local copy" is checked,
-            // we will send a download link to the qr code. Otherwise
-            // send the code via email if it exists. If email was not 
-            // provided, we must send a download link anyway
-
+            // If the email was provided, send the qr code via email
             if (!empty($email))
             {
                 // Replace the #recipient# with firstname
@@ -167,16 +121,28 @@ class TeachersController extends Controller
             // convert the checkbox value to boolean
             $option_saveQR_localCopy = filter_var($request->input('save_qr_copy'), FILTER_VALIDATE_BOOLEAN);
 
+            // When the checkbox "save qr code local copy" is checked,
+            // we will send a download link to the qr code. Otherwise
+            // send the code via email if it exists. If email was not 
+            // provided, we must send a download link anyway
             if ($option_saveQR_localCopy || empty($email))
             {
-                // $rowData['qrcode_download'] = [
-                //     'fileName' => $rowData['emp_num'] . '.png',
-                //     'url'      => $qrCodePathAsset
-                // ];
                 $rowData['qrcode_download'] = [
                     'fileName' => $rowData['emp_num'] . '.png',
                     'url'      => $downloadUrl
                 ];
+            }
+
+            // The Mail::failures() method returns an array of addresses 
+            // that failed during the last operation performed. If the 
+            // array is empty, it means that the email was sent successfully 
+            // to all recipients
+            if (!$option_saveQR_localCopy && !Mail::failures()) {
+               
+                // Delete the file after sending
+                if (File::exists($qrcode)) {
+                    File::delete($qrcode);
+                }
             }
             
             // Return AJAX response
@@ -212,6 +178,94 @@ class TeachersController extends Controller
         catch (Exception $ex) 
         {
             return $failMessage;
+        }
+    }
+
+    // Performs a database update
+    public function update(Request $request)
+    {
+        $key = $request->input('key');
+
+        if (empty($key))
+        {
+            $code = Constants::RecordId_Empty;
+            $msg = "Failed to update the record because it cannot be identified.\n\n(Error Code $code)";
+
+            return Extensions::encodeFailMessage($msg, $code);
+        }
+
+        $input = $this->validateFields($request);
+
+        if ($input['validation_stat'] == 400)
+            return json_encode($input);
+
+        $data = [
+            Employee::f_EmpNo       => $input['input-id-no'],
+            Employee::f_FirstName   => $input['input-fname'],
+            Employee::f_MiddleName  => $input['input-mname'],
+            Employee::f_LastName    => $input['input-lname'],
+            Employee::f_Email       => $input['input-email'],
+            Employee::f_Contact     => $input['input-contact'],
+            //Employee::f_Status      => Employee::ON_STATUS_DUTY
+        ];
+
+        try 
+        {
+            // Save the newly created teacher into database
+            $insert = DB::transaction(function () use ($data, $key) 
+            {
+                $id = $this->hashids->decode($key);
+
+                return Employee::where('id', '=', $id)->update($data);
+            });
+
+            // Convert the collection to array so that we can use
+            // these into the frontend such as adding a new row to
+            // the datatable
+            $employeeData = $insert->toArray();
+            $rowData = [
+                'emp_num'       => $employeeData[Employee::f_EmpNo],
+                'fname'         => $employeeData[Employee::f_FirstName],
+                'mname'         => $employeeData[Employee::f_MiddleName],
+                'lname'         => $employeeData[Employee::f_LastName],
+                'emp_status'    => $employeeData[Employee::f_Status]
+            ];
+            
+            // Return AJAX response
+            return Extensions::encodeSuccessMessage("Success!", $rowData);
+        } 
+        catch (\Exception $ex) 
+        {    
+            return Extensions::encodeFailMessage("Failed " . $ex->getMessage());
+        }
+    }
+
+    // Load the employee details
+    public function details(Request $request)
+    {
+        try
+        {
+            $key = $request->input('key');
+            $id = $this->hashids->decode($key);
+
+            $dataset = Employee::where('id', '=', $id)
+            ->select([
+                Employee::f_EmpNo       . ' as idNo',
+                Employee::f_FirstName   . ' as fname',
+                Employee::f_MiddleName  . ' as mname',
+                Employee::f_LastName    . ' as lname',
+                Employee::f_Contact     . ' as phone',
+                Employee::f_Email       . ' as email',
+            ])
+            ->first()
+            ->toArray();
+
+            return Extensions::encodeSuccessMessage('Basic information loaded for edit mode', $dataset);
+        }
+        catch (Exception $ex)
+        {
+            // error_log($ex->getMessage());
+            return Extensions::encodeFailMessage('Unable to read the record. Please try again.');
         }
     }
 

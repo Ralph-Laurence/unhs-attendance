@@ -60,13 +60,16 @@ function handleEvents()
                     return;
                 }
 
-                var a  = document.createElement('a');
-                a.href = dl.url;
-                a.download = dl.fileName;
+                let link = document.createElement('a');
+                link.href = dl.url;
+                link.download = dl.fileName;
 
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                document.body.appendChild(link);
+
+                // Programmatically click the 'a' element to start the download
+                link.click();
+
+                document.body.removeChild(link);
             }
         }
         else
