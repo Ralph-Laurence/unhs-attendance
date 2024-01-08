@@ -20,8 +20,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
                     <li>
-                        <a class="dropdown-item btn-add-record" {{-- data-mdb-toggle="modal" data-mdb-target="#employeeFormModal" --}}
-                            role="button">Create Manually</a>
+                        <a class="dropdown-item btn-add-record"role="button">Create Manually</a>
                     </li>
                     <li><a class="dropdown-item" href="#">Import Sheet</a></li>
                 </ul>
@@ -60,7 +59,7 @@
     @include('modals.employee-form', [
         'role'         => $descriptiveRole,
         'employeeType' => $empType,
-        'requireEmail' => $requireEmail,
+        'requireEmail' => true,
         'postCreate'   => $routes['POST_CreateTeacher'], // Route for create
         'postUpdate'   => $routes['POST_UpdateTeacher']  // Route for update
     ])

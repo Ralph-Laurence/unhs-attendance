@@ -35,6 +35,8 @@ class RouteNames
         'index'     => 'backoffice.staff',
         'all'       => 'backoffice.staff.all',
         'create'    => 'backoffice.staff.create',
+        'update'    => 'backoffice.staff.update',
+        'details'   => 'backoffice.staff.details',
         'destroy'   => 'backoffice.staff.destroy',
     ];
 }

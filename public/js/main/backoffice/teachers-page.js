@@ -231,10 +231,6 @@ function deleteRecord(row)
             {
                 response = JSON.parse(response);
                 
-                // console.log(response);
-                // console.log(response.code == 0);
-                // console.log(typeof (response.code));
-
                 if (response.code == 0)
                 {
                     snackbar.showSuccess(response.message);

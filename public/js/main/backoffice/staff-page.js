@@ -20,6 +20,29 @@ function initialize()
 //
 function handleEvents() 
 {
+    $(document).on('employeeFormUpdateSuccess', function (event, data, selectedRow) {
+        
+        let row = dataTable.row(selectedRow);
+        //let rowIndex = row.index();
+        let rowData = row.data();
+
+        rowData.fname = data.fname;
+        rowData.mname = data.mname;
+        rowData.lname = data.lname;
+
+        // Update the row data
+        dataTable.row(row).data(rowData).invalidate().draw();
+
+        let rowNode = $(row.node());
+        rowNode.addClass('row-flash');
+
+        // Remove the class after the animation ends
+        rowNode.on('animationend', function ()
+        {
+            rowNode.removeClass('row-flash');
+        });
+    });
+
     $(document).on('employeeFormInsertSuccess', function (event, data) 
     { 
         if (!data)
@@ -60,9 +83,9 @@ function handleEvents()
                     return;
                 }
 
-                let link = document.createElement('a');
-                link.href = dl.url;
-                link.download = dl.fileName;
+                let link        = document.createElement('a');
+                link.href       = dl.url;
+                link.download   = dl.fileName;
 
                 document.body.appendChild(link);
 
@@ -91,8 +114,16 @@ function handleEvents()
 
         alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
     });
+    
+    $(document).on('click', '.row-actions .btn-edit', function()
+    {
+        let row = $(this).closest('tr');
+
+        openEditForm(row);
+    });
     // $(document).on('click', '.row-actions')
-    // $(document).on('click', '.row-actions')
+
+    $('.btn-add-record').on('click', () => openCreateForm());
 }
 
 function bindTableDataSource(url)
@@ -200,10 +231,6 @@ function deleteRecord(row)
             {
                 response = JSON.parse(response);
                 
-                // console.log(response);
-                // console.log(response.code == 0);
-                // console.log(typeof (response.code));
-
                 if (response.code == 0)
                 {
                     snackbar.showSuccess(response.message);

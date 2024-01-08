@@ -59,6 +59,8 @@ Route::controller(AttendanceController::class)->group(function()
 Route::controller(TeachersController::class)->group(function()
 {
     Route::get('/backoffice/employees/teachers',             'index')->name(RouteNames::Teachers['index']);
+
+    // AJAX
     Route::post('/backoffice/employees/teachers/get',        'getTeachers')->name(RouteNames::Teachers['all']);
     Route::post('/backoffice/employees/teachers/create',     'store')->name(RouteNames::Teachers['create']);
     Route::post('/backoffice/employees/teachers/delete',     'destroy')->name(RouteNames::Teachers['destroy']);
@@ -74,6 +76,8 @@ Route::controller(StaffController::class)->group(function()
     Route::post('/backoffice/employees/staff/get',      'getStaff')->name(RouteNames::Staff['all']);
     Route::post('/backoffice/employees/staff/create',   'store')->name(RouteNames::Staff['create']);
     Route::post('/backoffice/employees/staff/delete',   'destroy')->name(RouteNames::Staff['destroy']);
+    Route::post('/backoffice/employees/staff/details',  'details')->name(RouteNames::Staff['details']);
+    Route::post('/backoffice/employees/staff/update',   'update')->name(RouteNames::Staff['update']);
 });
 
 Route::controller(TestController::class)->group(function(){

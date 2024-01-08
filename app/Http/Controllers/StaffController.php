@@ -35,6 +35,8 @@ class StaffController extends Controller
         $routes = [
             'defaultDataSource'  => route(RouteNames::Staff['all']),
             'POST_CreateStaff'   => route(RouteNames::Staff['create']),
+            'POST_UpdateStaff'   => route(RouteNames::Staff['update']),
+            'DETAILS_Staff'      => route(RouteNames::Staff['details']),
             'DELETE_Staff'       => route(RouteNames::Staff['destroy'])
         ];
 
@@ -175,6 +177,110 @@ class StaffController extends Controller
         catch (Exception $ex) 
         {
             return $failMessage;
+        }
+    }
+
+    // Performs a database update
+    public function update(Request $request)
+    {
+        $key = $request->input('row-key');
+
+        if (empty($key))
+        {
+            $code = Constants::RecordId_Empty;
+            $msg = Messages::UPDATE_FAIL_CANT_IDENTIFY_RECORD;
+
+            return Extensions::encodeFailMessage("$msg\n\n(Error Code $code)", $code);
+        }
+
+        $input = $this->validateFields($request);
+
+        if ($input['validation_stat'] == 400)
+            return json_encode($input);
+
+        $data = [
+            Employee::f_EmpNo       => $input['input-id-no'],
+            Employee::f_FirstName   => $input['input-fname'],
+            Employee::f_MiddleName  => $input['input-mname'],
+            Employee::f_LastName    => $input['input-lname'],
+            Employee::f_Email       => $input['input-email'],
+            Employee::f_Contact     => $input['input-contact'],
+            //Employee::f_Status      => Employee::ON_STATUS_DUTY
+        ];
+
+        try 
+        {
+            // Save the updated data into database
+            $update = DB::transaction(function () use ($data, $key) 
+            {
+                $id = $this->hashids->decode($key);
+                $employee = Employee::where('id', '=', $id)->first();
+
+                if ($employee)
+                {
+                    $employee->update($data);
+                    return $employee;
+                }
+                else
+                    return -1;
+            });
+
+            if (is_int($update) && $update == -1)
+            {
+                $code = Constants::RecordNotFound;
+                $msg = Messages::UPDATE_FAIL_NON_EXISTENT_RECORD;
+
+                return Extensions::encodeFailMessage("$msg.\n\n(Error Code $code)", $code);
+            }
+
+            // Convert the collection to array so that we can use
+            // these into the frontend such as adding a new row to
+            // the datatable
+            $employeeData = $update->toArray();
+            $rowData = [
+                'emp_num'       => $employeeData[Employee::f_EmpNo],
+                'fname'         => $employeeData[Employee::f_FirstName],
+                'mname'         => $employeeData[Employee::f_MiddleName],
+                'lname'         => $employeeData[Employee::f_LastName],
+                'emp_status'    => $employeeData[Employee::f_Status]
+            ];
+            
+            // Return AJAX response
+            return Extensions::encodeSuccessMessage("Success!", $rowData);
+        } 
+        catch (\Exception $ex) 
+        {    
+            //return Extensions::encodeFailMessage("Failed " . $ex->getMessage());
+            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED, Constants::InternalServerError);
+        }
+    }
+
+    // Load the employee details
+    public function details(Request $request)
+    {
+        try
+        {
+            $key = $request->input('key');
+            $id = $this->hashids->decode($key);
+
+            $dataset = Employee::where('id', '=', $id)
+            ->select([
+                Employee::f_EmpNo       . ' as idNo',
+                Employee::f_FirstName   . ' as fname',
+                Employee::f_MiddleName  . ' as mname',
+                Employee::f_LastName    . ' as lname',
+                Employee::f_Contact     . ' as phone',
+                Employee::f_Email       . ' as email',
+            ])
+            ->first()
+            ->toArray();
+
+            return Extensions::encodeSuccessMessage('Basic information loaded for edit mode', $dataset);
+        }
+        catch (Exception $ex)
+        {
+            // error_log($ex->getMessage());
+            return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
         }
     }
     
