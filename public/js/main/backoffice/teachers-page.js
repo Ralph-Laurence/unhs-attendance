@@ -1,4 +1,4 @@
-let datasetTable = '.dataset-table';
+let teachers_datasetTable = '.dataset-table';
 let dataTable;
 let csrfToken;
 
@@ -121,14 +121,20 @@ function handleEvents()
 
         openEditForm(row);
     });
-    // $(document).on('click', '.row-actions')
+
+    $(document).on('click', '.row-actions .btn-details', function () 
+    {  
+        let row = $(this).closest('tr');
+
+        showEmployeeDetails(row);
+    });
 
     $('.btn-add-record').on('click', () => openCreateForm());
 }
 
 function bindTableDataSource(url)
 {
-    url = url || $(datasetTable).data('src-default');
+    url = url || $(teachers_datasetTable).data('src-default');
 
     let options = {
         "deferRender"  : true,
@@ -206,7 +212,7 @@ function bindTableDataSource(url)
     }
     
     // Initialize datatable if not yet created
-    dataTable = $(datasetTable).DataTable(options);
+    dataTable = $(teachers_datasetTable).DataTable(options);
 }
 
 function deleteRecord(row) 

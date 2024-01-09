@@ -29,11 +29,11 @@
     color: white;
 }
 
-.row-actions button.btn-about {
+.row-actions button.btn-details {
     font-size: 12px;  
 }
 
-.row-actions button.btn-about:hover {
+.row-actions button.btn-details:hover {
     background-color: var(--primary-color);
     color: white;
 }

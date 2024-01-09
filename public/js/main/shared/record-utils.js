@@ -3,7 +3,7 @@ function createRowActions(recordKey)
     var html = 
     `<div class="row-actions" data-record-key="${recordKey}">
         <div class="loader d-none"></div>
-        <button class="btn btn-sm btn-about"> 
+        <button class="btn btn-sm btn-details"> 
             <i class="fa-solid fa-circle-info"></i> 
         </button>
         <button class="btn btn-sm btn-edit"> 

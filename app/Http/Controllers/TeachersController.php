@@ -137,13 +137,13 @@ class TeachersController extends Controller
             // that failed during the last operation performed. If the 
             // array is empty, it means that the email was sent successfully 
             // to all recipients
-            if (!$option_saveQR_localCopy && !Mail::failures()) {
+            // if (!$option_saveQR_localCopy && !Mail::failures()) {
                
-                // Delete the file after sending
-                if (File::exists($qrcode)) {
-                    File::delete($qrcode);
-                }
-            }
+            //     // Delete the file after sending
+            //     if (File::exists($qrcode)) {
+            //         File::delete($qrcode);
+            //     }
+            // }
             
             // Return AJAX response
             return Extensions::encodeSuccessMessage("Success!", $rowData);
@@ -168,7 +168,7 @@ class TeachersController extends Controller
         {
             $id = $this->hashids->decode($recordId);
 
-            $rowsDeleted = Employee::where('id', '=', $id)->delete();
+            $rowsDeleted = Employee::where('id', '=', $id[0])->delete();
 
             if ($rowsDeleted > 0)
                 return Extensions::encodeSuccessMessage(Messages::TEACHER_DELETE_OK);
@@ -215,7 +215,7 @@ class TeachersController extends Controller
             $update = DB::transaction(function () use ($data, $key) 
             {
                 $id = $this->hashids->decode($key);
-                $employee = Employee::where('id', '=', $id)->first();
+                $employee = Employee::where('id', '=', $id[0])->first();
 
                 if ($employee)
                 {
@@ -264,7 +264,7 @@ class TeachersController extends Controller
             $key = $request->input('key');
             $id = $this->hashids->decode($key);
 
-            $dataset = Employee::where('id', '=', $id)
+            $dataset = Employee::where('id', '=', $id[0])
             ->select([
                 Employee::f_EmpNo       . ' as idNo',
                 Employee::f_FirstName   . ' as fname',
@@ -272,6 +272,7 @@ class TeachersController extends Controller
                 Employee::f_LastName    . ' as lname',
                 Employee::f_Contact     . ' as phone',
                 Employee::f_Email       . ' as email',
+                Employee::f_Status      . ' as status',
             ])
             ->first()
             ->toArray();

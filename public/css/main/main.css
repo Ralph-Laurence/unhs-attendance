@@ -154,6 +154,10 @@ Button Overrides
     color: var(--dark-color);
 }
 
+.text-primary-dark {
+    color: var(--primary-dark);
+}
+
 /* Text Size Utilities */
 .text-sm {
     font-size: 12px;

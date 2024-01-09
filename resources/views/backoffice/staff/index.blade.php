@@ -63,6 +63,10 @@
         'postCreate'   => $routes['POST_CreateStaff'], // Route for create
         'postUpdate'   => $routes['POST_UpdateStaff']  // Route for update
     ])
+
+    @include('modals.employee-details', [
+        'role'         => $descriptiveRole,
+    ])
 @endpush
 
 @endsection

@@ -1,3 +1,6 @@
+const monthNames  = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const dayNames    = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 /**
  * Format a timestamp into 12-Hour time string
  * @param {*} timestamp 
@@ -19,9 +22,6 @@ function format12Hour(timestamp)
 
 function extractDate(timestamp)
 {
-    let monthNames  = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    let dayNames    = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
     // Create a new Date object with the UTC time
     let date    = new Date(timestamp + 'Z');
 
@@ -41,6 +41,22 @@ function extractDate(timestamp)
         'month': month,
         'day': day,
         'dayName': dayName
+    };
+
+    return parts;
+}
+
+function getCurrentDateParts()
+{
+    let dateToday = new Date();
+    let currentYear = dateToday.getUTCFullYear();
+    let currentMonth = monthNames[dateToday.getUTCMonth()];
+    let currentDay = (dateToday.getUTCDate() < 10 ? '0' + dateToday.getUTCDate() : dateToday.getUTCDate());
+
+    let parts = {
+        'year': currentYear,
+        'month': currentMonth,
+        'day': currentDay
     };
 
     return parts;

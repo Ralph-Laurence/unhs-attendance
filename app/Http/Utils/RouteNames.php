@@ -28,7 +28,12 @@ class RouteNames
         'create'    => 'backoffice.teachers.create',
         'update'    => 'backoffice.teachers.update',
         'details'   => 'backoffice.teachers.details',
-        'destroy'    => 'backoffice.teachers.destroy',
+        'destroy'   => 'backoffice.teachers.destroy',
+    ];
+
+    public const Trails = [
+        'index'     => 'backoffice.attendance.index',
+        'all'       => 'backoffice.attendance.trails.all',
     ];
 
     public const Staff = [

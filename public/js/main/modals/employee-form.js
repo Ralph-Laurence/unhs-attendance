@@ -1,3 +1,6 @@
+const employeeFormModal     = '#employeeFormModal';
+const employeeDetailsModal  = '#employeeDetailsModal';
+
 let dirty = false;
 let formModal = null;
 let formMode = undefined;
@@ -6,7 +9,7 @@ let FormMode_Create = 1;
 let FormMode_Edit = 2;
 let selectedRowForEdit = null;
 
-let employeeFormModal = '#employeeFormModal';
+let detailsModal = undefined;
 let employeeForm = undefined;
 let formSubmitButton = undefined;
 let formCancelButton = undefined;
@@ -20,8 +23,10 @@ $(document).ready(function ()
     formModal = new mdb.Modal($(employeeFormModal));
     employeeForm = $(`${employeeFormModal} form`);
 
+    detailsModal = new mdb.Modal($(employeeDetailsModal));
+
     formSubmitButton = $(`${employeeFormModal} .btn-save`);
-    formCancelButton = $(`${employeeFormModal} .btn-cancel, #employeeFormModal .btn-close`);
+    formCancelButton = $(`${employeeFormModal} .btn-cancel, ${employeeFormModal} .btn-close`);
 
     bindEvents();
 });
@@ -98,6 +103,22 @@ function openCreateForm()
     formModal.show();
 }
 
+function showEmployeeDetails(row)
+{
+    loadEmployeeDetails(row, (data) => 
+    {
+        if (data.code == 0)
+        {
+            bindTrailsData(data);
+            detailsModal.show();
+        }
+        else
+        {
+            alertModal.showDanger(data.message);
+        }
+    });
+}
+
 function clearForm()
 {
     employeeForm.trigger('reset');
@@ -129,10 +150,7 @@ function loadEmployeeDetails(row, onSuccess)
         url: route_detailsRecord,
         data: {
             '_token': $('meta[name="csrf-token"]').attr('content'),
-            'key': rowKey,
-            // 'full_details': true --> to load entire details
-            // we only need to load basic details that will be
-            // used for update
+            'key': rowKey
         },
         success: function(response) {
             // console.warn(response);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttendanceTrailController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Controllers\StaffController;
@@ -56,16 +57,24 @@ Route::controller(AttendanceController::class)->group(function()
     Route::post('/backoffice/attendance/daily/{employeeFilter?}', 'getDailyAttendances')->name(RouteNames::Attendance['daily']);
 });
 
+Route::controller(AttendanceTrailController::class)->group(function()
+{
+    Route::post('/backoffice/teachers/attendance/trails',   'index')->name(RouteNames::Trails['index']);
+    
+    Route::post('/backoffice/trails/get', 'getTrails')->name(RouteNames::Trails['all']);
+    //Route::get('/backoffice/teachers/attendance/trails',     'index')->name(RouteNames::Trails['index']);
+});
+
 Route::controller(TeachersController::class)->group(function()
 {
-    Route::get('/backoffice/employees/teachers',             'index')->name(RouteNames::Teachers['index']);
-
+    Route::get('/backoffice/employees/teachers',            'index')->name(RouteNames::Teachers['index']);
+    
     // AJAX
-    Route::post('/backoffice/employees/teachers/get',        'getTeachers')->name(RouteNames::Teachers['all']);
-    Route::post('/backoffice/employees/teachers/create',     'store')->name(RouteNames::Teachers['create']);
-    Route::post('/backoffice/employees/teachers/delete',     'destroy')->name(RouteNames::Teachers['destroy']);
-    Route::post('/backoffice/employees/teachers/details',    'details')->name(RouteNames::Teachers['details']);
-    Route::post('/backoffice/employees/teachers/update',     'update')->name(RouteNames::Teachers['update']);
+    Route::post('/backoffice/employees/teachers/get',       'getTeachers')->name(RouteNames::Teachers['all']);
+    Route::post('/backoffice/employees/teachers/create',    'store')->name(RouteNames::Teachers['create']);
+    Route::post('/backoffice/employees/teachers/delete',    'destroy')->name(RouteNames::Teachers['destroy']);
+    Route::post('/backoffice/employees/teachers/details',   'details')->name(RouteNames::Teachers['details']);
+    Route::post('/backoffice/employees/teachers/update',    'update')->name(RouteNames::Teachers['update']);
 });
 
 Route::controller(StaffController::class)->group(function()
@@ -81,7 +90,8 @@ Route::controller(StaffController::class)->group(function()
 });
 
 Route::controller(TestController::class)->group(function(){
-    Route::get('/test', 'index');
+    Route::get('/test',     'index');
+    Route::get('/qrtest',   'qrsamples');
 });
 
 Route::get('/download/qr-code/{filename}/{outputname?}', function($filename)

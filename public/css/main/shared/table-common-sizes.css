@@ -1,0 +1,36 @@
+td.td-50 {
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
+}
+
+td.td-60 {
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+}
+
+td.td-80 {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+}
+
+td.td-100 {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+}
+
+td.td-120 {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+}
+
+th.th-h30,
+td.td-h30 {
+    height: 30px;
+    min-height: 30px;
+    max-height: 30px;
+}

@@ -1,4 +1,4 @@
-let datasetTable = '.dataset-table';
+let teachers_datasetTable = '.dataset-table';
 let dataTable;
 let iconStyles;
 let csrfToken;
@@ -39,12 +39,12 @@ function handleEvents()
     });
 
     $('.record-range-filter .daily').on('click', function() {
-        var url = $(datasetTable).data('src-default');
+        var url = $(teachers_datasetTable).data('src-default');
         bindTableDataSource(url);
     });
 
     $('.record-range-filter .weekly').on('click', function() {
-        var url = $(datasetTable).data('src-weekly');
+        var url = $(teachers_datasetTable).data('src-weekly');
         bindTableDataSource(url);
     });
 
@@ -58,7 +58,9 @@ function handleEvents()
 
 function bindTableDataSource(url)
 {
-    url = url || $(datasetTable).data('src-default');
+    let currentDate = getCurrentDateParts();
+
+    url = url || $(teachers_datasetTable).data('src-default');
 
     let options = {
         "deferRender"  : true,
@@ -104,10 +106,16 @@ function bindTableDataSource(url)
 
                     var date = extractDate(data);
                     var dateAttr = `${date.month} ${date.day}`;
+
+                    let dayMarkerColor = '';
+
+                    if (date.month == currentDate.month && date.day == currentDate.day && date.year == currentDate.year)
+                        dayMarkerColor = 'day-today';
+
                     var dateTile = 
                     `<div class="date-tile" data-date-attr="${dateAttr}">
                         <div class="month">${date.month}</div>
-                        <div class="day mb-0">${date.day}</div>
+                        <div class="day ${dayMarkerColor} mb-0">${date.day}</div>
                         <div class="dayname">${date.dayName}</div>
                     </div>`;
 
@@ -177,7 +185,7 @@ function bindTableDataSource(url)
     }
     
     // Initialize datatable if not yet created
-    dataTable = $(datasetTable).DataTable(options);
+    dataTable = $(teachers_datasetTable).DataTable(options);
 }
 
 function deleteRecord(row) 

@@ -40,16 +40,9 @@ class Attendance extends Model
     public static $earlyDismissal = '16:50:00';     // 4:50 PM      -> Will not calculate undertime after this time
     public static $workExitTime   = '17:30:00';     // 5:30 PM      -> All employees fully dismissed
 
-    // public static function createTimeIn(int $empId) : Attendance
-    // {
-    //     $insert = Attendance::create([
-    //         self::f_Emp_FK_ID   => $empId,
-    //         self::f_TimeIn      => Carbon::now(),
-    //         self::f_Status      => self::STATUS_PRESENT,
-    //     ]);
-
-    //     return $insert;
-    // }
+    public const HASH_SALT = 'FA610E'; // Just random string, nothing special
+    public const MIN_HASH_LENGTH = 10;
+    
     public static function createTimeIn(int $empId) : Attendance
     {
         $timeIn = Carbon::now();

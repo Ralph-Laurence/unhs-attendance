@@ -72,7 +72,7 @@ class AttendanceController extends Controller
         try 
         {
             $hash = $this->hashids->decode($key);
-            $rowsDeleted = Attendance::where('id', '=', $hash)->delete();
+            $rowsDeleted = Attendance::where('id', '=', $hash[0])->delete();
 
             if ($rowsDeleted > 0)
                 return Extensions::encodeSuccessMessage(Messages::ATTENDANCE_DELETE_OK);

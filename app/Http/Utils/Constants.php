@@ -18,4 +18,7 @@ class Constants
     public const InternalServerError    = 500;
 
     public const AttendancePageTitle    = 'Attendance';
+
+    public const XHR_STAT_OK    = 0;
+    public const XHR_STAT_FAIL  = -1;
 }

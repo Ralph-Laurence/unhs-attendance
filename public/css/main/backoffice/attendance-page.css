@@ -10,6 +10,9 @@
     font-size: 16px;
     font-weight: 600;
     line-height: 1.25;
+}
+
+.date-tile .day-today {
     color: var(--primary-color);
 }
 
