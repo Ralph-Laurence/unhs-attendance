@@ -7,6 +7,7 @@ use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\TestController;
+use App\Http\Utils\Extensions;
 // use App\Http\Text\Messages;
 // use App\Http\Utils\QRMaker;
 use App\Http\Utils\RouteNames;
@@ -61,8 +62,8 @@ Route::controller(AttendanceTrailController::class)->group(function()
 {
     Route::post('/backoffice/teachers/attendance/trails',   'index')->name(RouteNames::Trails['index']);
     
-    Route::post('/backoffice/trails/get', 'getTrails')->name(RouteNames::Trails['all']);
-    //Route::get('/backoffice/teachers/attendance/trails',     'index')->name(RouteNames::Trails['index']);
+    Route::post('/backoffice/trails/get',        'getTrails')->name(RouteNames::Trails['all']);
+    Route::post('/backoffice/trails/export/pdf', 'exportTrailsReport')->name(RouteNames::Trails['exportPdf']);
 });
 
 Route::controller(TeachersController::class)->group(function()
@@ -97,13 +98,13 @@ Route::controller(TestController::class)->group(function(){
 Route::get('/download/qr-code/{filename}/{outputname?}', function($filename)
 {
     // Define the file path
-    $path = storage_path("app/public/temp/qrcodes/$filename");
+    $path = Extensions::getQRCode_storagePath($filename);
 
     // Download the file
     $file = response()->download($path, 'qr-code.png');
 
     // Delete the file after download
-    $file->deleteFileAfterSend(true);
+    //$file->deleteFileAfterSend(true);
 
     return $file;
 

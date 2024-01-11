@@ -1,10 +1,18 @@
+@php
+    $parentClasses = '';
+
+    if ($attributes->has('parent-classes'))
+        $parentClasses = $attributes->get('parent-classes')
+
+@endphp
+
 @once
     @push('styles')
     <link rel="stylesheet" href="{{ asset('css/main/components/textbox.css') }}">
     @endpush
 @endonce
 
-<div class="textbox {{ $errors->has($as) ? ' has-error' : '' }} {{ $attributes->has('required') ? 'required' : '' }}">
+<div class="textbox {{ $parentClasses }} {{ $errors->has($as) ? ' has-error' : '' }} {{ $attributes->has('required') ? 'required' : '' }}">
 
     <div class="input-wrapper">
         @if ($attributes->has('leading-icon'))

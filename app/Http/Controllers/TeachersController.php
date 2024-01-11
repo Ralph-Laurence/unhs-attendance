@@ -80,8 +80,11 @@ class TeachersController extends Controller
             // these into the frontend such as adding a new row to
             // the datatable
             $employeeData = $insert->toArray();
+            $encodedId    = $this->hashids->encode($employeeData['id']);
+            $empNum       = $employeeData[Employee::f_EmpNo];
+
             $rowData = [
-                'emp_num'       => $employeeData[Employee::f_EmpNo],
+                'emp_num'       => $empNum,
                 'fname'         => $employeeData[Employee::f_FirstName],
                 'mname'         => $employeeData[Employee::f_MiddleName],
                 'lname'         => $employeeData[Employee::f_LastName],
@@ -89,7 +92,7 @@ class TeachersController extends Controller
                 'total_lates'   => 0,
                 'total_leave'   => 0,
                 'total_absents' => 0,
-                'id'            => $this->hashids->encode($employeeData['id'])
+                'id'            => $encodedId
             ];
 
             // Send the QR code into their email
@@ -101,7 +104,9 @@ class TeachersController extends Controller
             $qrCodePathAsset = null;
             $downloadUrl = null;
 
-            $qrcode = QRMaker::generateTempFile($rowData['id'], $qrCodePathAsset, $downloadUrl);
+            $qrcode_filename = "qr_$empNum.png";
+
+            $qrcode = QRMaker::saveFile($encodedId, $qrcode_filename, $qrCodePathAsset, $downloadUrl);
 
             // If the email was provided, send the qr code via email
             if (!empty($email))
@@ -164,19 +169,48 @@ class TeachersController extends Controller
         $recordId = $request->input('rowKey');
         $failMessage = Extensions::encodeFailMessage(Messages::TEACHER_DELETE_FAIL);
 
-        try
+        try 
         {
             $id = $this->hashids->decode($recordId);
 
-            $rowsDeleted = Employee::where('id', '=', $id[0])->delete();
+            $delete = DB::transaction(function () use ($id, $failMessage) 
+            {
+                // Find the employee
+                $employee = Employee::where('id', '=', $id[0])
+                    ->select(Employee::f_EmpNo . ' as empNo')
+                    ->first();
 
-            if ($rowsDeleted > 0)
-                return Extensions::encodeSuccessMessage(Messages::TEACHER_DELETE_OK);
-            else
-                return $failMessage;
-        }
-        catch (Exception $ex) 
-        {
+                // Check if employee exists
+                if ($employee === null)
+                    throw new Exception('Employee not found');
+
+                // Grab a copy of his employee number. We will use his
+                // employee number to identify the qr code filename
+                $empNo = $employee->toArray()['empNo'];
+
+                // Delete the employee from database
+                $rowsDeleted = Employee::where('id', '=', $id[0])->delete();
+
+                if ($rowsDeleted > 0) 
+                {
+                    // Delete his qr code file
+                    $qrCodeFile = Extensions::getQRCode_storagePath("qr_$empNo.png");
+
+                    if (File::exists($qrCodeFile)) 
+                    {
+                        if (!File::delete($qrCodeFile))
+                            throw new Exception('File deletion failed');
+                    }
+
+                    return Extensions::encodeSuccessMessage(Messages::TEACHER_DELETE_OK);
+                } 
+                else
+                    return $failMessage;
+            });
+
+            return $delete;
+        } 
+        catch (Exception $ex) {
             return $failMessage;
         }
     }

@@ -79,8 +79,11 @@ class StaffController extends Controller
             // these into the frontend such as adding a new row to
             // the datatable
             $employeeData = $insert->toArray();
+            $encodedId    = $this->hashids->encode($employeeData['id']);
+            $empNum       = $employeeData[Employee::f_EmpNo];
+
             $rowData = [
-                'emp_num'       => $employeeData[Employee::f_EmpNo],
+                'emp_num'       => $empNum,
                 'fname'         => $employeeData[Employee::f_FirstName],
                 'mname'         => $employeeData[Employee::f_MiddleName],
                 'lname'         => $employeeData[Employee::f_LastName],
@@ -88,7 +91,7 @@ class StaffController extends Controller
                 'total_lates'   => 0,
                 'total_leave'   => 0,
                 'total_absents' => 0,
-                'id'            => $this->hashids->encode($employeeData['id'])
+                'id'            => $encodedId
             ];
 
             // Send the QR code into their email
@@ -100,13 +103,11 @@ class StaffController extends Controller
             $qrCodePathAsset = null;
             $downloadUrl = null;
 
-            $qrcode = QRMaker::generateTempFile($rowData['id'], $qrCodePathAsset, $downloadUrl);
+            $qrcode_filename = "qr_$empNum.png";
 
-            // When the checkbox "save qr code local copy" is checked,
-            // we will send a download link to the qr code. Otherwise
-            // send the code via email if it exists. If email was not 
-            // provided, we must send a download link anyway
+            $qrcode = QRMaker::saveFile($encodedId, $qrcode_filename, $qrCodePathAsset, $downloadUrl);
 
+            // If the email was provided, send the qr code via email
             if (!empty($email))
             {
                 // Replace the #recipient# with firstname
@@ -124,6 +125,10 @@ class StaffController extends Controller
             // convert the checkbox value to boolean
             $option_saveQR_localCopy = filter_var($request->input('save_qr_copy'), FILTER_VALIDATE_BOOLEAN);
 
+            // When the checkbox "save qr code local copy" is checked,
+            // we will send a download link to the qr code. Otherwise
+            // send the code via email if it exists. If email was not 
+            // provided, we must send a download link anyway
             if ($option_saveQR_localCopy || empty($email))
             {
                 $rowData['qrcode_download'] = [
@@ -163,19 +168,48 @@ class StaffController extends Controller
         $recordId = $request->input('rowKey');
         $failMessage = Extensions::encodeFailMessage(Messages::STAFF_DELETE_FAIL);
 
-        try
+        try 
         {
             $id = $this->hashids->decode($recordId);
 
-            $rowsDeleted = Employee::where('id', '=', $id[0])->delete();
+            $delete = DB::transaction(function () use ($id, $failMessage) 
+            {
+                // Find the employee
+                $employee = Employee::where('id', '=', $id[0])
+                    ->select(Employee::f_EmpNo . ' as empNo')
+                    ->first();
 
-            if ($rowsDeleted > 0)
-                return Extensions::encodeSuccessMessage(Messages::STAFF_DELETE_OK);
-            else
-                return $failMessage;
-        }
-        catch (Exception $ex) 
-        {
+                // Check if employee exists
+                if ($employee === null)
+                    throw new Exception('Employee not found');
+
+                // Grab a copy of his employee number. We will use his
+                // employee number to identify the qr code filename
+                $empNo = $employee->toArray()['empNo'];
+
+                // Delete the employee from database
+                $rowsDeleted = Employee::where('id', '=', $id[0])->delete();
+
+                if ($rowsDeleted > 0) 
+                {
+                    // Delete his qr code file
+                    $qrCodeFile = Extensions::getQRCode_storagePath("qr_$empNo.png");
+
+                    if (File::exists($qrCodeFile)) 
+                    {
+                        if (!File::delete($qrCodeFile))
+                            throw new Exception('File deletion failed');
+                    }
+
+                    return Extensions::encodeSuccessMessage(Messages::STAFF_DELETE_OK);
+                } 
+                else
+                    return $failMessage;
+            });
+
+            return $delete;
+        } 
+        catch (Exception $ex) {
             return $failMessage;
         }
     }

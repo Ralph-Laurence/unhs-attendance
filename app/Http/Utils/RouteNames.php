@@ -34,6 +34,7 @@ class RouteNames
     public const Trails = [
         'index'     => 'backoffice.attendance.index',
         'all'       => 'backoffice.attendance.trails.all',
+        'exportPdf' => 'backoffice.attendance.trails.export.pdf',
     ];
 
     public const Staff = [

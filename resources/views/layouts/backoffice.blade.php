@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="{{ asset('css/lib/mdb/mdb.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/lib/fontawesome/css/fontawesome.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/lib/fontawesome/css/solid.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset('css/lib/mdb/mdb.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/lib/simplebar/simplebar.min.css') }}">
 
     <!-- MAIN STYLES -->

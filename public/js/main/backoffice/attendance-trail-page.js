@@ -2,6 +2,10 @@ let trails_datasetTable = '.attendance-trail-table';
 let dataTable;
 let csrfToken;
 
+let frmExportPdf = undefined;
+let exportPdfTarget = undefined;
+let employeeKey = undefined;
+
 $(document).ready(function() 
 {
     initialize();
@@ -13,6 +17,11 @@ $(document).ready(function()
 function initialize()
 {
     csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+    frmExportPdf    = $("#frm-export-trail-pdf");
+    exportPdfTarget = frmExportPdf.attr('action');
+    employeeKey     = frmExportPdf.find('#employee-key').val();
+
     bindTableDataSource();
 }
 //
@@ -20,6 +29,13 @@ function initialize()
 //
 function handleEvents() 
 {
+    $('.dropdown-item.trail-range-filter').on('click', function()
+    {
+        let range    = $(this).data('trail-range');
+        let filename = $('#input-export-filename').val();
+
+        exportPdf(filename, range);
+    });
 }
 
 function bindTableDataSource(url)
@@ -48,7 +64,7 @@ function bindTableDataSource(url)
             // },
             data: {
                 '_token' : csrfToken,
-                'employee-key': $(trails_datasetTable).data('employee-key')
+                'employee-key': employeeKey //$(trails_datasetTable).data('employee-key')
             }
         },
         columns: [
@@ -57,36 +73,11 @@ function bindTableDataSource(url)
             {
                 className: 'daynumber td-50 opacity-45',
                 data: 'day_number',
-                // render: function(data, type, row, meta) {
-                //     return meta.row + 1;
-                // }
             },
             // Second Column -> Date
             {
                 className: 'dayname td-60',
                 data: 'day_name',
-                // render: function (data, type, row) 
-                // {
-                //     if (data == '' || data == undefined)
-                //         return '';
-
-                //     var date = extractDate(data);
-                //     var dateAttr = `${date.month} ${date.day}`;
-
-                //     let dayMarkerColor = '';
-
-                //     if (date.month == currentDate.month && date.day == currentDate.day && date.year == currentDate.year)
-                //         dayMarkerColor = 'day-today';
-
-                //     var dateTile = 
-                //     `<div class="date-tile" data-date-attr="${dateAttr}">
-                //         <div class="month">${date.month}</div>
-                //         <div class="day ${dayMarkerColor} mb-0">${date.day}</div>
-                //         <div class="dayname">${date.dayName}</div>
-                //     </div>`;
-
-                //     return dateTile;
-                // },
                 defaultContent: ''
             },
             // Third Column -> Status
@@ -94,9 +85,6 @@ function bindTableDataSource(url)
                 className: 'am_in text-center td-80',
                 data: 'am_in', 
                 defaultContent: '',
-                // render: function(data, type, row) {
-                //     return `<div class="attendance-status ${iconStyles[data]}">${data}</div>`;
-                // }
             },
             {
                 className: 'am_out text-center td-80',
@@ -138,34 +126,6 @@ function bindTableDataSource(url)
                 data: 'status', 
                 defaultContent: '',
             },
-            // Fourth Column -> Employee Name
-            // {
-            //     className: 'td-employee-name text-truncate',
-            //     width: '280px',
-            //     data: null,
-            //     render: function (data, type, row) {  
-            //         return `<span class="text-darker">${[data.fname, data.mname, data.lname].join(' ')}</span>`;
-            //     },
-            //     defaultContent: ''
-            // },
-            // Fifth Column -> Clockin Time
-            // {
-            //     width: '100px',
-            //     data: 'timein',
-            //     render: function(data, type, row) {
-            //         return data ? format12Hour(data) : ''
-            //     },
-            //     defaultContent: ''
-            // },
-            // Sixth Column -> Clockout Time
-            // {
-            //     width: '100px',
-            //     data: 'timeout', 
-            //     defaultContent: '',
-            //     render: function(data, type, row) {
-            //         return data ? `<span class="text-darker">${format12Hour(data)}</span>` : ''
-            //     }
-            // },
         ]
     };
 
@@ -179,4 +139,39 @@ function bindTableDataSource(url)
     
     // Initialize datatable if not yet created
     dataTable = $(trails_datasetTable).DataTable(options);
+}
+
+function exportPdf(filename, range)
+{
+    $.ajax({
+        type: 'POST',
+        url: exportPdfTarget,
+        data: {
+            'employee-key': employeeKey,
+            'trail-range':  range,
+            'filename':     filename,
+            '_token':       csrfToken
+        },
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(response) 
+        {
+            if (response)
+            {
+                var blob = new Blob([response]);
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = "MyPDF.pdf";
+                link.click();
+            }
+            else
+            {
+                alertModal.showDanger('The server was unable to generate the PDF report');
+            }
+        },
+        error: function(xhr, error, status) {
+            console.warn(xhr.responseText);
+        }
+    });
 }
