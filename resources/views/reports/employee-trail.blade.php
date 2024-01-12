@@ -274,7 +274,8 @@
                 $countUndertime = 0;
             @endphp
 
-            @foreach ($trailData as $data)
+            {{-- @for($i = 0; $i < 500; $i++) --}}
+            @foreach ($dataSet as $data)
                 @php
                     $absent_td_mark = '';
 
@@ -322,7 +323,23 @@
                 <td class="{{ $absent_td_mark }} border-end td-80 text-center gray-text">{{ $data->overtime }}</td>
                 <td class="border-end td-80 text-center">{{ $data->status }}</td>
             </tr>
+
             @endforeach
+            {{-- <tr>
+                <td class="border-start td-25 text-center td-day">123</td>
+                <td class="td-45 td-day">Abc</td>
+                <td class="border-start text-center darker-text">00:00:00</td>
+                <td class="text-center gray-text">00:00:00</td>
+                <td class="border-start text-center gray-text">00:00:00</td>
+                <td class="border-end text-center darker-text">00:00:00</td>
+                <td class="border-end td-80 text-center gray-text">00:00:00</td>
+                <td class="border-end td-80 text-center gray-text">00:00:00</td>
+                <td class="border-end td-80 text-center gray-text">00:00:00</td>
+                <td class="border-end td-80 text-center gray-text">00:00:00</td>
+                <td class="border-end td-80 text-center">xyz</td>
+            </tr>
+            
+            @endfor --}}
         </tbody>
     </table>
 

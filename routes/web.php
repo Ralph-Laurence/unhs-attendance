@@ -33,7 +33,9 @@ Route::get('/', function () {
 
 Route::controller(DailyTimeRecordController::class)->group(function()
 {
-    Route::get('/backoffice/daily-time-record', 'index')->name(RouteNames::DailyTimeRecord['index']);
+    Route::post('/backoffice/dtr', 'index')->name(RouteNames::DailyTimeRecord['index']);
+    Route::post('/backoffice/dtr/timerecords', 'getTimeRecords')->name(RouteNames::DailyTimeRecord['get']);
+    Route::post('/backoffice/dtr/export/pdf',  'exportPdf')->name(RouteNames::DailyTimeRecord['exportPdf']);
 });
 
 Route::controller(ScannerController::class)->group(function()

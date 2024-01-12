@@ -3,6 +3,7 @@
 namespace App\Http\Utils;
 
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Hashids\Hashids;
 
 class Extensions
@@ -58,6 +59,20 @@ class Extensions
            'dates' => $dates
        ];
     }
+
+    public static function getPeriods($dateFrom, $dateTo, $format = 'F d, Y') : string
+    {
+        $period = new CarbonPeriod($dateFrom, $dateTo);
+
+        $dates = [];
+
+        foreach($period as $date) {
+            $dates[] = $date->format($format);
+        }
+
+        return $dates[0] .' - '. $dates[count($dates) -1 ];
+    }
+
     //
     // Dataset Utilities
     //

@@ -5,7 +5,9 @@ namespace App\Http\Utils;
 class RouteNames
 {
     public const DailyTimeRecord = [
-        'index' => 'backoffice.daily-time-record.index'
+        'index'     => 'backoffice.attendance.dtr.index',
+        'get'       => 'backoffice.attendance.dtr.get',
+        'exportPdf' => 'backoffice.attendance.dtr.export-pdf',
     ];
 
     public const Scanner = [

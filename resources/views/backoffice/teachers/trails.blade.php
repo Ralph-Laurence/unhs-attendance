@@ -53,7 +53,7 @@
             </div> --}}
 
             {{-- ADD BUTTON --}}
-            <div class="dropdown">
+            {{-- <div class="dropdown">
                 <button class="btn btn-primary flat-button dropdown-toggle shadow-0" id="add-record-dropdown-button"
                     data-mdb-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-download"></i>
@@ -67,7 +67,31 @@
                     <li>
                         <a class="dropdown-item" role="button">Raw Dataset (csv)</a>
                     </li>
-                    {{-- <li><a class="dropdown-item" href="#">Import Sheet</a></li> --}}
+                </ul>
+            </div> --}}
+            <div class="dropdown">
+                <button class="btn btn-primary flat-button dropdown-toggle shadow-0" id="report-dropdown-button"
+                    data-mdb-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-download"></i>
+                    <span class="ms-1">Report</span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
+                    <li>
+                        <a class="dropdown-item" role="button">First half</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" role="button">Second Half</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" role="button">Whole Month</a>
+                    </li>
+                    {{-- <li>
+                        <a class="dropdown-item" role="button" data-mdb-toggle="modal" 
+                        data-mdb-target="#exportPrintablesModal">Printable Report (pdf)</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" role="button">Raw Dataset (csv)</a>
+                    </li> --}}
                 </ul>
             </div>
         </div>
@@ -106,7 +130,7 @@
 @endsection
 
 @push('dialogs')
-<div class="modal fade" data-mdb-backdrop="static" id="exportPrintablesModal" tabindex="-1" aria-labelledby="exportPrintablesModalLabel"
+{{-- <div class="modal fade" data-mdb-backdrop="static" id="exportPrintablesModal" tabindex="-1" aria-labelledby="exportPrintablesModalLabel"
     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -149,20 +173,6 @@
                         </div>
                     </div>
                     <hr class="opacity-10 my-2">
-                    {{-- <div class="text-primary-dark text-sm">Export Options:</div>
-                    <div class="export-options">
-                        <!-- Default radio -->
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="input-export-option" id="input-export-option-basic" />
-                            <label class="form-check-label" for="input-export-option-basic">Basic</label>
-                        </div>
-                        
-                        <!-- Default checked radio -->
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="input-export-option" id="input-export-option-detailed" checked />
-                            <label class="form-check-label" for="input-export-option-detailed"> Detailed </label>
-                        </div>
-                    </div> --}}
                     <div class="d-none">
                         <form action="{{ $routes['export_trail_pdf'] }}" method="post" id="frm-export-trail-pdf">
                             <input type="hidden" id="employee-key" value="{{ $empKey }}" />
@@ -179,7 +189,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 @endpush
 
 @push('scripts')

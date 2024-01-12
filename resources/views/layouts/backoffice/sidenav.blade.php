@@ -11,7 +11,7 @@ $routeItems =
     ['wildcard' => 'backoffice.attendance.tardiness',   'icon' => 'fa-qrcode',              'text' => 'Scanner',        'target' => route(RouteNames::Scanner['index']), 'menu_type' => 'sub' ],
     ['wildcard' => 'backoffice.teachers',               'icon' => 'fa-person-chalkboard',   'text' => 'Teachers',       'target' => route(RouteNames::Teachers['index'])],
     ['wildcard' => 'backoffice.staff',                  'icon' => 'fa-people-carry-box',    'text' => 'Staff',          'target' => route(RouteNames::Staff['index'])],
-    ['wildcard' => '', /*backoffice.teachers*/          'icon' => 'fa-users-gear',          'text' => 'Users',          'target' => ''], // route(RouteNames::Staffs['index'])
+    ['wildcard' => '', /*backoffice.teachers*/          'icon' => 'fa-shield',              'text' => 'Administrator',  'target' => ''], // route(RouteNames::Staffs['index'])
 ];
 @endphp
 <div class="col sidenav shadow-4-strong user-select-none d-flex flex-column vh-100 px-0">

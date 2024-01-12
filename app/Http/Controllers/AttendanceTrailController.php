@@ -29,8 +29,20 @@ class AttendanceTrailController extends Controller
         'all'   => 4
     ];
 
+    private const PERIOD_15TH = 'fifteenth';
+    private const PERIOD_END  = 'end_of_month';
+    private const PERIOD_ALL  = 'current_month';
+
+    private $PAYROLL_PERIOD = array();
+
     public function __construct() 
     {
+        $this->PAYROLL_PERIOD = [
+            self::PERIOD_15TH => 0,
+            self::PERIOD_END  => 1,
+            self::PERIOD_ALL  => 2
+        ];
+
         $this->emp_hashids = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
 
         $this->fullForm  = ['Hr', 'Mins', 'Secs'];
@@ -69,7 +81,8 @@ class AttendanceTrailController extends Controller
             ->with('empKey',        $request->input('employee-key'))
             ->with('empName',       implode(' ', [ $employee['fname'], $employee['mname'], $employee['lname'], ]))
             ->with('empIdNo',       $employee['idNo'])
-            ->with('trailRange',    self::TRAIL_RANGE);
+            //->with('trailRange',    self::TRAIL_RANGE);
+            ->with('payroll_period', $this->PAYROLL_PERIOD);
     }
 
     public function getTrails(Request $request)
@@ -109,64 +122,9 @@ class AttendanceTrailController extends Controller
 
         unset($data); // unset reference to last element
     }
-    /**
-     * Filter a dataset of attendance trails
-     * then return the resulting date range string
-     */
+
     private function filterTrailRange($range, &$query) : string
     {
-        $selectTrailRange = [
-            //
-            // Attendances Today
-            //
-            self::TRAIL_RANGE['today'] => function(&$query)
-            {
-                $date = Carbon::now();
-
-                $query->whereBetween('created_at', [
-                    $date->startOfDay()->format(Constants::TimestampFormat), 
-                    $date->endOfDay()->format(Constants::TimestampFormat)
-                ]);
-
-                return date('F d, Y');
-            },
-            //
-            // Attendances This Week
-            //
-            self::TRAIL_RANGE['week' ] => function(&$query)
-            {
-                $currentWeek = Extensions::getCurrentWeek();
-                $query->where(Attendance::f_WeekNo, '=', $currentWeek);
-                
-                $weekRange = Extensions::getWeekDateRange($currentWeek, date('Y'));
-
-                return $weekRange['start'] ." - ". $weekRange['end'];
-            },
-            //
-            // Attendances This Month
-            //
-            self::TRAIL_RANGE['month'] => function(&$query)
-            {
-                $date = Carbon::now();
-
-                $query->whereBetween('created_at', [
-                    $date->startOfMonth()->format(Constants::TimestampFormat), 
-                    $date->endOfMonth()->format(Constants::TimestampFormat)
-                ]);
-
-                $monthRange = Extensions::getMonthDateRange($date->month, $date->year);
-
-                return $monthRange['start'] ." - ". $monthRange['end'];
-            },
-            //
-            // Attendances This Month
-            //
-            self::TRAIL_RANGE['all'] => function()
-            {
-                return "All Records";
-            }
-        ];
-
         if (isset($selectTrailRange[$range])) 
         {
             $dateRange = $selectTrailRange[$range]($query);

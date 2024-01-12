@@ -106,7 +106,7 @@ $icons = [
             </div>
         </div>
     </div>
-    <form action="{{ route(RouteNames::Trails['index']) }}" method="post" class="attendance-trail-form d-none">
+    <form action="{{ route(RouteNames::DailyTimeRecord['index']) }}" method="post" class="attendance-trail-form d-none">
         @csrf
         <input type="hidden" name="employee-key" id="employee-key">
     </form>
