@@ -12,6 +12,7 @@
         "guzzlehttp/guzzle": "^7.0.1",
         "hashids/hashids": "^4.1",
         "intervention/image": "^2.7",
+        "laravel/fortify": "^1.19",
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5"

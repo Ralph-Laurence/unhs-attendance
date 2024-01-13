@@ -68,6 +68,10 @@ Route::controller(AttendanceTrailController::class)->group(function()
     Route::post('/backoffice/trails/export/pdf', 'exportTrailsReport')->name(RouteNames::Trails['exportPdf']);
 });
 
+Route::get('/home', function() {
+    return view('home');
+})->middleware(['auth']);
+
 // Route::controller(TeachersController::class)->group(function()
 // {
 //     Route::get('/backoffice/employees/teachers',            'index')->name(RouteNames::Teachers['index']);
