@@ -1,7 +1,7 @@
 @extends('layouts.backoffice')
 
 @section('title')
-{{'Teachers'}}
+{{ $descriptiveRole }}
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
     <div class="card-body">
         {{-- TABLE TITLE HEADER --}}
         <div class="d-flex align-items-center gap-1 mb-3">
-            <h6 class="card-title me-auto">Faculty</h6>
+            <h6 class="card-title me-auto">{{ $descriptiveRole }} Directory</h6>
 
             {{-- ADD BUTTON --}}
             <div class="dropdown">
@@ -42,7 +42,7 @@
                 <tr>
                     <th>#</th>
                     <th>ID no.</th>
-                    <th>Faculty Name</th>
+                    <th>Employee Name</th>
                     <th>Status</th>
                     <th style="background-color: #FADCB7;">Late</th>
                     <th>Leave</th>
@@ -60,8 +60,8 @@
         'role'         => $descriptiveRole,
         'employeeType' => $empType,
         'requireEmail' => true,
-        'postCreate'   => $routes['POST_CreateTeacher'], // Route for create
-        'postUpdate'   => $routes['POST_UpdateTeacher']  // Route for update
+        'postCreate'   => $routes['POST_Create_Employee'], // Route for create
+        'postUpdate'   => $routes['POST_Update_Employee']  // Route for update
     ])
 
     @include('modals.employee-details', [
@@ -73,13 +73,13 @@
 
 @push('scripts')
 <script>
-    const route_deleteRecord  = "{{ $routes['DELETE_Teacher'] }}";
-    const route_detailsRecord = "{{ $routes['DETAILS_Teacher'] }}";
+    const route_deleteRecord  = "{{ $routes['DELETE_Employee'] }}";
+    const route_detailsRecord = "{{ $routes['DETAILS_Employee'] }}";
 </script>
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
-<script src="{{ asset('js/main/backoffice/teachers-page.js') }}"></script>
+<script src="{{ asset('js/main/backoffice/employee-page.js') }}"></script>
 {{-- 
 <script>
     $.ajax({

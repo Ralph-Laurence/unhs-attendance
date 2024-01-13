@@ -1,12 +1,15 @@
 <?php
-
+//Fat Model, Skinny Controller
 namespace App\Models;
 
+use App\Http\Text\Messages;
 use App\Http\Utils\Extensions;
+use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class Employee extends Model
 {
@@ -89,6 +92,24 @@ class Employee extends Model
         ]);
     }
 
+    public function getBasicDetails($id) : array
+    {
+        $dataset = Employee::where('id', '=', $id)
+            ->select([
+                Employee::f_EmpNo       . ' as idNo',
+                Employee::f_FirstName   . ' as fname',
+                Employee::f_MiddleName  . ' as mname',
+                Employee::f_LastName    . ' as lname',
+                Employee::f_Contact     . ' as phone',
+                Employee::f_Email       . ' as email',
+                Employee::f_Status      . ' as status',
+            ])
+            ->first()
+            ->toArray();
+
+        return $dataset;
+    }
+
     private function getEmployees(int $role)
     {
         $fname  = Employee::f_FirstName;
@@ -122,5 +143,71 @@ class Employee extends Model
             ->get();
 
         return $results;
+    }
+
+    public function dissolve($employeeId)
+    {
+        $messages =
+        [
+            'fail' =>  [
+                self::RoleTeacher   => Messages::TEACHER_DELETE_FAIL,
+                self::RoleStaff     => Messages::STAFF_DELETE_FAIL,
+            ],
+            'success' =>  [
+                self::RoleTeacher   => Messages::TEACHER_DELETE_OK,
+                self::RoleStaff     => Messages::STAFF_DELETE_OK,
+            ],
+        ];
+
+        try 
+        {
+            // Find the employee
+            $employee = Employee::where('id', '=', $employeeId)
+                ->select([
+                    Employee::f_EmpNo    . ' as empNo',
+                    Employee::f_Position . ' as role'
+                ])
+                ->first();
+
+            // Check if employee exists
+            if ($employee === null)
+                throw new Exception('Employee not found');
+
+            $employee = $employee->toArray();
+
+            // Grab a copy of his employee number. We will use his
+            // employee number to identify the qr code filename
+            $empNo = $employee['empNo'];
+            $role  = $employee['role'];
+
+            $delete = DB::transaction(function () use ($empNo, $employeeId, $role, $messages) 
+            {
+                // Delete the employee from database
+                $rowsDeleted = Employee::where('id', '=', $employeeId)->delete();
+
+                if ($rowsDeleted > 0) 
+                {
+                    // Delete his qr code file
+                    $qrCodeFile = Extensions::getQRCode_storagePath("qr_$empNo.png");
+
+                    if (File::exists($qrCodeFile)) 
+                    {
+                        if (!File::delete($qrCodeFile))
+                            throw new Exception('File deletion failed');
+                    }
+
+                    return Extensions::encodeSuccessMessage($messages['success'][$role]);
+                } 
+                else 
+                {
+                    return Extensions::encodeFailMessage($messages['fail'][$role]);
+                }
+            });
+
+            return $delete;
+        } 
+        catch (Exception $ex) {
+            return Extensions::encodeFailMessage($messages['fail'][$role]);
+        }
     }
 }

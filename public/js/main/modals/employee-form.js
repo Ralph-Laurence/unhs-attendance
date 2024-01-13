@@ -185,6 +185,7 @@ function handleFormSubmit()
 
     let postData = {
         '_token'       : metaCSRF,
+        'input-role'   : $("#input-role").val(),
         'input-id-no'  : $("#input-id-no").val(),
         'input-fname'  : $("#input-fname").val(),
         'input-mname'  : $("#input-mname").val(),

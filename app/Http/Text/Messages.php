@@ -10,6 +10,9 @@ class Messages
     public const ATTENDANCE_DELETE_OK    = 'Attendance record successfully deleted.';
     public const ATTENDANCE_DELETE_FAIL  = 'Failed to delete attendance record.';
 
+    public const GENERIC_DELETE_FAIL     = 'A problem has occurred while trying to delete the record.';
+    public const GENERIC_DELETE_OK       = 'Record successfully deleted.';
+
     public const TEACHER_DELETE_OK       = 'Faculty member successfully removed from records.';
     public const TEACHER_DELETE_FAIL     = 'Failed to remove faculty member from the records.';
 

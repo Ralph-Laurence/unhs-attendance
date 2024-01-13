@@ -4,8 +4,8 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceTrailController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\scanner\ScannerController;
-use App\Http\Controllers\StaffController;
-use App\Http\Controllers\TeachersController;
+use App\Http\Controllers\backoffice\TeachersController;
+use App\Http\Controllers\backoffice\StaffController;
 use App\Http\Controllers\TestController;
 use App\Http\Utils\Extensions;
 // use App\Http\Text\Messages;
@@ -68,6 +68,17 @@ Route::controller(AttendanceTrailController::class)->group(function()
     Route::post('/backoffice/trails/export/pdf', 'exportTrailsReport')->name(RouteNames::Trails['exportPdf']);
 });
 
+// Route::controller(TeachersController::class)->group(function()
+// {
+//     Route::get('/backoffice/employees/teachers',            'index')->name(RouteNames::Teachers['index']);
+    
+//     // AJAX
+//     Route::post('/backoffice/employees/teachers/get',       'getTeachers')->name(RouteNames::Teachers['all']);
+//     Route::post('/backoffice/employees/teachers/create',    'store')->name(RouteNames::Teachers['create']);
+//     Route::post('/backoffice/employees/teachers/delete',    'destroy')->name(RouteNames::Teachers['destroy']);
+//     Route::post('/backoffice/employees/teachers/details',   'details')->name(RouteNames::Teachers['details']);
+//     Route::post('/backoffice/employees/teachers/update',    'update')->name(RouteNames::Teachers['update']);
+// });
 Route::controller(TeachersController::class)->group(function()
 {
     Route::get('/backoffice/employees/teachers',            'index')->name(RouteNames::Teachers['index']);

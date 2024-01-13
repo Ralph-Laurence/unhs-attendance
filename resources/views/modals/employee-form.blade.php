@@ -31,7 +31,8 @@ $icons = [
                     required.</small>
                 <form data-post-create-target="{{ $postCreate }}" data-post-update-target="{{ $postUpdate }}" method="post">
                     @csrf
-                    <input type="hidden" name="roleKey" value="{{ $empType }}" />
+                    <input type="hidden" name="input-role" id="input-role" value="{{ $role }}" />
+                    {{-- <input type="hidden" name="roleKey" value="{{ $empType }}" /> --}}
                     <input type="text" class="d-none" name="record-key" id="record-key" value=""/>
                     <div class="row mb-2">
                         <div class="col">
@@ -55,11 +56,12 @@ $icons = [
                                 required />
                         </div>
                         <div class="col">
-                            @if (!empty($requireEmail) && $requireEmail === true)
+                            <x-text-box as="input-email" placeholder="Email" maxlength="32" required />
+                            {{-- @if (!empty($requireEmail) && $requireEmail === true)
                             <x-text-box as="input-email" placeholder="Email" maxlength="32" required />
                             @else
                             <x-text-box as="input-email" placeholder="Email" maxlength="32" />
-                            @endif
+                            @endif --}}
                         </div>
                     </div>
                     <div class="row mb-2">

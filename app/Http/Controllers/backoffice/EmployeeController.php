@@ -1,85 +1,47 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\backoffice;
 
+use App\Http\Controllers\Controller;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\QRMaker;
 use App\Http\Utils\RegexPatterns;
-use App\Http\Utils\RouteNames;
 use App\Http\Utils\ValidationMessages;
 use App\Models\Employee;
 use Exception;
 use Hashids\Hashids;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-class TeachersController extends Controller
+class EmployeeController extends Controller
 {
-    private Employee $employeeModel;
     private $hashids;
 
     public function __construct() 
     {
-        $this->employeeModel = new Employee();
-
         $this->hashids = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
-    }
-
-    public function index()
-    {
-        $routes = [
-            'defaultDataSource'  => route(RouteNames::Teachers['all']),
-            'POST_CreateTeacher' => route(RouteNames::Teachers['create']),
-            'POST_UpdateTeacher' => route(RouteNames::Teachers['update']),
-            'DELETE_Teacher'     => route(RouteNames::Teachers['destroy']),
-            'DETAILS_Teacher'    => route(RouteNames::Teachers['details'])
-        ];
-
-        $role = Employee::RoleToString[Employee::RoleTeacher];
-
-        return view('backoffice.teachers.index')
-            ->with('requireEmail', true)           // Require email in registration
-            ->with('descriptiveRole', $role)
-            ->with('routes', $routes)
-            ->with('empType', encrypt($role));
     }
 
     public function store(Request $request)
     {
-        $input = $this->validateFields($request);
+        $inputs = $this->validateFields($request);
 
-        if ($input['validation_stat'] == 400)
-            return json_encode($input);
-
-        $data = [
-            Employee::f_EmpNo       => $input['input-id-no'],
-            Employee::f_FirstName   => $input['input-fname'],
-            Employee::f_MiddleName  => $input['input-mname'],
-            Employee::f_LastName    => $input['input-lname'],
-            Employee::f_Email       => $input['input-email'],
-            Employee::f_Contact     => $input['input-contact'],
-            Employee::f_Position    => Employee::RoleTeacher,
-            Employee::f_Status      => Employee::ON_STATUS_DUTY
-        ];
+        if ($inputs['validation_stat'] == 400)
+            return json_encode($inputs);
 
         try 
         {
-            // Save the newly created teacher into database
-            $insert = DB::transaction(function () use ($data) 
-            {
-                return Employee::create($data);
-            });
+            $insertResults = $this->addEmployee($inputs);
 
             // Convert the collection to array so that we can use
             // these into the frontend such as adding a new row to
             // the datatable
-            $employeeData = $insert->toArray();
+            $employeeData = $insertResults->toArray();
             $encodedId    = $this->hashids->encode($employeeData['id']);
             $empNum       = $employeeData[Employee::f_EmpNo];
 
@@ -95,8 +57,10 @@ class TeachersController extends Controller
                 'id'            => $encodedId
             ];
 
-            // Send the QR code into their email
-            $email = $data[Employee::f_Email];
+            // To send the QR code into their email, we
+            // must first read the email from the newly
+            // inserted data
+            $email = $insertResults[Employee::f_Email];
 
             // The content of QR code is the hashed record id.
             // Also, we will return the path to the generated
@@ -137,18 +101,6 @@ class TeachersController extends Controller
                     'url'      => $downloadUrl
                 ];
             }
-
-            // The Mail::failures() method returns an array of addresses 
-            // that failed during the last operation performed. If the 
-            // array is empty, it means that the email was sent successfully 
-            // to all recipients
-            // if (!$option_saveQR_localCopy && !Mail::failures()) {
-               
-            //     // Delete the file after sending
-            //     if (File::exists($qrcode)) {
-            //         File::delete($qrcode);
-            //     }
-            // }
             
             // Return AJAX response
             return Extensions::encodeSuccessMessage("Success!", $rowData);
@@ -160,59 +112,53 @@ class TeachersController extends Controller
             //     return ['validation_stat' => Constants::ValidationStat_Failed] + 
             //            ['errors' => $validator->errors()];
             // }
-            return Extensions::encodeFailMessage("Failed " . $ex->getMessage());
+
+            $emailError = "failed with errno=10054 An existing connection was forcibly closed by the remote host";
+          
+            if (Str::contains($ex->getMessage(), $emailError) )
+            {
+                return Extensions::encodeFailMessage("Record successfully saved but failed to send QR Code through email.");
+            }
+
+            return Extensions::encodeFailMessage("Request Failed\n\n" . $ex->getMessage());
         }
+    }
+
+    private function addEmployee($inputs)
+    {
+        error_log(print_r($inputs, true));
+
+        $inputs['input-role'] = array_flip(Employee::RoleToString)[
+            $inputs['input-role']
+        ];
+
+        $data = [
+            Employee::f_EmpNo       => $inputs['input-id-no'],
+            Employee::f_FirstName   => $inputs['input-fname'],
+            Employee::f_MiddleName  => $inputs['input-mname'],
+            Employee::f_LastName    => $inputs['input-lname'],
+            Employee::f_Email       => $inputs['input-email'],
+            Employee::f_Contact     => $inputs['input-contact'],
+            Employee::f_Position    => $inputs['input-role'],
+            Employee::f_Status      => Employee::ON_STATUS_DUTY
+        ];
+
+        // Save the newly created employee into database
+        $insert = DB::transaction(function () use ($data) 
+        {
+            return Employee::create($data);
+        });
+
+        return $insert;
     }
 
     public function destroy(Request $request)
     {
-        $recordId = $request->input('rowKey');
-        $failMessage = Extensions::encodeFailMessage(Messages::TEACHER_DELETE_FAIL);
+        $key = $request->input('rowKey');
+        $id = $this->hashids->decode($key);
 
-        try 
-        {
-            $id = $this->hashids->decode($recordId);
-
-            $delete = DB::transaction(function () use ($id, $failMessage) 
-            {
-                // Find the employee
-                $employee = Employee::where('id', '=', $id[0])
-                    ->select(Employee::f_EmpNo . ' as empNo')
-                    ->first();
-
-                // Check if employee exists
-                if ($employee === null)
-                    throw new Exception('Employee not found');
-
-                // Grab a copy of his employee number. We will use his
-                // employee number to identify the qr code filename
-                $empNo = $employee->toArray()['empNo'];
-
-                // Delete the employee from database
-                $rowsDeleted = Employee::where('id', '=', $id[0])->delete();
-
-                if ($rowsDeleted > 0) 
-                {
-                    // Delete his qr code file
-                    $qrCodeFile = Extensions::getQRCode_storagePath("qr_$empNo.png");
-
-                    if (File::exists($qrCodeFile)) 
-                    {
-                        if (!File::delete($qrCodeFile))
-                            throw new Exception('File deletion failed');
-                    }
-
-                    return Extensions::encodeSuccessMessage(Messages::TEACHER_DELETE_OK);
-                } 
-                else
-                    return $failMessage;
-            });
-
-            return $delete;
-        } 
-        catch (Exception $ex) {
-            return $failMessage;
-        }
+        $employee = new Employee;
+        return $employee->dissolve($id);
     }
 
     // Performs a database update
@@ -245,7 +191,7 @@ class TeachersController extends Controller
 
         try 
         {
-            // Save the newly created teacher into database
+            // Save the updated employee data into database
             $update = DB::transaction(function () use ($data, $key) 
             {
                 $id = $this->hashids->decode($key);
@@ -298,33 +244,16 @@ class TeachersController extends Controller
             $key = $request->input('key');
             $id = $this->hashids->decode($key);
 
-            $dataset = Employee::where('id', '=', $id[0])
-            ->select([
-                Employee::f_EmpNo       . ' as idNo',
-                Employee::f_FirstName   . ' as fname',
-                Employee::f_MiddleName  . ' as mname',
-                Employee::f_LastName    . ' as lname',
-                Employee::f_Contact     . ' as phone',
-                Employee::f_Email       . ' as email',
-                Employee::f_Status      . ' as status',
-            ])
-            ->first()
-            ->toArray();
+            $employee = new Employee;
+            $dataset = $employee->getBasicDetails($id[0]);
 
             return Extensions::encodeSuccessMessage('Basic information loaded for edit mode', $dataset);
         }
         catch (Exception $ex)
         {
-            // error_log($ex->getMessage());
+            error_log($ex->getMessage());
             return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
         }
-    }
-
-    public function getTeachers() 
-    {
-        $dataset = $this->employeeModel->getTeachers();
-
-        return $dataset;
     }
 
     public function validateFields(Request $request)
@@ -359,6 +288,7 @@ class TeachersController extends Controller
             'input-lname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-email'   => 'required|max:64',
             'input-contact' => 'nullable|regex:'        . RegexPatterns::MOBILE_NO,
+            'input-role'    => 'required|not_in:'       . implode(',', array_keys(Employee::RoleToString))
         );
 
         // Common validation

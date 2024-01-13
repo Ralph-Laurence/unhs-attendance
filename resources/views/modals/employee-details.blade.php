@@ -80,7 +80,7 @@ $icons = [
                     </div>
                     <hr>
                     <div class="text-sm text-primary-dark mb-1">
-                        <i class="fas fa-phone me-1"></i> Contact Details
+                        <i class="fas fa-phone me-1"></i>Contact Details
                     </div>
                     <div class="d-flex text-14 gap-2 mb-1">
                         <div class="opacity-65 detail-tag">Mobile:</div>
@@ -92,7 +92,7 @@ $icons = [
                     </div>
                     <hr>
                     <div class="text-sm text-primary-dark mb-3">
-                        <i class="fas fa-calendar-days me-1"></i> Attendance Trail
+                        <i class="fas fa-calendar-days me-1"></i>Daily Time Record
                     </div>
                     <button class="btn btn-sm btn-primary flat-button shadow-0 btn-view-trail">
                         View all
