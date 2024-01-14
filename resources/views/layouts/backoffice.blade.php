@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="{{ asset('css/main/components/loader.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/main/components/row-action-buttons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/overrides/simplebar-overrides.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/overrides/datatable-overrides.css') }}"/>
 
     <!-- CHILD VIEW STYLES -->
     @stack('styles')

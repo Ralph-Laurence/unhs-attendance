@@ -29,7 +29,8 @@
 
         {{-- DATASET TABLE --}}
         <table class="table table-striped table-sm table-hover dataset-table"
-            data-src-default="{{ $routes['defaultDataSource'] }}">
+            data-src-default="{{ $routes['defaultDataSource'] }}"
+            data-employee-role="{{ $descriptiveRole }}">
             <thead class="user-select-none">
                 <tr class="border-top">
                     <th></th>

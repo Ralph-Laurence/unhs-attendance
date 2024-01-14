@@ -2,6 +2,8 @@ let datasetTable = '.dataset-table';
 let dataTable;
 let csrfToken;
 
+let desc_emp_role = "Employee";
+
 $(document).ready(function() 
 {
     initialize();
@@ -12,6 +14,9 @@ $(document).ready(function()
 //
 function initialize()
 {
+    // Descriptive employee role
+    desc_emp_role = $(datasetTable).data('employee-role');
+
     csrfToken = $('meta[name="csrf-token"]').attr('content');
     bindTableDataSource();
 }
@@ -108,7 +113,7 @@ function handleEvents()
         if (name)
             name = name.trim();
 
-        let message = sanitize(`You are about to remove the faculty member <i><b>"${name}"</b></i> from the records. This action will also erase all attendance data associated with this faculty member.<br><br>Are you sure you want to proceed?`);
+        let message = sanitize(`You are about to remove the employee <i><b>"${name}"</b></i> from the ${desc_emp_role} records. This action will also erase all attendance data associated with this employee.<br><br>Are you sure you want to proceed?`);
 
         alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
     });
@@ -134,6 +139,15 @@ function bindTableDataSource(url)
 {
     url = url || $(datasetTable).data('src-default');
 
+    let emphasizeCounts =  function(data, type, row) {
+        let style = `opacity-40`;
+
+        if (data && data > 0)
+            style = '';
+
+        return `<span class="${style}">${data}</span>`;
+    };
+
     let options = {
         "deferRender"  : true,
         'searching'    : false,
@@ -158,13 +172,14 @@ function bindTableDataSource(url)
                     return meta.row + 1;
                 }
             },
+            // Second Column -> Employee Number
             {
                 width: '120px',
                 className: 'text-truncate',
                 data: 'emp_num',
                 defaultContent: ''
             },
-            // Second Column -> Names
+            // Third Column -> Name
             {
                 className: 'td-employee-name text-truncate',
                 width: '300px',
@@ -174,7 +189,7 @@ function bindTableDataSource(url)
                 },
                 defaultContent: ''
             },
-            // Third Column -> Status
+            // Fourth Column  -> Status
             {
                 width: '120px',
                 data: 'emp_status', 
@@ -183,10 +198,10 @@ function bindTableDataSource(url)
                     return data; //`<div class="attendance-status ${iconStyles[data]}">${data}</div>`;
                 }
             },
-            // Seventh Column -> Work Hours (Duration)
-            { width: '80px', data: 'total_lates', defaultContent: ''},
-            { width: '80px', data: 'total_leave', defaultContent: ''},
-            { width: '80px', data: 'total_absents', defaultContent: ''},
+            // Fifth Column -> Late
+            { width: '80px', data: 'total_lates', defaultContent: '', render: emphasizeCounts},
+            { width: '80px', data: 'total_leave', defaultContent: '', render: emphasizeCounts},
+            { width: '80px', data: 'total_absents', defaultContent: '', render: emphasizeCounts},
 
             // Eighth Column -> Actions
             {
