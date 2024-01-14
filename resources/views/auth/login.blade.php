@@ -1,60 +1,50 @@
-@extends('layouts.base')
+@extends('layouts.auth.base')
+
+@php
+    use App\Http\Utils\Constants;
+
+    $orgName    = Constants::OrganizationName;
+    $system     = Constants::SystemName;
+    $version    = Constants::BuildVersion;
+@endphp
+
 @section('content')
-<div class="container">
-    <div class="card login-card">
-        <div class="row no-gutters">
-            <div class="col-md-5">
-                <img src="/img/login.jpg" alt="login" class="login-card-img">
-            </div>
-            <div class="col-md-7">
-                @if($errors->any())
-                @foreach ($errors->all() as $error)
-                <h1>{{ $error }}</h1>
-                @endforeach
-                @endif
-                @error('email')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-                <div class="card-body">
-                    <div class="brand-wrapper">
-                        <img src="/img/logo.png" alt="logo" class="logo">
-                    </div>
-                    <p class="login-card-description">Sign into your account</p>
-                    <form method="POST" action="{{ route('login') }}">
-                        @csrf
-                        <div class="form-group">
-                            <label for="email" class="sr-only">Email</label>
-                            <input type="email" name="email" id="email" class="form-control"
-                                placeholder="Email address">
-                            @error('email')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                            @enderror
-                        </div>
-                        <div class="form-group mb-4">
-                            <label for="password" class="sr-only">Password</label>
-                            <input type="password" name="password" id="password" class="form-control"
-                                placeholder="***********">
-                            @error('password')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                            @enderror
-                        </div>
-                        <input name="login" id="login" class="btn btn-block login-btn mb-4" type="submit" value="Login">
-                    </form>
-                    <a href="{{ route('password.request') }}" class="forgot-password-link">Forgot password?</a>
-                    <p class="login-card-footer-text">Don't have an account? <a href="{{ route('register') }}"
-                            class="text-reset">Register here</a></p>
-                    <nav class="login-card-footer-nav">
-                        <a href="#!">Terms of use.</a>
-                        <a href="#!">Privacy policy</a>
-                    </nav>
-                </div>
+<div class="bg-image"></div>
+<div class="position-relative d-flex align-items-center justify-content-centerx auth-container flex-column w-100 h-100">
+
+    
+    <div class="card login-card shadow-4-strong p-4">
+        <div class="flex-center mb-2 gap-1">
+            <img src="{{ asset('images/logo.svg') }}" alt="logo" width="45" height="45"/>
+            <div class="d-flex flex-column">
+                <h6 class="mb-1 text-sm text-uppercase fw-bold letter-sp-1 opacity-85">{{ $orgName }}</h6>
+                <h6 class="text-sm ms-3 opacity-50 mb-1">{{ $system }}</h6>
             </div>
         </div>
+        <h6 class="text-center my-4 text-primary-dark">Administrator Login</h6>
+        <form method="POST" action="{{ route('login') }}" autocomplete="new-password">
+            @csrf
+
+            <x-text-box as="email" placeholder="Email or Username" maxlength="32" parent-classes="mb-3"
+                leading-icon-s="fa-user" aria-autocomplete="none" />
+
+            <x-text-box as="password" of="password" placeholder="Password" maxlength="32" parent-classes="mb-3"
+                leading-icon-s="fa-key" aria-autocomplete="none" />
+
+            <div class="d-flex flex-row align-items-center">
+                <p class="opacity-60 m-0">
+                    <small>Forgot Password?</small>
+                </p>
+                <a href="{{ route('password.request') }}" class="mx-2 link-primary">
+                    <small>Reset</small>
+                </a>
+                <button name="login" class="btn btn-primary flat-button login-btn shadow-0 ms-auto">Login</button>
+            </div>
+        </form>
     </div>
-    @endsection
+</div>
+
+<div class="sticky-bottom text-end">
+    <small class="version text-white text-sm opacity-80">{{ $version }}</small>
+</div>
+@endsection

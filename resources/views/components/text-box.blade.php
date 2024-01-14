@@ -2,8 +2,9 @@
     $parentClasses = '';
 
     if ($attributes->has('parent-classes'))
-        $parentClasses = $attributes->get('parent-classes')
+        $parentClasses = $attributes->get('parent-classes');
 
+    $inputType = $attributes->has('of') ? $attributes->get('of') : 'text';
 @endphp
 
 @once
@@ -19,7 +20,12 @@
         <i class="fas leading-icon {{ $attributes->get('leading-icon') }}"></i>
         @endif
 
-        <input type="text" name="{{ $as }}" id="{{ $as }}" {{ $attributes->merge(['class' => "main-control"]) }}>
+        @if ($attributes->has('leading-icon-s'))
+        <i class="fas leading-icon text-sm ms-2 opacity-80 {{ $attributes->get('leading-icon-s') }}"></i>
+        @endif
+
+        <input type="{{ $inputType }}" name="{{ $as }}" id="{{ $as }}" {{ $attributes->merge(['class' => "main-control"]) }} 
+        value="{{ old($as) }}"/>
 
         @if ($attributes->has('trailing-icon'))
         <i class="fas trailing-icon {{ $attributes->get('trailing-icon') }}"></i>

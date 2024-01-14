@@ -14,6 +14,13 @@
     height: 68px;
 }
 
+.sidenav button.nav-items {
+    border: none;
+    outline: none;
+    background: none;
+}
+
+.sidenav button.nav-items,
 .sidenav .nav-items-container .nav-items {
     color: white;
     opacity: 0.65;

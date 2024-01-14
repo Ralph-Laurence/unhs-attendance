@@ -47,6 +47,14 @@ html, body {
     font-family: var(--primary-font);
 }
 
+a.link-primary {
+    color: var(--primary-dark) !important;
+}
+
+a.link-primary:hover {
+    color: var(--primary-600) !important;
+}
+
 /* LOGO */
 .logo-wrapper {
     display: flex;
@@ -89,6 +97,29 @@ html, body {
     font-size: 12px;
     opacity: 0.8;
     letter-spacing: 1px;
+}
+
+.navbar .profile-dropdown 
+{
+    user-select: none;
+    cursor: pointer;
+    border-radius: 2rem;
+    background-color: #F2F2F2;
+}
+
+.navbar .profile-dropdown:hover {
+    background-color: #e3ebf7;
+}
+
+.navbar .profile-pic {
+    width: 34px;
+    height: 34px;
+    background-color: #d1d5da;
+}
+
+.navbar .profile-pic img {
+    width: 100%;
+    height: 100%;
 }
 
 /*

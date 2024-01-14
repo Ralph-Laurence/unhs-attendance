@@ -1,19 +1,14 @@
 <?php
 
 use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\AttendanceTrailController;
+use App\Http\Controllers\TestController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
-use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Controllers\backoffice\TeachersController;
 use App\Http\Controllers\backoffice\StaffController;
-use App\Http\Controllers\TestController;
+use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Utils\Extensions;
-// use App\Http\Text\Messages;
-// use App\Http\Utils\QRMaker;
 use App\Http\Utils\RouteNames;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
-//use Illuminate\Support\Facades\Mail;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,14 +26,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::controller(DailyTimeRecordController::class)->group(function()
+Route::controller(DailyTimeRecordController::class)->middleware(['auth'])
+->group(function()
 {
     Route::post('/backoffice/dtr', 'index')->name(RouteNames::DailyTimeRecord['index']);
     Route::post('/backoffice/dtr/timerecords', 'getTimeRecords')->name(RouteNames::DailyTimeRecord['get']);
     Route::post('/backoffice/dtr/export/pdf',  'exportPdf')->name(RouteNames::DailyTimeRecord['exportPdf']);
 });
 
-Route::controller(ScannerController::class)->group(function()
+Route::controller(ScannerController::class) //->middleware(['auth'])
+->group(function()
 {
     Route::get('/dtr-scanner',          'index')->name(RouteNames::Scanner['index']);
 
@@ -47,7 +44,8 @@ Route::controller(ScannerController::class)->group(function()
     Route::post('/dtr-scanner/decode/', 'decode')->name(RouteNames::Scanner['decode']);
 });
 
-Route::controller(AttendanceController::class)->group(function()
+Route::controller(AttendanceController::class)->middleware(['auth'])
+->group(function()
 {
     Route::get('/backoffice/attendance',             'index')->name(RouteNames::Attendance['index']);
 
@@ -60,30 +58,13 @@ Route::controller(AttendanceController::class)->group(function()
     Route::post('/backoffice/attendance/daily/{employeeFilter?}', 'getDailyAttendances')->name(RouteNames::Attendance['daily']);
 });
 
-Route::controller(AttendanceTrailController::class)->group(function()
-{
-    Route::post('/backoffice/teachers/attendance/trails',   'index')->name(RouteNames::Trails['index']);
-    
-    Route::post('/backoffice/trails/get',        'getTrails')->name(RouteNames::Trails['all']);
-    Route::post('/backoffice/trails/export/pdf', 'exportTrailsReport')->name(RouteNames::Trails['exportPdf']);
-});
+// Route::get('/home', function() {
+//     return view('home');
+// })->middleware(['auth']);
 
-Route::get('/home', function() {
-    return view('home');
-})->middleware(['auth']);
 
-// Route::controller(TeachersController::class)->group(function()
-// {
-//     Route::get('/backoffice/employees/teachers',            'index')->name(RouteNames::Teachers['index']);
-    
-//     // AJAX
-//     Route::post('/backoffice/employees/teachers/get',       'getTeachers')->name(RouteNames::Teachers['all']);
-//     Route::post('/backoffice/employees/teachers/create',    'store')->name(RouteNames::Teachers['create']);
-//     Route::post('/backoffice/employees/teachers/delete',    'destroy')->name(RouteNames::Teachers['destroy']);
-//     Route::post('/backoffice/employees/teachers/details',   'details')->name(RouteNames::Teachers['details']);
-//     Route::post('/backoffice/employees/teachers/update',    'update')->name(RouteNames::Teachers['update']);
-// });
-Route::controller(TeachersController::class)->group(function()
+Route::controller(TeachersController::class)->middleware(['auth'])
+->group(function()
 {
     Route::get('/backoffice/employees/teachers',            'index')->name(RouteNames::Teachers['index']);
     
@@ -95,7 +76,8 @@ Route::controller(TeachersController::class)->group(function()
     Route::post('/backoffice/employees/teachers/update',    'update')->name(RouteNames::Teachers['update']);
 });
 
-Route::controller(StaffController::class)->group(function()
+Route::controller(StaffController::class)->middleware(['auth'])
+->group(function()
 {
     Route::get('/backoffice/employees/staff',           'index')->name(RouteNames::Staff['index']);
 
@@ -125,4 +107,4 @@ Route::get('/download/qr-code/{filename}/{outputname?}', function($filename)
 
     return $file;
 
-})->name('qr-download');
+})->name('qr-download')->middleware(['auth']);

@@ -1,56 +1,84 @@
-@extends('layouts.base')
+{{-- 
+    Laravel Fortify Adopted From:    
+    https://gitlab.com/penguindigital/laravel-admin-dashboard-starter/-/snippets/2016100 
+--}}
+@extends('layouts.auth.base')
+
+@php
+use App\Http\Utils\Constants;
+use Illuminate\Support\Facades\Lang;
+
+$orgName    = Constants::OrganizationName;
+$system     = Constants::SystemName;
+$version    = Constants::BuildVersion;
+
+$non_existent_email = Lang::get('passwords.user');
+$email_sent     = Lang::get('passwords.sent');
+$show_success   = false;
+
+@endphp
+
 @section('content')
-<div class="container">
-    <div class="card login-card">
-        <div class="row no-gutters">
-            <div class="col-md-5">
-                <img src="/img/login.jpg" alt="login" class="login-card-img">
-            </div>
-            <div class="col-md-7">
-                @if($errors->any())
-                @foreach ($errors->all() as $error)
-                <h1>{{ $error }}</h1>
-                @endforeach
-                @endif
-                @error('email')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-                <div class="card-body">
-                    <div class="brand-wrapper">
-                        <img src="/img/logo.png" alt="logo" class="logo">
-                    </div>
-                    <p class="login-card-description">Forgot Password</p>
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-                    <form method="POST" action="{{ route('password.request') }}">
-                        @csrf
-                        <div class="form-group">
-                            <label for="email" class="sr-only">Email</label>
-                            <input type="email" name="email" id="email" class="form-control"
-                                placeholder="Email address">
-                            @error('email')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                            @enderror
-                        </div>
-                        <input name="login" id="login" class="btn btn-block login-btn mb-4" type="submit" value="Reset">
-                    </form>
-                    <p class="login-card-footer-text">Don't have an account? <a href="{{ route('register') }}"
-                            class="text-reset">Register here</a></p>
-                    <nav class="login-card-footer-nav">
-                        <a href="#!">Terms of use.</a>
-                        <a href="#!">Privacy policy</a>
-                    </nav>
-                </div>
+<div class="bg-image"></div>
+<div class="position-relative d-flex align-items-center justify-content-centerx auth-container flex-column w-100 h-100">
+
+    <div class="card login-card shadow-4-strong p-4">
+        <div class="flex-center mb-2 gap-1">
+            <img src="{{ asset('images/logo.svg') }}" alt="logo" width="45" height="45" />
+            <div class="d-flex flex-column">
+                <h6 class="mb-1 text-sm text-uppercase fw-bold letter-sp-1 opacity-85">{{ $orgName }}</h6>
+                <h6 class="text-sm ms-3 opacity-50 mb-1">{{ $system }}</h6>
             </div>
         </div>
-    </div>
-    @endsection
+ 
+        @php
+            // Check for error messages returned by the Message Bag. 
+            // Then find the 'email' message key
+            foreach ($errors->getMessages() as $key => $message)
+            {
+                // If the message returned is a "non existent email" message,
+                // we should not show it to prevent giving the hackers
+                // a hint for enumerating the email or users. We must mask or
+                // disguise the error message as a success message instead.
+                if ($key == 'email' && in_array($non_existent_email, $message)) // $message[0]
+                {
+                    $show_success = true;
+                    break;
+                }
+            }
+        @endphp
+        {{-- session('status') indeed means successful.
+            this time, we force the success message to show up 
+            wether the request was successful or not
+        --}}
+        @if (session('status') || $show_success !== false)
+        
+            <div class="alert alert-success p-2 my-4" role="alert">
+                <small>{{ $email_sent }}</small>
+            </div> 
+            <a href="{{ route('login') }}" class="mx-2 link-primary text-center">
+                <small>Continue to Login</small>
+            </a>
+        @else
+            <h6 class="text-center my-4 text-primary-dark">Forgot Password</h6>
+            <form method="POST" action="{{ route('password.request') }}" autocomplete="new-password">
+                @csrf
+                <label class="text-14 opacity-75 mb-1" for="email">Please enter your email address so that we can send you a password reset link.</label>
+                <x-text-box as="email" placeholder="Email" maxlength="32" parent-classes="mb-3" aria-autocomplete="none" 
+                leading-icon-s="fa-envelope"/>
 
-    {{-- https://gitlab.com/penguindigital/laravel-admin-dashboard-starter/-/snippets/2016100 --}}
+                <div class="d-flex flex-row align-items-center">
+                    <a href="{{ route('login') }}" class="mx-2 link-primary">
+                        <small>Login instead</small>
+                    </a>
+                    <button name="login" class="btn btn-primary flat-button login-btn shadow-0 ms-auto">Reset</button>
+                </div>
+            </form>
+        @endif
+    </div>
+</div>
+
+<div class="sticky-bottom text-end">
+    <small class="version text-white text-sm opacity-80">{{ $version }}</small>
+</div>
+@endsection

@@ -48,6 +48,23 @@ $routeItems =
                 </a>
                 
             @endforeach
+            <hr>
+            <button class="nav-items p-2 rounded-2 w-100">
+                <div class="nav-item-icon">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <div class="ms-2">Settings</div>
+            </button>
+            <form action="{{ route('logout') }}" method="post">
+                @csrf
+                {{-- <button class="btn btn-primary flat-btn">Logout</button> --}}
+                <button class="nav-items p-2 rounded-2 w-100">
+                    <div class="nav-item-icon">
+                        <i class="fa-solid fa-times"></i>
+                    </div>
+                    <div class="ms-2">Logout</div>
+                </button>
+            </form>
        </div>
     </div>
 </div>

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
@@ -174,7 +175,8 @@ class EmployeeController extends Controller
             return Extensions::encodeFailMessage("$msg\n\n(Error Code $code)", $code);
         }
 
-        $input = $this->validateFields($request);
+        $id = $this->hashids->decode($key);
+        $input = $this->validateFields($request, $id[0]);
 
         if ($input['validation_stat'] == 400)
             return json_encode($input);
@@ -192,9 +194,8 @@ class EmployeeController extends Controller
         try 
         {
             // Save the updated employee data into database
-            $update = DB::transaction(function () use ($data, $key) 
+            $update = DB::transaction(function () use ($data, $id) 
             {
-                $id = $this->hashids->decode($key);
                 $employee = Employee::where('id', '=', $id[0])->first();
 
                 if ($employee)
@@ -256,7 +257,7 @@ class EmployeeController extends Controller
         }
     }
 
-    public function validateFields(Request $request)
+    public function validateFields(Request $request, $ignoreId = null)
     {
         $validationMessages = 
         [
@@ -277,19 +278,38 @@ class EmployeeController extends Controller
             'input-lname.regex'    => ValidationMessages::alphaDashDotSpace('Lastname'),
 
             'input-email.required' => ValidationMessages::required('Email'),
+            'input-email.unique'   => ValidationMessages::unique('Email'),
         ];
-
-        $employeesUnique = '|unique:' . Employee::getTableName();
 
         $validationFields = array(
             'input-id-no'   => 'required|regex:'        . RegexPatterns::NUMERIC_DASH,// . $employeesUnique,
             'input-fname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-mname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-lname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
-            'input-email'   => 'required|max:64',
+            'input-email'   => [
+                'required',
+                'email',
+                'max:64',
+                Rule::unique('users', 'email'),
+                Rule::unique(Employee::getTableName(), Employee::f_Email),
+            ],
             'input-contact' => 'nullable|regex:'        . RegexPatterns::MOBILE_NO,
             'input-role'    => 'required|not_in:'       . implode(',', array_keys(Employee::RoleToString))
         );
+
+        //
+        // This will be used to ignore the validation rule during Update
+        //
+        if ($ignoreId && !is_null($ignoreId))
+        {
+            $validationFields['input-email'] = [
+                'required',
+                'email',
+                'max:64',
+                Rule::unique('users', 'email')->ignore($ignoreId),
+                Rule::unique(Employee::getTableName(), Employee::f_Email)->ignore($ignoreId),
+            ];
+        }
 
         // Common validation
         $validator = Validator::make($request->all(), $validationFields, $validationMessages);

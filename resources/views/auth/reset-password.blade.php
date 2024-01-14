@@ -1,64 +1,71 @@
-@extends('layouts.base')
-@section('content')
-<div class="container">
-    <div class="card login-card">
-        <div class="row no-gutters">
-            <div class="col-md-5">
-                <img src="/img/login.jpg" alt="login" class="login-card-img">
-            </div>
-            <div class="col-md-7">
-                @if($errors->any())
-                @foreach ($errors->all() as $error)
-                <h1>{{ $error }}</h1>
-                @endforeach
-                @endif
-                @error('email')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-                <div class="card-body">
-                    <div class="brand-wrapper">
-                        <img src="/img/logo.png" alt="logo" class="logo">
-                    </div>
-                    <p class="login-card-description">Reset Password</p>
-                    <form method="POST" action="{{ route('password.update') }}">
-                        @csrf
-                        <input type="hidden" name="token" value="{{ $request->route('token') }}"/>
-                        <div class="form-group">
-                            <label for="email" class="sr-only">Email</label>
-                            <input type="email" name="email" id="email" class="form-control"
-                                value="{{ $request->email }}">
-                            @error('email')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                            @enderror
-                        </div>
-                        <div class="form-group mb-4">
-                            <label for="password" class="sr-only">Password</label>
-                            <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password" placeholder="Password">
-                            @error('password')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                        <div class="form-group mb-4">
-                            <label for="password" class="sr-only">Password</label>
-                            <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password" placeholder="Confirm password">
-                        </div>
+@extends('layouts.auth.base')
 
-                        <input name="reset" id="reset" class="btn btn-block login-btn mb-4" type="submit" value="Update">
-                    </form>
-                    <p class="login-card-footer-text">Don't have an account? <a href="{{ route('register') }}"
-                            class="text-reset">Register here</a></p>
-                    <nav class="login-card-footer-nav">
-                        <a href="#!">Terms of use.</a>
-                        <a href="#!">Privacy policy</a>
-                    </nav>
-                </div>
+@php
+use App\Http\Utils\Constants;
+
+$orgName = Constants::OrganizationName;
+$system = Constants::SystemName;
+$version = Constants::BuildVersion;
+
+@endphp
+
+@section('content')
+<div class="bg-image"></div>
+<div class="position-relative d-flex align-items-center justify-content-centerx auth-container flex-column w-100 h-100">
+
+    <div class="card login-card shadow-4-strong p-4">
+        <div class="flex-center mb-2 gap-1">
+            <img src="{{ asset('images/logo.svg') }}" alt="logo" width="45" height="45" />
+            <div class="d-flex flex-column">
+                <h6 class="mb-1 text-sm text-uppercase fw-bold letter-sp-1 opacity-85">{{ $orgName }}</h6>
+                <h6 class="text-sm ms-3 opacity-50 mb-1">{{ $system }}</h6>
             </div>
         </div>
+
+        @if (session('status'))
+
+        <div class="alert alert-success p-2 my-4" role="alert">
+            <small>{{ session('status') }}</small>
+        </div>
+        @else
+
+        <h6 class="text-center my-4 text-primary-dark">Update Password</h6>
+        <form method="POST" action="{{ route('password.update') }}" autocomplete="new-password">
+            @csrf
+            <input type="hidden" name="token" value="{{ $request->route('token') }}" />
+
+            <div class="alert alert-info">
+                <small class="text-sm d-block opacity-75 mb-1" for="email">
+                    <i class="fas fa-caret-right me-1 text-primary-dark"></i>
+                    We will use your email address so that we can verify that it is really you.
+                </small>
+                <small class="text-sm d-block opacity-75 mb-0" for="email">
+                    <i class="fas fa-caret-right me-1 text-primary-dark"></i>
+                    Please choose a password that is easy to remember and at least 8 characters long.
+                </small>
+            </div>
+
+            <x-text-box as="email" readonly placeholder="Email" maxlength="32" parent-classes="mb-3"
+                aria-autocomplete="none" leading-icon-s="fa-envelope" value="{{ $request->email }}" />
+
+            <x-text-box of="password" as="password" placeholder="New Password" maxlength="32" parent-classes="mb-3"
+                aria-autocomplete="none" leading-icon-s="fa-key" />
+
+            <x-text-box of="password" as="password_confirmation" placeholder="Retype Password" maxlength="32"
+                parent-classes="mb-3" aria-autocomplete="none" leading-icon-s="fa-key" />
+
+            <div class="d-flex flex-row align-items-center">
+                <a href="{{ route('login') }}" class="mx-2 link-primary">
+                    <small>Login instead</small>
+                </a>
+                <button name="reset" class="btn btn-primary flat-button reset-btn shadow-0 ms-auto">Update</button>
+            </div>
+        </form>
+        @endif
     </div>
-    @endsection
+</div>
+
+<div class="sticky-bottom text-end">
+    <small class="version text-white text-sm opacity-80">{{ $version }}</small>
+</div>
+@endsection

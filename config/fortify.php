@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Utils\RouteNames;
 use App\Providers\RouteServiceProvider;
 use Laravel\Fortify\Features;
 
@@ -157,4 +158,8 @@ return [
         ]),
     ],
 
+    // Redirect the user to login page after logout
+    'redirects' => [
+        'logout' => 'login'
+    ],
 ];

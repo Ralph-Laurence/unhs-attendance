@@ -17,14 +17,18 @@ class UsersSeeder extends Seeder
     {
         DB::table('users')->insert([
             [
-                'name' => 'System Default',
-                'email' => 'sudo@laravel.com',
-                'password' => Hash::make('root'),
+                'firstname'     => 'Sudo',
+                'lastname'      => 'Admin',
+                'username'      => 'sudo',
+                'email'         => 'sudo@laravel.com',
+                'password'      => Hash::make('root'),
             ],
             [
-                'name' => 'Mark Cortes',
-                'email' => 'admin@laravel.com',
-                'password' => Hash::make('1234'),
+                'firstname'     => 'Mark',
+                'lastname'      => 'Cortes',
+                'username'      => 'mark',
+                'email'         => 'laramailer.dev@gmail.com',
+                'password'      => Hash::make('1234'),
             ]
         ]);
     }
