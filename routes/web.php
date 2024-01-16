@@ -52,10 +52,13 @@ Route::controller(AttendanceController::class)->middleware(['auth'])
     // This will be exectued by CRON JOB
     Route::get('/backoffice/attendance/auto-absent', 'autoAbsentEmployees')->name(RouteNames::Attendance['autoAbsent']);
 
-    Route::post('/backoffice/attendance/this-week',  'getWeeklyAttendances')->name(RouteNames::Attendance['weekly']);
+    Route::post('/backoffice/attendance/get',        'getAttendances')->name(RouteNames::Attendance['get']);
+
+    //Route::post('/backoffice/attendance/this-week',  'getWeeklyAttendances')->name(RouteNames::Attendance['weekly']);
+    //Route::post('/backoffice/attendance/by-month',   'getMonthlyAttendances')->name(RouteNames::Attendance['month']);
     Route::post('/backoffice/attendance/delete',     'destroy')->name(RouteNames::Attendance['delete']);
 
-    Route::post('/backoffice/attendance/daily/{employeeFilter?}', 'getDailyAttendances')->name(RouteNames::Attendance['daily']);
+    //Route::post('/backoffice/attendance/daily/{employeeFilter?}', 'getDailyAttendances')->name(RouteNames::Attendance['daily']);
 });
 
 // Route::get('/home', function() {

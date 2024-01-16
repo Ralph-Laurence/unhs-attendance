@@ -163,26 +163,6 @@ function exportPdf(range)
             'range':        range,
             '_token':       csrfToken
         },
-        // xhrFields: {
-        //     responseType: 'blob'
-        // },
-        // success: function(response) 
-        // {
-        //     if (response)
-        //     {
-        //         response = JSON.parse(response);
-
-        //         var blob = new Blob([response.blob]);
-        //         var link = document.createElement('a');
-        //         link.href = window.URL.createObjectURL(blob);
-        //         link.download = "MyPDF.pdf";
-        //         link.click();
-        //     }
-        //     else
-        //     {
-        //         alertModal.showDanger('The server was unable to generate the PDF report');
-        //     }
-        // },
         success: function(response) 
         {
             if (response)

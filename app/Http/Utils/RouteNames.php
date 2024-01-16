@@ -17,9 +17,11 @@ class RouteNames
     ];
 
     public const Attendance = [
+        'get'        => 'backoffice.attendance.get',
         'index'      => 'backoffice.attendance',
-        'daily'      => 'backoffice.attendance.daily',
-        'weekly'     => 'backoffice.attendance.weekly',
+        // 'daily'      => 'backoffice.attendance.daily',
+        // 'weekly'     => 'backoffice.attendance.weekly',
+        // 'month'      => 'backoffice.attendance.month',
         'delete'     => 'backoffice.attendance.delete',
         'autoAbsent' => 'backoffice.attendance.auto-absent'
     ];

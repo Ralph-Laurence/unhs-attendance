@@ -1,7 +1,15 @@
 let teachers_datasetTable = '.dataset-table';
+let dataSrcTarget;
 let dataTable;
 let iconStyles;
 let csrfToken;
+
+let range;
+let monthIndex;
+
+const RANGE_TODAY = 'this_day';
+const RANGE_WEEK  = 'this_week';
+const RANGE_MONTH = 'by_month';
 
 $(document).ready(function() 
 {
@@ -14,7 +22,10 @@ $(document).ready(function()
 function initialize()
 {
     csrfToken = $('meta[name="csrf-token"]').attr('content');
-    bindTableDataSource();
+
+    dataSrcTarget = $(teachers_datasetTable).data('src-default');
+
+    bindTableDataSource(RANGE_TODAY);
 }
 //
 // Handle events here
@@ -39,13 +50,11 @@ function handleEvents()
     });
 
     $('.record-range-filter .daily').on('click', function() {
-        var url = $(teachers_datasetTable).data('src-default');
-        bindTableDataSource(url);
+        bindTableDataSource(RANGE_TODAY);
     });
 
     $('.record-range-filter .weekly').on('click', function() {
-        var url = $(teachers_datasetTable).data('src-weekly');
-        bindTableDataSource(url);
+        bindTableDataSource(RANGE_WEEK);
     });
 
     $('.role-filters .dropdown-item').on('click', function() {
@@ -54,13 +63,20 @@ function handleEvents()
     });
     // $(document).on('click', '.row-actions')
     // $(document).on('click', '.row-actions')
+
+    $('.month-select-dropmenu #selected-month-index').on('change', function()
+    {
+        monthIndex = $(this).val();
+        bindTableDataSource(RANGE_MONTH, monthIndex);
+    });
 }
 
-function bindTableDataSource(url)
+function bindTableDataSource(new_range, new_monthIndex)
 {
     let currentDate = getCurrentDateParts();
 
-    url = url || $(teachers_datasetTable).data('src-default');
+    range = new_range;
+    monthIndex = new_monthIndex;
 
     let options = {
         "deferRender"  : true,
@@ -69,18 +85,35 @@ function bindTableDataSource(url)
         'bAutoWidth'   : false,
         ajax: {
 
-            url     : url,
+            url     : dataSrcTarget,
             type    : 'POST',
             dataType: 'JSON',
-            dataSrc : function(json) {
+            dataSrc : function(json) 
+            {
 
                 if (iconStyles == undefined)
                     iconStyles = json.icon;
 
+                if (json && 'code' in json)
+                {
+                    if (json.code == -1) 
+                    {
+                        alertModal.showDanger(json.message);
+                        return [];
+                    }
+                }
+
+                monthIndex = undefined;
+
                 return json.data;
             },
-            data: {
-                '_token' : csrfToken
+            data: function () 
+            {
+                return {
+                    '_token' : csrfToken,
+                    'monthIndex': monthIndex,
+                    'range': range
+                }
             }
         },
         columns: [
@@ -176,11 +209,20 @@ function bindTableDataSource(url)
         ]
     };
 
+    // if (options.ajax.data.monthIndex)
+    //     alert(options.ajax.data.monthIndex);
+
     // If an instance of datatable has already been created,
     // reload its data source with given url instead
     if (dataTable != null)
     {
-        dataTable.ajax.url(url).load();
+        dataTable.ajax.reload();
+        //dataTable.ajax.url(url).load(); 
+        // if (monthIndex)
+        //     dataTable.ajax.reload(); 
+        // else
+        //     dataTable.ajax.url(url).load();
+
         return;
     }
     
@@ -258,29 +300,3 @@ function convertToFullMonth(dateString)
     // Return the full month name and day
     return fullMonth + ' ' + day;
 }
-
-
-
-/*
-NEXT TASK:
-
----------------------------
-CREATE ATTENDANCE MAPPING
----------------------------
-
-In DB, Add a table called 'Attendance Mapping'
-This will hold the attendance status of all employees
-_____________________________________________________
-id | employee_fk | status | flag | created_at
------------------------------------------------------
-
-Newly inserted attendances will update this table and
-mark the status 'Present'. However, deleting a record
-from the 'Attendances' table will mark the status as
-'Absent'
-
-id          -> primary key
-employee_fk -> foreign key
-status      -> PRESENT , ABSENT , DAY OFF
-flag        -> REGULAR | HOLIDAY | REST DAY (Weekends) | EVENT
-*/

@@ -51,7 +51,7 @@
                     <i class="fas fa-gear"></i>
                 </div>
                 <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
-                    <li><a class="dropdown-item" href="{{ $recordsManagementRoute }}">Manage Records</a></li>
+                    <li><a class="dropdown-item" href="{{ $routes['recordsManagement'] }}">Manage Records</a></li>
                     <li><a class="dropdown-item" href="#">Another action</a></li>
                     <li><a class="dropdown-item" href="#">Something else here</a></li>
                 </ul>
@@ -66,7 +66,8 @@
         <div class="attendance-table-wrapper shadow shadow-3-strong flex-fill position-relative">
             <div class="overflow-hidden w-100 h-100">
                 <div data-simplebar class="overflow-y-auto h-100 w-100 scrollbar-parent">
-                    <table class="table table-hover table-sm table-striped table-fixed w-100 attendance-table position-relative">
+                    <table class="table table-hover table-sm table-striped table-fixed w-100 attendance-table position-relative"
+                        data-default-src="{{ $routes['scannerHistory'] }}">
                         <thead class="position-sticky top-0">
                             <tr>
                                 <th scope="col">Name</th>
@@ -110,7 +111,7 @@
     <script src="{{ asset('js/lib/momentjs/moment-with-locales.js') }}"></script>
     <script src="{{ asset('js/effects/slide-text.js') }}"></script>
     <script>
-        const scannerSubmitUrl = "{{ $scannerPostURL }}";
+        const scannerSubmitUrl = "{{ $routes['scannerPostURL'] }}";
     </script>
     <script src="{{ asset('js/main/utils.js') }}"></script>
     <script src="{{ asset('js/main/scanner-page/scanner.js') }}"></script>

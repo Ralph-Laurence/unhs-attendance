@@ -19,30 +19,7 @@
             <h6 class="card-title me-auto">Daily Time Records</h6>
 
             {{-- RECORD DATE RANGE FILTERS --}}
-            <div class="dropdown">
-                <button class="btn btn-secondary flat-button dropdown-toggle shadow-0" id="record-date-dropdown-button"
-                    data-mdb-toggle="dropdown" aria-expanded="false" data-mdb-auto-close="outside">
-                    <span class="me-1">Today</span>
-                    <i class="fas fa-chevron-down opacity-65"></i>
-                </button>
-                <ul class="dropdown-menu record-range-filter" aria-labelledby="options-dropdown-button">
-                    <li><a class="dropdown-item daily" role="button">Today</a></li>
-                    <li><a class="dropdown-item weekly" role="button">This Week</a></li>
-                    <li class="dropstart">
-                        <a class="dropdown-item dropdown-toggle" id="date-range-dropdown-button"
-                            data-mdb-toggle="dropdown" role="button">By Month</a>
-                        <ul class="dropdown-menu" aria-labelledby="date-range-dropdown-button">
-                            <li><a class="dropdown-item" href="#">Action</a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
-                            <li>
-                                <hr class="dropdown-divider" />
-                            </li>
-                            <li><a class="dropdown-item" href="#">Separated link</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+            @include('components.record-range-filters')
 
             {{-- EMPLOYEE ROLE FILTERS --}}
             <div class="dropdown">
@@ -81,7 +58,7 @@
 
         {{-- DATASET TABLE --}}
         <table class="table table-striped table-sm table-hover table-fixed dataset-table"
-            data-src-default="{{ $routes['filter_thisDay'] }}" data-src-weekly="{{ $routes['filter_thisWeek'] }}">
+            data-src-default="{{ $routes['ajax_get_all'] }}">
             <thead class="user-select-none">
                 <tr>
                     <th>#</th>

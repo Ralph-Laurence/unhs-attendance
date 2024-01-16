@@ -63,10 +63,12 @@
     text-align: center;
     font-size: 12px;
     font-weight: 600;
-    display: inline-block;
-    width: 25px;
-    min-width: 25px;
-    height: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    min-width: 20px;
+    height: 20px;
 }
 
 .dataTables_paginate .paginate_button.previous+span>.paginate_button {

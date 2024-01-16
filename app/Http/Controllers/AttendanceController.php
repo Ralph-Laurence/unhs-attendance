@@ -16,37 +16,32 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
-    private $attendanceFields;
-    private $employeeFields;
-
     private $hashids;
+
+    private $attendanceRanges;
+
+    private const RANGE_TODAY = 'this_day';
+    private const RANGE_WEEK  = 'this_week';
+    private const RANGE_MONTH = 'by_month';
 
     public function __construct() 
     {
         $this->hashids = new Hashids();
 
-        $this->employeeFields = Extensions::prefixArray('e.', [
-            Employee::f_FirstName  . ' as fname',
-            Employee::f_MiddleName . ' as mname',
-            Employee::f_LastName   . ' as lname',
-            Employee::f_Position   . ' as role',
-        ]);
-
-        $this->attendanceFields = Extensions::prefixArray('a.', [
-            Attendance::f_TimeIn   . ' as timein',
-            Attendance::f_TimeOut  . ' as timeout',
-            Attendance::f_Duration . ' as duration',
-            Attendance::f_Status   . ' as status',
-            'id',
-            'created_at' ,
-        ]);
+        $this->attendanceRanges = [
+            'today' => self::RANGE_TODAY,
+            'week'  => self::RANGE_WEEK,
+            'month' => self::RANGE_MONTH
+        ];
     }
 
     public function index()
     {
         $routes = [
-            'filter_thisWeek' => route(RouteNames::Attendance['weekly']),
-            'filter_thisDay'  => route(RouteNames::Attendance['daily']),
+            'ajax_get_all'    => route(RouteNames::Attendance['get']),
+            // 'filter_thisWeek' => route(RouteNames::Attendance['weekly']),
+            // 'filter_thisDay'  => route(RouteNames::Attendance['daily']),
+            // 'filter_byMonth'  => route(RouteNames::Attendance['month']),
             'deleteRoute'     => route(RouteNames::Attendance['delete']),
             'scannerRoute'    => route(RouteNames::Scanner['index'])
         ];
@@ -85,76 +80,34 @@ class AttendanceController extends Controller
         }
     }
 
-    /**
-     * Retrieve all attendances that were made today
-     */
-    public function getDailyAttendances($employeeType = null)
-    {
-        // The current timestamp
-        $currentDate = Carbon::now();
+    public function getAttendances(Request $request)
+    {     
+        ///error_log(print_r($request->all(), true));
+        // Set a default value to select period if not provided
+        $selectRange = $request->input('range');
 
-        // Instead of whereDate($today), we will use where between
-        $dataset = $this->buildAttendanceQuery()
-            ->whereBetween('a.created_at', 
-            [
-                $currentDate->startOfDay()->format(Constants::TimestampFormat), 
-                $currentDate->endOfDay()->format(Constants::TimestampFormat)
-            ]);
+        // Make sure that the select range is one of the allowed values.
+        // If not, set its default select period
+        if (!in_array($selectRange, $this->attendanceRanges, true))
+            //$selectRange = 'this-day';
+            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
 
-        if ($employeeType)
-                $dataset->where('e.role', '=', $employeeType);
+        $model = new Attendance;
 
-        $dataset = $dataset->get();
+        $transactions = [
+            self::RANGE_TODAY => $model->getDailyAttendances($request),
+            self::RANGE_WEEK  => $model->getWeeklyAttendances($request),
+            self::RANGE_MONTH => $model->getMonthlyAttendances($request)
+        ];
 
-        Extensions::hashRowIds($dataset);
+        $dataset = $transactions[$selectRange];
         
-        return $this->makeAttendanceData($dataset);
-    }
-
-    /**
-     * Retrieve all attendances this week
-     */
-    public function getWeeklyAttendances()
-    {
-        $currentWeek = Extensions::getCurrentWeek();
-
-        $dataset = $this->buildAttendanceQuery()
-            ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek)
-            ->get();
-
-        Extensions::hashRowIds($dataset);
-
-        return $this->makeAttendanceData($dataset);
+        return $dataset;
     }
 
     public function autoAbsentEmployees() 
     {
         Attendance::autoAbsentEmployees();
-    }
-
-    /**
-    * Base query builder for retrieving attendances 
-    */
-    private function buildAttendanceQuery()
-    {
-        $fields  = array_merge($this->attendanceFields, $this->employeeFields);
-        $query = DB::table(Attendance::getTableName() . ' as a')
-        ->select($fields)
-        ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
-        ->orderBy('a.created_at', 'desc');
-
-        return $query;
-    }
-
-    /**
-     * Encode the datasets into JSON that will be sent as AJAX response
-     */
-    private function makeAttendanceData($dataset)
-    {
-        return json_encode([
-            'data' => $dataset->toArray(),
-            'icon' => Attendance::getIconClasses()
-        ]);
     }
 }
 

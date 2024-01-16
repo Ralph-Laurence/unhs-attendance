@@ -122,6 +122,11 @@ a.link-primary:hover {
     height: 100%;
 }
 
+/* Color Utilities */
+.bg-color-primary {
+    background-color: var(--primary-color);
+}
+
 /*
 Checkbox Overrides
 */

@@ -25,10 +25,15 @@ class ScannerController extends Controller
             'version'   => Constants::BuildVersion
         ];
 
+        $routes = [
+            'recordsManagement' => route(RouteNames::Attendance['index']),
+            'scannerPostURL' => route(RouteNames::Scanner['decode']),
+            'scannerHistory'    => route(RouteNames::Scanner['history'])
+        ];
+
         return view('scanner.index')
             ->with('layoutTitles', $layoutTitles)
-            ->with('recordsManagementRoute', route(RouteNames::Attendance['index']))
-            ->with('scannerPostURL', route(RouteNames::Scanner['decode']));
+            ->with('routes', $routes);
     }
 
     public function history()

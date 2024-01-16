@@ -151,7 +151,7 @@ function bindDatatableData()
         'bAutoWidth'   : false,
         ajax: {
 
-            url     : 'http://localhost:8000/dtr-scanner/history',
+            url     : $(attendanceTable).data('default-src'),//'http://localhost:8000/dtr-scanner/history',
             type    : 'GET',
             dataType: 'JSON',
             dataSrc : function(json) {

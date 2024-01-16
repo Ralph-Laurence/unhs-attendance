@@ -1,0 +1,24 @@
+step 1: 
+-go to htdocs
+
+step 2:
+-inside that, create a folder called "laravel"
+
+step 3:
+-in the htdocs root folder, upload the project file's "public" folder 
+
+step 4:
+-go to "laravel" folder then upload all project files except ".git" and "public" folders
+
+step 5:
+-edit index.php
+
+-replace all ".." with "laravel"
+
+step 6:
+-goto laravel folder > bootstrap folder > cache folder
+
+-delete config.php
+
+step 7:
+edit ".env" and configure database

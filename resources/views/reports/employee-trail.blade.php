@@ -210,7 +210,7 @@
             <tbody>
                 <tr>
                     <td class="td-60">
-                        <img src="{{ public_path('images/internal/templates/pdf-logo.png') }}" alt="logo" width="50" height="50">
+                        <img src="{{$pdf_banner_logo_img}}" alt="logo" width="50" height="50">
                     </td>
                     <td>
                         <h3>{{ $pdf_banner_org_name }}</h3>
@@ -274,7 +274,6 @@
                 $countUndertime = 0;
             @endphp
 
-            {{-- @for($i = 0; $i < 500; $i++) --}}
             @foreach ($dataSet as $data)
                 @php
                     $absent_td_mark = '';
@@ -325,21 +324,6 @@
             </tr>
 
             @endforeach
-            {{-- <tr>
-                <td class="border-start td-25 text-center td-day">123</td>
-                <td class="td-45 td-day">Abc</td>
-                <td class="border-start text-center darker-text">00:00:00</td>
-                <td class="text-center gray-text">00:00:00</td>
-                <td class="border-start text-center gray-text">00:00:00</td>
-                <td class="border-end text-center darker-text">00:00:00</td>
-                <td class="border-end td-80 text-center gray-text">00:00:00</td>
-                <td class="border-end td-80 text-center gray-text">00:00:00</td>
-                <td class="border-end td-80 text-center gray-text">00:00:00</td>
-                <td class="border-end td-80 text-center gray-text">00:00:00</td>
-                <td class="border-end td-80 text-center">xyz</td>
-            </tr>
-            
-            @endfor --}}
         </tbody>
     </table>
 

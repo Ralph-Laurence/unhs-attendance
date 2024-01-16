@@ -1,0 +1,21 @@
+.month-select-dropmenu {
+    min-width: 280px;
+    width: 280px;
+}
+
+.month-select .month-item {
+    min-width: 60px; 
+    width: 60px; 
+    max-width: 60px;
+}
+
+.month-select .month-item.current-month {
+    background-color: var(--warning-color) !important;
+    color: var(--dark-color);
+    font-weight: 600 !important;
+}
+
+.month-select .month-item.selected-month {
+    background-color: var(--primary-dark) !important;
+    color: white;
+}

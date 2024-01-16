@@ -16,9 +16,9 @@ $counter = 0;
 @endphp
 
 <div class="overflow-y-scroll w-100 h-100" data-simplebar>
-    @foreach ($codes as $emp_no => $obj)
-    @if ($counter % 4 == 0)
-        <div class="row mb-5">
+@foreach ($codes as $emp_no => $obj)
+            @if ($counter % 4 == 0)
+                <div class="row mb-5">
             @endif
             <div class="col">
                 <div class="d-flex flex-column">
@@ -28,8 +28,8 @@ $counter = 0;
                 </div>
             </div>
             @if ($counter % 4 == 3)
-        </div>
-    @endif
+            </div>
+            @endif
     @php
         $counter++;
     @endphp

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
+use App\Http\Utils\Extensions;
 use Carbon\Carbon;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -131,7 +134,7 @@ class Attendance extends Model
      */
     public static function autoAbsentEmployees()
     {
-        $tblAttendance = Attendance::getTableName();
+        $tblAttendance = self::getTableName(); //Attendance::getTableName();
 
         // Get today's date
         $today = Carbon::today();
@@ -163,6 +166,109 @@ class Attendance extends Model
                 Attendance::f_Status    => Attendance::STATUS_ABSENT
             ]);
         }
+    }
+
+    /**
+     * Retrieve all attendances that were made today
+     */
+    public function getDailyAttendances(Request $request)
+    {
+        // The current timestamp
+        $currentDate = Carbon::now();
+
+        // Instead of whereDate($today), we will use where between
+        $dataset = $this->buildAttendanceQuery()
+            ->whereBetween('a.created_at', 
+            [
+                $currentDate->startOfDay()->format(Constants::TimestampFormat), 
+                $currentDate->endOfDay()->format(Constants::TimestampFormat)
+            ]);
+
+        if ($request->has('employeeType') && $request->filled('employeeType'))
+            $dataset->where('e.role', '=', $request->get('employeeType'));
+
+        $dataset = $dataset->get();
+
+        Extensions::hashRowIds($dataset);
+        
+        return $this->encodeAttendanceData($dataset);
+    }
+
+    /**
+     * Retrieve all attendances this week
+     */
+    public function getWeeklyAttendances(Request $request)
+    {
+        $currentWeek = Extensions::getCurrentWeek();
+
+        $dataset = $this->buildAttendanceQuery()
+            ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek)
+            ->get();
+
+        if ($request->has('employeeType') && $request->filled('employeeType'))
+            $dataset->where('e.role', '=', $request->get('employeeType'));
+
+        Extensions::hashRowIds($dataset);
+
+        return $this->encodeAttendanceData($dataset);
+    }
+
+    public function getMonthlyAttendances(Request $request)
+    {
+        //error_log(print_r($request->all(), true));
+
+        if (!$request->filled('monthIndex'))
+            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
+
+        $monthIndex = $request->input('monthIndex');
+
+        $dataset = $this->buildAttendanceQuery()
+            ->whereMonth('a.created_at', '=', $monthIndex)
+            ->get();
+
+        Extensions::hashRowIds($dataset);
+
+        return $this->encodeAttendanceData($dataset);
+    }
+
+    /**
+    * Base query builder for retrieving attendances 
+    */
+    private function buildAttendanceQuery()
+    {
+        $employeeFields = Extensions::prefixArray('e.', [
+            Employee::f_FirstName  . ' as fname',
+            Employee::f_MiddleName . ' as mname',
+            Employee::f_LastName   . ' as lname',
+            Employee::f_Position   . ' as role',
+        ]);
+        $attendanceFields = Extensions::prefixArray('a.', [
+            Attendance::f_TimeIn   . ' as timein',
+            Attendance::f_TimeOut  . ' as timeout',
+            Attendance::f_Duration . ' as duration',
+            Attendance::f_Status   . ' as status',
+            'id',
+            'created_at' ,
+        ]);
+
+        $fields  = array_merge($attendanceFields, $employeeFields);
+        $query = DB::table(self::getTableName() . ' as a')
+        ->select($fields)
+        ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
+        ->orderBy('a.created_at', 'desc');
+
+        return $query;
+    }
+
+     /**
+     * Encode the datasets into JSON that will be sent as AJAX response
+     */
+    private function encodeAttendanceData($dataset)
+    {
+        return json_encode([
+            'data' => $dataset->toArray(),
+            'icon' => Attendance::getIconClasses()
+        ]);
     }
 }
 

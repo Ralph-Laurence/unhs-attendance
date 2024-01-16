@@ -46,6 +46,10 @@
     box-shadow: 0 0 0 1px #FA8E96;
 }
 
+.textbox.has-error .input-wrapper input {
+    background-color: #FBD3D4 !important;
+}
+
 .textbox.has-error .error-icon {
     display: inline;
     color: #FF283D;

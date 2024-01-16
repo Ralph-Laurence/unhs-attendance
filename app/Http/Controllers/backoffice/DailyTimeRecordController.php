@@ -220,26 +220,14 @@ class DailyTimeRecordController extends Controller
 
                 'pdf_banner_org_name'  => Constants::OrganizationName,
                 'pdf_banner_org_addr'  => Constants::OrganizationAddress,
-
+                'pdf_banner_logo_img'  => public_path('/images/internal/templates/pdf-banner-logo.jpg')
             ]);
             
-            $pdf->setOption(['isPhpEnabled' => true]);
-
-            // error_log(print_r($trailData, true));
             // build a filename for the PDF
             $range_as_fileName = array_flip(self::PAYROLL_PERIODS)[$selectRange];
 
             $out_filename = "$range_as_fileName-" . date('Y-m-d_H-i-s') . '.pdf';
             $temp_filename = "temp-$out_filename";
-            // $pdf->save(public_path('pdf') . "/$out_filename");
-            // $pdf = public_path("pdf/$out_filename");
-
-            // $blob = response()->download($pdf);
-            // $blob->deleteFileAfterSend(true);
-            
-            // return json_encode([
-            //     'blob' => $blob
-            // ]);
             
             $pdf->save(public_path('pdf') . "/$temp_filename");
             $pdfPath = public_path("pdf/$temp_filename");
@@ -257,7 +245,6 @@ class DailyTimeRecordController extends Controller
         }
         catch(Exception $ex)
         {
-            error_log($ex->getMessage());
             return Extensions::encodeFailMessage('Failed to generate report.');
         }
     }
@@ -354,10 +341,3 @@ class DailyTimeRecordController extends Controller
         return $duration;
     }
 }
-
-/**
- * $firstHalf = Attendance::whereBetween('date', [Carbon::now()->startOfMonth(), Carbon::now()->startOfMonth()->addDays(14)])->get();
-$secondHalf = Attendance::whereBetween('date', [Carbon::now()->startOfMonth()->addDays(15), Carbon::now()->endOfMonth()])->get();
-
-return view('your_view', ['firstHalf' => $firstHalf, 'secondHalf' => $secondHalf]);
- */

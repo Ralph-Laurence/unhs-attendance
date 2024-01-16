@@ -1,5 +1,5 @@
 @extends('layouts.base')
 
 @section('content')
-@dd($dataset)
+{{ Form::selectMonth('month') }}
 @endsection
