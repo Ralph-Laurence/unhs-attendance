@@ -4,18 +4,18 @@
     @endpush 
 @endonce
 
-<div class="dropdown">
+<div class="dropdown record-range-dropdown">
     <button class="btn btn-secondary flat-button dropdown-toggle shadow-0" id="record-date-dropdown-button"
         data-mdb-toggle="dropdown" aria-expanded="false" data-mdb-auto-close="outside">
-        <span class="me-1">Today</span>
+        <span class="me-1 button-text">Today</span>
         <i class="fas fa-chevron-down opacity-65"></i>
     </button>
     <ul class="dropdown-menu record-range-filter" aria-labelledby="options-dropdown-button">
-        <li><a class="dropdown-item daily" role="button">Today</a></li>
-        <li><a class="dropdown-item weekly" role="button">This Week</a></li>
-        <li class="dropstart">
-            <a class="dropdown-item dropdown-toggle" id="month-range-dropdown-button"
-                data-mdb-toggle="dropdown" role="button">By Month</a>
+        <li><a class="dropdown-item daily" role="button" data-button-text="Today">Today</a></li>
+        <li><a class="dropdown-item weekly" role="button" data-button-text="This Week">This Week</a></li>
+        <li class="dropstart month-range-dropstart">
+            <a class="dropdown-item dropdown-togglex with-submenu" id="month-range-dropdown-button"
+                data-mdb-toggle="dropdown" role="button" data-button-text="By Month">By Month</a>
             <div class="dropdown-menu month-select-dropmenu overflow-hidden" aria-labelledby="month-range-dropdown-button" >
                 <div class="bg-color-primary p-2 flex-center mb-2">
                     <h6 class="text-sm text-uppercase fw-bold text-center text-white m-0">Select Month</h6>
@@ -61,26 +61,6 @@
 
 @once
     @push('scripts')
-        <script>
-            $(document).ready(function()
-            {
-                const selected_month_class = 'selected-month';
-
-                $('.month-select-dropmenu .month-select .month-item').on('click', function()
-                {
-                    $('.month-select-dropmenu .month-select .month-item').removeClass(selected_month_class);
-
-                    let month = $(this).data('month');
-                    
-                    $('#selected-month-index').val(month).trigger('change');
-                    $(this).addClass(selected_month_class);
-                });
-
-                // $('#selected-month-index').on('change', function()
-                // {
-                //     alert($(this).val());
-                // });
-            });
-        </script>
+        <script src="{{ asset('js/components/record-range-filter.js') }}"></script>
     @endpush
 @endonce

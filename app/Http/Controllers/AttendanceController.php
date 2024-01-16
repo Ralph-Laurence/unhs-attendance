@@ -3,16 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Text\Messages;
-use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
 use App\Models\Attendance;
 use App\Models\Employee;
-use Carbon\Carbon;
 use Exception;
 use Hashids\Hashids;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
@@ -38,12 +35,9 @@ class AttendanceController extends Controller
     public function index()
     {
         $routes = [
-            'ajax_get_all'    => route(RouteNames::Attendance['get']),
-            // 'filter_thisWeek' => route(RouteNames::Attendance['weekly']),
-            // 'filter_thisDay'  => route(RouteNames::Attendance['daily']),
-            // 'filter_byMonth'  => route(RouteNames::Attendance['month']),
-            'deleteRoute'     => route(RouteNames::Attendance['delete']),
-            'scannerRoute'    => route(RouteNames::Scanner['index'])
+            'ajax_get_all' => route(RouteNames::Attendance['get']),
+            'deleteRoute'  => route(RouteNames::Attendance['delete']),
+            'scannerRoute' => route(RouteNames::Scanner['index'])
         ];
 
         $roleFilters = [];
@@ -80,16 +74,16 @@ class AttendanceController extends Controller
         }
     }
 
+    /**
+     * Select Attendance Records with the appropriate filters
+     */
     public function getAttendances(Request $request)
     {     
-        ///error_log(print_r($request->all(), true));
-        // Set a default value to select period if not provided
         $selectRange = $request->input('range');
 
         // Make sure that the select range is one of the allowed values.
         // If not, set its default select period
         if (!in_array($selectRange, $this->attendanceRanges, true))
-            //$selectRange = 'this-day';
             return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
 
         $model = new Attendance;
@@ -105,6 +99,9 @@ class AttendanceController extends Controller
         return $dataset;
     }
 
+    /**
+     * Executed by a CRON Job
+     */
     public function autoAbsentEmployees() 
     {
         Attendance::autoAbsentEmployees();

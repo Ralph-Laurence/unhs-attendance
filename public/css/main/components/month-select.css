@@ -16,6 +16,22 @@
 }
 
 .month-select .month-item.selected-month {
-    background-color: var(--primary-dark) !important;
+    background-color: var(--primary-color) !important;
     color: white;
+    opacity: 1 !important;
+}
+
+.month-range-dropstart .dropdown-item::before {
+    font-family: var(--font-awesome);
+    content: '\f0d9';
+    color: var(--primary-dark);
+    float: left;
+    padding-right: 4px;
+}
+
+.record-range-filter .dropdown-item.selected-option::after {
+    font-family: var(--font-awesome);
+    content: '\f00c';
+    color: var(--primary-color);
+    float: right;
 }

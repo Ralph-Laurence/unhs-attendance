@@ -16,7 +16,11 @@
 
         {{-- TABLE TITLE HEADER --}}
         <div class="d-flex align-items-center gap-1">
-            <h6 class="card-title me-auto">Daily Time Records</h6>
+            <h6 class="card-title me-auto">
+                <span>Daily Time Records</span>
+                <i class="fas fa-caret-right mx-2 opacity-60"></i>
+                <span class="opacity-60 attendance-range text-14"></span>
+            </h6>
 
             {{-- RECORD DATE RANGE FILTERS --}}
             @include('components.record-range-filters')

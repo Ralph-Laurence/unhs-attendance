@@ -191,7 +191,7 @@ class Attendance extends Model
 
         Extensions::hashRowIds($dataset);
         
-        return $this->encodeAttendanceData($dataset);
+        return $this->encodeAttendanceData($dataset, 'Today');
     }
 
     /**
@@ -210,7 +210,7 @@ class Attendance extends Model
 
         Extensions::hashRowIds($dataset);
 
-        return $this->encodeAttendanceData($dataset);
+        return $this->encodeAttendanceData($dataset, "Current Week (week #$currentWeek)");
     }
 
     public function getMonthlyAttendances(Request $request)
@@ -228,7 +228,9 @@ class Attendance extends Model
 
         Extensions::hashRowIds($dataset);
 
-        return $this->encodeAttendanceData($dataset);
+        $monthName = Carbon::createFromFormat('!m', $monthIndex)->monthName;
+
+        return $this->encodeAttendanceData($dataset, "Month of $monthName");
     }
 
     /**
@@ -263,10 +265,11 @@ class Attendance extends Model
      /**
      * Encode the datasets into JSON that will be sent as AJAX response
      */
-    private function encodeAttendanceData($dataset)
+    private function encodeAttendanceData($dataset, $descriptiveRange = null)
     {
         return json_encode([
-            'data' => $dataset->toArray(),
+            'data'  => $dataset->toArray(),
+            'range' => $descriptiveRange,
             'icon' => Attendance::getIconClasses()
         ]);
     }

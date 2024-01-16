@@ -1,6 +1,7 @@
 let teachers_datasetTable = '.dataset-table';
 let dataSrcTarget;
 let dataTable;
+let dataTable_isFirstDraw = true;
 let iconStyles;
 let csrfToken;
 
@@ -61,8 +62,6 @@ function handleEvents()
         var role = $(this).data('role');
         alert(role);
     });
-    // $(document).on('click', '.row-actions')
-    // $(document).on('click', '.row-actions')
 
     $('.month-select-dropmenu #selected-month-index').on('change', function()
     {
@@ -83,6 +82,24 @@ function bindTableDataSource(new_range, new_monthIndex)
         'searching'    : false,
         'ordering'     : false,
         'bAutoWidth'   : false,
+
+        'drawCallback' : function() 
+        {   
+            // dataTable_isFirstDraw is when the "Loading..." was first shown.
+            // We need to show the alert message only when it is not on first draw
+            // and when rows are empty
+            if (dataTable_isFirstDraw)
+            {
+                dataTable_isFirstDraw = false;
+                return;
+            }
+
+            var isEmpty = this.api().rows().count() === 0;
+
+            if (isEmpty)
+                snackbar.showInfo('No data to show');
+        },
+
         ajax: {
 
             url     : dataSrcTarget,
@@ -90,7 +107,6 @@ function bindTableDataSource(new_range, new_monthIndex)
             dataType: 'JSON',
             dataSrc : function(json) 
             {
-
                 if (iconStyles == undefined)
                     iconStyles = json.icon;
 
@@ -98,9 +114,17 @@ function bindTableDataSource(new_range, new_monthIndex)
                 {
                     if (json.code == -1) 
                     {
+                        $('.card-title .attendance-range').text('No data');
                         alertModal.showDanger(json.message);
+
                         return [];
                     }
+                }
+
+                if ('range' in json)
+                {
+                    if (json.range)
+                        $('.card-title .attendance-range').text(json.range);
                 }
 
                 monthIndex = undefined;
@@ -209,20 +233,11 @@ function bindTableDataSource(new_range, new_monthIndex)
         ]
     };
 
-    // if (options.ajax.data.monthIndex)
-    //     alert(options.ajax.data.monthIndex);
-
     // If an instance of datatable has already been created,
     // reload its data source with given url instead
     if (dataTable != null)
     {
         dataTable.ajax.reload();
-        //dataTable.ajax.url(url).load(); 
-        // if (monthIndex)
-        //     dataTable.ajax.reload(); 
-        // else
-        //     dataTable.ajax.url(url).load();
-
         return;
     }
     
