@@ -11,7 +11,7 @@
         <i class="fas fa-chevron-down opacity-65"></i>
     </button>
     <ul class="dropdown-menu record-range-filter" aria-labelledby="options-dropdown-button">
-        <li><a class="dropdown-item daily" role="button" data-button-text="Today">Today</a></li>
+        <li><a class="dropdown-item daily selected-option" role="button" data-button-text="Today">Today</a></li>
         <li><a class="dropdown-item weekly" role="button" data-button-text="This Week">This Week</a></li>
         <li class="dropstart month-range-dropstart">
             <a class="dropdown-item dropdown-togglex with-submenu" id="month-range-dropdown-button"

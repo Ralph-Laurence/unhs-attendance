@@ -34,31 +34,27 @@ Route::controller(DailyTimeRecordController::class)->middleware(['auth'])
     Route::post('/backoffice/dtr/export/pdf',  'exportPdf')->name(RouteNames::DailyTimeRecord['exportPdf']);
 });
 
-Route::controller(ScannerController::class) //->middleware(['auth'])
-->group(function()
+Route::controller(ScannerController::class)->group(function()
 {
-    Route::get('/dtr-scanner',          'index')->name(RouteNames::Scanner['index']);
+    Route::get('/dtr-scanner', 'index')->name(RouteNames::Scanner['index']);
 
     // AJAX requests
-    Route::get('/dtr-scanner/history',  'history')->name(RouteNames::Scanner['history']);
-    Route::post('/dtr-scanner/decode/', 'decode')->name(RouteNames::Scanner['decode']);
+    Route::get('/dtr-scanner/history',   'history')->name(RouteNames::Scanner['history']);
+    Route::post('/dtr-scanner/decode/',  'decode')->name(RouteNames::Scanner['decode']);
+
+    Route::post('/dtr-scanner/pin/auth', 'authenticatePin')->name(RouteNames::Scanner['authpin']);
 });
 
 Route::controller(AttendanceController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::get('/backoffice/attendance',             'index')->name(RouteNames::Attendance['index']);
+    Route::get('/backoffice/attendance', 'index')->name(RouteNames::Attendance['index']);
 
     // This will be exectued by CRON JOB
     Route::get('/backoffice/attendance/auto-absent', 'autoAbsentEmployees')->name(RouteNames::Attendance['autoAbsent']);
 
-    Route::post('/backoffice/attendance/get',        'getAttendances')->name(RouteNames::Attendance['get']);
-
-    //Route::post('/backoffice/attendance/this-week',  'getWeeklyAttendances')->name(RouteNames::Attendance['weekly']);
-    //Route::post('/backoffice/attendance/by-month',   'getMonthlyAttendances')->name(RouteNames::Attendance['month']);
-    Route::post('/backoffice/attendance/delete',     'destroy')->name(RouteNames::Attendance['delete']);
-
-    //Route::post('/backoffice/attendance/daily/{employeeFilter?}', 'getDailyAttendances')->name(RouteNames::Attendance['daily']);
+    Route::post('/backoffice/attendance/get',    'getAttendances')->name(RouteNames::Attendance['get']);
+    Route::post('/backoffice/attendance/delete', 'destroy')->name(RouteNames::Attendance['delete']);
 });
 
 // Route::get('/home', function() {

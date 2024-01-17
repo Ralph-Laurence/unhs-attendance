@@ -8,8 +8,15 @@ let lastScanned = {};
 let dataTable;
 let iconStyles;
 
+let inputId;
+let inputPin;
+
+let metaCSRF;
+let pinAuthTarget;
+let pinAuthModal;
+
 const attendanceTable  = '.attendance-table';
-const refractoryPeriod = 5000;
+const refractoryPeriod = 10000; //ms
 
 $(document).ready(function() 
 {
@@ -21,6 +28,10 @@ $(document).ready(function()
 //
 function initialize()
 {
+    metaCSRF      = $('meta[name="csrf-token"]').attr('content');
+    pinAuthTarget = $('.frm-pin-auth').data('action-target');
+    pinAuthModal  = new mdb.Modal($('#pinAuthModal'));
+
     // Initially load datatable data
     bindDatatableData();
 
@@ -38,6 +49,9 @@ function initialize()
 
     // animate the calendar to change from Date today and Day name
     x_calendar.animateCalendar();
+
+    inputId = $('#input-id-no');
+    inputPin = $('#input-pin-no');
 }
 //
 // Handle events here   
@@ -45,6 +59,50 @@ function initialize()
 function handleEvents()
 {
     scanner.render(onScanSuccess);
+
+    // If PIN Auth modal was shown, stop the camera
+    $('#pinAuthModal').on('shown.mdb.modal', function()
+    {
+        if (scanner.getState() === Html5QrcodeScannerState.SCANNING)
+            scanner.pause();
+    })
+    .on('hidden.mdb.modal', function()
+    {
+        if (scanner.getState() === Html5QrcodeScannerState.PAUSED)
+            scanner.resume();
+
+        resetPinAuthForm();
+    });
+
+    $('#pinAuthModal .btn-ok').on('click', function()
+    {
+        // validate the input fields
+        if (!inputId.val())
+        {
+            showTextboxError(inputId, 'Please enter your ID number.');
+            return;
+        }
+
+        if (!inputPin.val())
+        {
+            showTextboxError(inputPin, 'Please enter your PIN code.');
+            return;
+        }
+
+        authenticatePin(inputId.val(), inputPin.val());
+    });
+
+    inputPin.on('input', function() 
+    {
+        if ($(this).val())
+            hideTextboxError($(this));
+    });
+
+    inputId.on('input', function() 
+    {
+        if ($(this).val())
+            hideTextboxError($(this));
+    });
 }
 
 //==================================================//
@@ -95,10 +153,6 @@ function playSound(soundSource)
 //
 function submitScanResult(data) 
 {
-    console.log(data);
-
-    var metaCSRF = $('meta[name="csrf-token"]').attr('content');
-
     $.ajax({
         type: 'POST',
         url: scannerSubmitUrl,
@@ -151,7 +205,7 @@ function bindDatatableData()
         'bAutoWidth'   : false,
         ajax: {
 
-            url     : $(attendanceTable).data('default-src'),//'http://localhost:8000/dtr-scanner/history',
+            url     : $(attendanceTable).data('default-src'),
             type    : 'GET',
             dataType: 'JSON',
             dataSrc : function(json) {
@@ -205,4 +259,85 @@ function bindDatatableData()
     };
 
     dataTable = $(attendanceTable).DataTable(options);
+}
+
+//==================================================//
+//:::::::::::::::    PIN CODE FORM   ::::::::::::::://
+//==================================================//
+
+function authenticatePin(idno, pin)
+{
+    $.ajax({
+        url: pinAuthTarget,
+        type: 'POST',
+        data: {
+            '_token' : metaCSRF, 
+            'input-id-no': idno,
+            'input-pin-no': pin
+        },
+        success: function(response) 
+        {
+            if (response)
+            {
+                var data = JSON.parse(response);
+
+                // Validation Failed
+                if (data.validation_stat == 400)
+                {
+                    for (var field in data.errors)
+                    {
+                        showTextboxError(`#${field}`, data.errors[field]);
+                    }
+
+                    showPinAuthError(data.err_msg);
+                    return;
+                }
+
+                if ('code' in data)
+                {
+                    let message = data.message.replace(/\r?\n/g, '<br>');
+
+                    if (data.code == 0)
+                    {
+                        closePinAuthModal();
+                        dataTable.ajax.reload();
+                        snackbar.showSuccess(data.message);
+                    }
+                    else
+                    {
+                        showPinAuthError(message);
+                        showTextboxError('#input-id-no, #input-pin-no');
+                    }   
+                }
+            }
+            console.log(response);
+        },
+        error: function(xhr, error, status) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function showPinAuthError(error)
+{
+    $('.pin-auth-alert-error').text(error).fadeIn();
+}
+
+function hidePinAuthError()
+{
+    $('.pin-auth-alert-error').text('').hide();
+}
+
+function closePinAuthModal()
+{
+    resetPinAuthForm();
+    pinAuthModal.hide();
+}
+
+function resetPinAuthForm()
+{
+    hideTextboxError(inputId);
+    hideTextboxError(inputPin);
+    hidePinAuthError();
+    $(".frm-pin-auth").trigger('reset');
 }

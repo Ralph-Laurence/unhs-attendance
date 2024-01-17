@@ -20,6 +20,9 @@ class Constants
     public const InternalServerError    = 500;
 
     public const AttendancePageTitle    = 'Attendance';
+    public const FLAG_ON  = 'on';
+    public const FLAG_OFF = 'off';
+    public const FLAG_2FA = '2fa';
 
     public const XHR_STAT_OK    = 0;
     public const XHR_STAT_FAIL  = -1;

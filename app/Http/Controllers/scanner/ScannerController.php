@@ -6,13 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
+use App\Http\Utils\RegexPatterns;
 use App\Http\Utils\RouteNames;
+use App\Http\Utils\ValidationMessages;
 use App\Models\Attendance;
 use App\Models\Employee;
 use Carbon\Carbon;
 use Hashids\Hashids;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ScannerController extends Controller
 {
@@ -27,8 +30,9 @@ class ScannerController extends Controller
 
         $routes = [
             'recordsManagement' => route(RouteNames::Attendance['index']),
-            'scannerPostURL' => route(RouteNames::Scanner['decode']),
-            'scannerHistory'    => route(RouteNames::Scanner['history'])
+            'scannerPostURL'    => route(RouteNames::Scanner['decode']),
+            'scannerHistory'    => route(RouteNames::Scanner['history']),
+            'pincodeForm'       => route(RouteNames::Scanner['authpin'])
         ];
 
         return view('scanner.index')
@@ -76,32 +80,77 @@ class ScannerController extends Controller
         ]);
     }
 
-    /**
-     * The QR codes contain a HASHED data which are the database ids. 
-     * We need to decode those data and process it for attendance
-     */
+    // From PIN
+    public function authenticatePin(Request $request)
+    {
+        // Validate the PIN codes first to make sure
+        // they are filled and meets the required criteria
+        $validationFields = [
+            'input-id-no'  => 'required|regex:' . RegexPatterns::NUMERIC_DASH,
+            'input-pin-no' => 'required|regex:' . RegexPatterns::NUMERIC_DASH
+        ];
+
+        $validationMessages = 
+        [
+            'input-id-no.required'  => 'Please enter your ID Number',
+            'input-id-no.regex'     => ValidationMessages::invalid('ID Number'),
+
+            'input-pin-no.required' => 'Please enter your PIN Code',
+            'input-pin-no.regex'    => ValidationMessages::invalid('PIN Code'),
+        ];
+
+        $validator = Validator::make($request->all(), $validationFields, $validationMessages);
+
+        if ($validator->fails())
+            return json_encode(['validation_stat' => Constants::ValidationStat_Failed] + 
+            [
+                'errors'  => $validator->errors(),
+                'err_msg' => Messages::ATTENDANCE_CRED_REQUIRE //Messages::ATTENDANCE_CRED_FAIL
+            ]);
+
+        $inputs = $validator->validated();
+
+        // We assume successful validation. 
+        // Find the employee with that matching credentials
+        $employee = Employee::select('id')
+                  ->where(Employee::f_EmpNo,   '=', $inputs['input-id-no'])
+                  ->where(Employee::f_PINCode, '=', $inputs['input-pin-no'])
+                  ->first();
+
+        if (!$employee)
+            return Extensions::encodeFailMessage(Messages::ATTENDANCE_CRED_FAIL, Constants::RecordNotFound);
+
+        return $this->handleAttendance($employee->id);
+    }
+
+    // Process Attendance From Scanner
     public function decode(Request $request)
     {
+        // Read QR code data
         $hash    = $request->input('hash');
         $hashids = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
         $decode  = $hashids->decode($hash);
 
-        if (is_null($decode) || empty($decode)) {
-            return Extensions::encodeFailMessage( Messages::QR_CODE_UNREADABLE );
-        }
+        // Make sure that it has contents
+        if (is_null($decode) || empty($decode))
+            return Extensions::encodeFailMessage( Messages::QR_CODE_UNREADABLE);
+
+        // Check first if the employee id exists
+        // then begin processing their atendance
+        if (!Employee::where('id', $decode[0])->exists())
+            return Extensions::encodeFailMessage(Messages::QR_CODE_NOT_RECOGNIZED);
 
         return $this->handleAttendance($decode[0]);
     }
 
     public function handleAttendance(int $empId)
     {
+        // Handle Attendance Wont Work when the 
+        // employee has been marked as Absent
+
         // Tasks to be added:
         // A1 -> Prevent attendances 1hr before dismissal or after dismissal
         // A2 -> Exclude Sundays and Holidays (Dont allow scans during those days)
-
-        // Check first if the employee id exists
-        if (!Employee::where('id', $empId)->exists())
-            return Extensions::encodeFailMessage(Messages::QR_CODE_NOT_RECOGNIZED);
 
         // The current date
         $currentDate = Carbon::now();

@@ -42,6 +42,9 @@ class Employee extends Model
                                                     // -> None   - No security
                                                     // -> Medium - PIN Code
                                                     // -> High   - App
+    public const f_PINCode      = 'pin_code';
+    public const f_PINFlags     = 'pin_flag';       // -> Enabled | Disabled
+
     public static function getTableName() : string {
         return (new self)->getTable();
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Utils\Constants;
 use App\Models\Employee;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,7 +15,8 @@ class CreateEmployeesTable extends Migration
      */
     public function up()
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('employees', function (Blueprint $table) 
+        {
             $table->id();
             $table->string(Employee::f_EmpNo,       32)->unique();
             $table->string(Employee::f_FirstName,   32);
@@ -25,6 +27,14 @@ class CreateEmployeesTable extends Migration
             $table->tinyInteger(Employee::f_Position);
             $table->string(Employee::f_Status,      16)->default(Employee::ON_STATUS_DUTY);
             $table->string(Employee::f_Photo          )->nullable();
+
+            // Ideal PIN code length is between 4-12
+            // PIN FLAG OFF -> PIN Disabled
+            // PIN FLAG ON  -> PIN Enabled
+            // PIN FLAG 2FA -> PIN Enabled for 2-Factor Auth (Scanner)
+
+            $table->string(Employee::f_PINFlags,     8)->default(Constants::FLAG_OFF);
+            $table->string(Employee::f_PINCode,     16)->nullable();
 
             $table->timestamps();
         });

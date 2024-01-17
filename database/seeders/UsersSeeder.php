@@ -20,7 +20,7 @@ class UsersSeeder extends Seeder
                 'firstname'     => 'Sudo',
                 'lastname'      => 'Admin',
                 'username'      => 'sudo',
-                'email'         => 'sudo@laravel.com',
+                'email'         => 'ptlangsakalam@gmail.com',
                 'password'      => Hash::make('root'),
             ],
             [

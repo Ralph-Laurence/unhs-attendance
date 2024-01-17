@@ -6,6 +6,15 @@
     <link rel="stylesheet" href="{{ asset('css/main/scanner-page.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/effects/slide-text.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/main/components/loader.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/main/components/fab.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/main/components/snackbar.css') }}" />
+    <style>
+        #input-pin-no::placeholder,
+        #input-id-no::placeholder {
+            font-size: 18px;
+            transform: translate3d(0, -3px, 0);
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -86,7 +95,7 @@
         </div>
     </div>
 
-    {{-- <div class="row px-5 mx-3 py-3">
+    <div class="row px-5 mx-3 py-3">
         <div class="col">
             <span class="opacity-75 small">&copy; {{ $layoutTitles['footer'] }}</span>
         </div>
@@ -95,7 +104,12 @@
                 <span class="opacity-75 small">{{ $layoutTitles['version'] }}</span>
             </div>
         </div>
-    </div> --}}
+    </div>
+
+    <button type="button" data-mdb-toggle="modal" data-mdb-target="#pinAuthModal" data-mdb-ripple-init
+        class="btn shadow shadow-4-strong btn-floating fab fab-danger position-fixed mx-4 my-5 bottom-0 end-0" >
+        <i class="fa-solid fa-key"></i>
+      </button>
 
     <div class="d-none beep-sounds">
         <audio src="{{ asset('audio/beep-time-in.mp3') }}" id="beep-time-in"></audio>
@@ -104,6 +118,45 @@
     </div>
 
 @endsection
+
+@push('dialogs')
+<div class="modal fade" data-mdb-keyboard="false" data-mdb-backdrop="static" id="pinAuthModal" tabindex="-1" aria-labelledby="pinAuthModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header py-2 user-select-none">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="{{ asset('images/internal/icons/modal_icon_pin_auth.png') }}" alt="icon" class="modal-icon">
+                    
+                    <h6 class="modal-title mb-0" id="pinAuthModalLabel">Authenticate with PIN</h6>
+                </div>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-5 py-3 opacity-75 user-select-none">
+                <h6 class="text-14 text-center mb-4">
+                    Having problems with the scanner?<br><br>
+                    Did you misplace your QR Code?<br><br>
+                    <b>Use your PIN Code instead.</b>
+                </h6>
+                <div class="alert alert-danger p-2 text-center pin-auth-alert-error d-hidden"></div>
+                <div class="w-100 flex-center">
+                    <form class="frm-pin-auth w-75" data-action-target="{{ $routes['pincodeForm'] }}" aria-autocomplete="none">
+                        @csrf
+                        <x-text-box as="input-id-no" placeholder="ID Number" maxlength="32" class="numeric-dash fs-3" parent-classes="mb-3" required autocomplete="new-password" aria-autocomplete="none"/>
+                        <x-text-box of="password" as="input-pin-no" placeholder="PIN Code" maxlength="8" class="numeric fs-3" required autocomplete="new-password" aria-autocomplete="new-password"/>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel btn-secondary flat-button" data-mdb-ripple-init
+                    data-mdb-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-ok btn-primary flat-button shadow-0" data-mdb-dismissx="modal"
+                    data-mdb-ripple-init>OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endpush
 
 @push('scripts')
     <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
@@ -116,17 +169,5 @@
     <script src="{{ asset('js/main/utils.js') }}"></script>
     <script src="{{ asset('js/main/scanner-page/scanner.js') }}"></script>
     <script src="{{ asset('js/main/scanner-page/calendar.js') }}"></script>
-    <script>
-        
-        /*
-        // Assuming 'table' is your DataTable instance
-        var data = table.row('#row-3').data(); // replace '#row-3' with the id of the row you want to move
-
-        // Remove the row from the table
-        table.row('#row-3').remove().draw();
-
-        // Add the row back at the beginning
-        table.row.add(data).draw();
-        */
-    </script>
+    <script src="{{ asset('js/components/snackbar.js') }}"></script>
 @endpush

@@ -26,7 +26,11 @@
 <body>
 
     @include('modals.alert')
+    @stack('dialogs')
     
+    {{-- SNACKBAR HOLDER --}}
+    <div class="snackbar-frame position-fixed bottom-0 end-0 flex-column-reverse d-flex gap-2"></div>
+
     <div class="container-fluid h-100 overflow-hidden">
         @yield('content')
     </div>

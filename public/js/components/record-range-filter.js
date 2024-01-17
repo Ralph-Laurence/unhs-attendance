@@ -9,26 +9,24 @@ $(document).ready(function ()
 
         $('#selected-month-index').val(month).trigger('change');
         
+        // Remove 'check' icon on previous checked items
+        // then set the icon to the currently selected
         $('.month-select-dropmenu .month-select .month-item').removeClass(selected_month_class);
         $(this).addClass(selected_month_class);
 
         redrawSelectedRangeIcon($(this).closest('.month-range-dropstart').find('.dropdown-item'));
-
-        $(this).closest('.record-range-dropdown')
-               .find('#record-date-dropdown-button .button-text')
-               .text('By Month');
+        setDropbuttonText($(this), 'By Month');
     });
 
     $('.record-range-filter .dropdown-item').on('click', function ()
     {
+        // If the dropdown item is a submenu, do not add  a
+        // check indicator to it unless its item was selected
         if ($(this).is('.with-submenu'))
             return;
 
         redrawSelectedRangeIcon($(this));
-
-        $(this).closest('.record-range-dropdown')
-               .find('#record-date-dropdown-button .button-text')
-               .text($(this).data('button-text'));
+        setDropbuttonText($(this), $(this).data('button-text'));
     });
 });
 
@@ -36,4 +34,11 @@ function redrawSelectedRangeIcon(sender)
 {
     $('.record-range-filter .dropdown-item').removeClass(selected_range_class);
     sender.addClass(selected_range_class);
+}
+
+function setDropbuttonText(sender, text) 
+{
+    sender.closest('.record-range-dropdown')
+        .find('#record-date-dropdown-button .button-text')
+        .text(text);
 }

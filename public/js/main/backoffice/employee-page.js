@@ -113,7 +113,7 @@ function handleEvents()
         if (name)
             name = name.trim();
 
-        let message = sanitize(`You are about to remove the employee <i><b>"${name}"</b></i> from the ${desc_emp_role} records. This action will also erase all attendance data associated with this employee.<br><br>Are you sure you want to proceed?`);
+        let message = sanitize(`You are about to remove the ${desc_emp_role} <i><b>"${name}"</b></i> from the employee records. This action will also erase all data associated with this employee such as attendances.<br><br>Are you sure you want to proceed?`);
 
         alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
     });
