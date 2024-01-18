@@ -6,7 +6,7 @@
 
 <div class="dropdown record-range-dropdown">
     <button class="btn btn-secondary flat-button dropdown-toggle shadow-0" id="record-date-dropdown-button"
-        data-mdb-toggle="dropdown" aria-expanded="false" data-mdb-auto-close="outside">
+        data-mdb-toggle="dropdown" aria-expanded="false" data-mdb-auto-close="outside" disabled>
         <span class="me-1 button-text">Today</span>
         <i class="fas fa-chevron-down opacity-65"></i>
     </button>
@@ -14,7 +14,7 @@
         <li><a class="dropdown-item daily selected-option" role="button" data-button-text="Today">Today</a></li>
         <li><a class="dropdown-item weekly" role="button" data-button-text="This Week">This Week</a></li>
         <li class="dropstart month-range-dropstart">
-            <a class="dropdown-item dropdown-togglex with-submenu" id="month-range-dropdown-button"
+            <a class="dropdown-item with-submenu" id="month-range-dropdown-button"
                 data-mdb-toggle="dropdown" role="button" data-button-text="By Month">By Month</a>
             <div class="dropdown-menu month-select-dropmenu overflow-hidden" aria-labelledby="month-range-dropdown-button" >
                 <div class="bg-color-primary p-2 flex-center mb-2">

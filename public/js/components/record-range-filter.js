@@ -1,6 +1,9 @@
 const selected_month_class = 'selected-month';
 const selected_range_class = 'selected-option';
 
+let rangeFilterEl;
+let rangeFilterDropdown;
+
 $(document).ready(function ()
 {
     $('.month-select-dropmenu .month-select .month-item').on('click', function ()
@@ -28,6 +31,9 @@ $(document).ready(function ()
         redrawSelectedRangeIcon($(this));
         setDropbuttonText($(this), $(this).data('button-text'));
     });
+
+    rangeFilterEl = $('#record-date-dropdown-button');
+    rangeFilterDropdown = new mdb.Dropdown(rangeFilterEl);
 });
 
 function redrawSelectedRangeIcon(sender)
@@ -41,4 +47,15 @@ function setDropbuttonText(sender, text)
     sender.closest('.record-range-dropdown')
         .find('#record-date-dropdown-button .button-text')
         .text(text);
+}
+
+function finishRangeFilter()
+{
+    rangeFilterDropdown.hide();
+    rangeFilterEl.prop('disabled', true);
+
+}
+
+function enableRangeFilter() {  
+    rangeFilterEl.prop('disabled', false);
 }

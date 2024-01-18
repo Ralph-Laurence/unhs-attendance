@@ -49,9 +49,9 @@ function extractDate(timestamp)
 function getCurrentDateParts()
 {
     let dateToday = new Date();
-    let currentYear = dateToday.getUTCFullYear();
-    let currentMonth = monthNames[dateToday.getUTCMonth()];
-    let currentDay = (dateToday.getUTCDate() < 10 ? '0' + dateToday.getUTCDate() : dateToday.getUTCDate());
+    let currentYear = dateToday.getFullYear();
+    let currentMonth = monthNames[dateToday.getMonth()];
+    let currentDay = (dateToday.getDate() < 10 ? '0' + dateToday.getDate() : dateToday.getDate());
 
     let parts = {
         'year': currentYear,

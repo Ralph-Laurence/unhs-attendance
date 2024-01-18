@@ -8,9 +8,9 @@ use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
 use App\Models\Attendance;
 use App\Models\Employee;
-use Exception;
 use Hashids\Hashids;
 use Illuminate\Http\Request;
+use Exception;
 
 class AttendanceController extends Controller
 {
@@ -42,13 +42,7 @@ class AttendanceController extends Controller
         ];
 
         // Role filters will be used for <select> dropdowns
-        $roleFilters = [];
-
-        foreach (Employee::RoleToString as $k => $v) 
-        {
-            $hashKey = $this->hashids->encode($k);
-            $roleFilters[$hashKey] = $v;
-        }
+        $roleFilters = array_values(Employee::RoleToString);
 
         return view('backoffice.attendance.index')
             ->with('routes'             , $routes)

@@ -185,7 +185,7 @@ class Attendance extends Model
 
         Extensions::hashRowIds($dataset);
         
-        return $this->encodeAttendanceData($dataset, 'Today');
+        return $this->encodeAttendanceData($request, $dataset, 'Today');
     }
 
     public function getWeeklyAttendances(Request $request)
@@ -200,7 +200,7 @@ class Attendance extends Model
 
         Extensions::hashRowIds($dataset);
 
-        return $this->encodeAttendanceData($dataset, "Current Week (week #$currentWeek)");
+        return $this->encodeAttendanceData($request, $dataset, "This Week (week #$currentWeek)");
     }
 
     public function getMonthlyAttendances(Request $request)
@@ -220,13 +220,27 @@ class Attendance extends Model
 
         $monthName = Carbon::createFromFormat('!m', $monthIndex)->monthName;
 
-        return $this->encodeAttendanceData($dataset, "Month of $monthName");
+        return $this->encodeAttendanceData($request, $dataset, "Month of $monthName");
     }
 
     private function applyRoleFilter(Request &$request, &$dataset)
     {
-        if ($request->has('roleFilter') && $request->filled('roleFilter'))
-            $dataset->where('e.'.Employee::f_Position, '=', $request->get('employeeType'));
+        if (
+            ($request->has('role') && $request->filled('role')) && 
+            ($request->input('role') != Constants::RECORD_FILTER_ALL)
+        )
+        {
+            $role  = $request->input('role');
+            $roles = Employee::RoleToString; 
+            
+            if (!in_array($role, $roles))
+            {
+                $request->replace(['role' => Constants::RECORD_FILTER_ALL]);
+                return;
+            }
+
+            $dataset->where('e.'.Employee::f_Position, '=', array_flip($roles)[ $role ]);
+        }
     }
 
     /**
@@ -248,7 +262,7 @@ class Attendance extends Model
             'created_at' ,
         ]);
 
-        $fields  = array_merge($attendanceFields, $employeeFields);
+        $fields = array_merge($attendanceFields, $employeeFields);
         $query = DB::table(self::getTableName() . ' as a')
                 ->select($fields)
                 ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
@@ -260,12 +274,25 @@ class Attendance extends Model
      /**
      * Encode the datasets into JSON that will be sent as AJAX response
      */
-    private function encodeAttendanceData($dataset, $descriptiveRange = null)
+    private function encodeAttendanceData(Request &$request, $dataset, $descriptiveRange = null)
     {
+        $filters = [
+            'select_range' => $request->input('range')
+        ];
+
+        if ($request->has('monthIndex'))
+            $filters['month_index'] = $request->input('monthIndex');
+
+        if ($request->has('role'))
+            $filters['select_role'] = $request->input('role');
+        else
+            $filters['select_role'] = Constants::RECORD_FILTER_ALL;
+
         return json_encode([
-            'data'  => $dataset->toArray(),
-            'range' => $descriptiveRange,
-            'icon' => Attendance::getIconClasses()
+            'data'      => $dataset->toArray(),
+            'range'     => $descriptiveRange,
+            'filters'   => $filters,
+            'icon'      => Attendance::getIconClasses()
         ]);
     }
 }

@@ -5,8 +5,14 @@ let dataTable_isFirstDraw = true;
 let iconStyles;
 let csrfToken;
 
-let range;
-let monthIndex;
+let global_rangeFilter;
+let global_monthFilter;
+let global_roleFilter;
+
+let last_selected_range;
+
+let roleFilterEl;
+let roleFilterDropdown;
 
 const RANGE_TODAY = 'this_day';
 const RANGE_WEEK  = 'this_week';
@@ -25,6 +31,8 @@ function initialize()
     csrfToken = $('meta[name="csrf-token"]').attr('content');
 
     dataSrcTarget = $(teachers_datasetTable).data('src-default');
+    roleFilterEl  = $("#role-filters-dropdown-button");
+    roleFilterDropdown = new mdb.Dropdown(roleFilterEl);
 
     bindTableDataSource(RANGE_TODAY);
 }
@@ -51,31 +59,42 @@ function handleEvents()
     });
 
     $('.record-range-filter .daily').on('click', function() {
-        bindTableDataSource(RANGE_TODAY);
+        bindTableDataSource(RANGE_TODAY, undefined, global_roleFilter);
     });
 
     $('.record-range-filter .weekly').on('click', function() {
-        bindTableDataSource(RANGE_WEEK);
-    });
-
-    $('.role-filters .dropdown-item').on('click', function() {
-        var role = $(this).data('role');
-        alert(role);
+        bindTableDataSource(RANGE_WEEK, undefined, global_roleFilter);
     });
 
     $('.month-select-dropmenu #selected-month-index').on('change', function()
     {
-        monthIndex = $(this).val();
-        bindTableDataSource(RANGE_MONTH, monthIndex);
+        global_monthFilter = $(this).val();
+        bindTableDataSource(RANGE_MONTH, global_monthFilter, global_roleFilter);
+    });
+
+    $('.role-filters .dropdown-item').on('click', function() 
+    {        
+        let option = $(this);
+
+        global_roleFilter = option.data('role');
+
+        $('.role-filters .dropdown-item').removeClass('selected-option');
+        option.addClass('selected-option');
+
+        $(this).closest('.dropdown').find('.dropdown-toggle').text(global_roleFilter);
+        bindTableDataSource(last_selected_range, global_monthFilter, global_roleFilter);
     });
 }
 
-function bindTableDataSource(new_range, new_monthIndex)
+function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
 {
+    disableControlButtons();
+
     let currentDate = getCurrentDateParts();
 
-    range = new_range;
-    monthIndex = new_monthIndex;
+    global_rangeFilter  = ref_range;
+    global_roleFilter   = ref_roleFilter;
+    global_monthFilter  = ref_monthIndex;
 
     let options = {
         "deferRender"  : true,
@@ -97,20 +116,24 @@ function bindTableDataSource(new_range, new_monthIndex)
             var isEmpty = this.api().rows().count() === 0;
 
             if (isEmpty)
-                snackbar.showInfo('No data to show');
+                snackbar.showInfo('No records to show');
         },
 
         ajax: {
 
-            url     : dataSrcTarget,
-            type    : 'POST',
-            dataType: 'JSON',
-            dataSrc : function(json) 
+            url      : dataSrcTarget,
+            type     : 'POST',
+            dataType : 'JSON',
+            dataSrc  : function(json) 
             {
                 if (iconStyles == undefined)
                     iconStyles = json.icon;
 
-                if (json && 'code' in json)
+                if (!json)
+                    return;
+
+                // Display Messages By Error Codes
+                if ('code' in json) 
                 {
                     if (json.code == -1) 
                     {
@@ -121,22 +144,37 @@ function bindTableDataSource(new_range, new_monthIndex)
                     }
                 }
 
+                // Descriptive Range
                 if ('range' in json)
                 {
                     if (json.range)
                         $('.card-title .attendance-range').text(json.range);
                 }
 
-                monthIndex = undefined;
+                // Last Selected Range Filters
+                if ('filters' in json)
+                {
+                    last_selected_range = json.filters.select_range;
+                    
+                    if (last_selected_range == RANGE_MONTH)
+                        global_monthFilter = json.filters['month_index'];
+
+                    if (json.filters.select_role)
+                        $('.lbl-employee-filter').text(json.filters.select_role);
+                }
+
+                // After AJAX response, reenable the control buttons
+                enableControlButtons();
 
                 return json.data;
             },
             data: function () 
             {
                 return {
-                    '_token' : csrfToken,
-                    'monthIndex': monthIndex,
-                    'range': range
+                    '_token'    : csrfToken,
+                    'monthIndex': global_monthFilter,
+                    'range'     : global_rangeFilter,
+                    'role'      : global_roleFilter
                 }
             }
         },
@@ -314,4 +352,18 @@ function convertToFullMonth(dateString)
 
     // Return the full month name and day
     return fullMonth + ' ' + day;
+}
+
+function enableControlButtons()
+{
+    enableRangeFilter();
+    roleFilterEl.prop('disabled', false);
+}
+
+function disableControlButtons()
+{
+    finishRangeFilter();
+
+    roleFilterDropdown.hide();
+    roleFilterEl.prop('disabled', true);
 }

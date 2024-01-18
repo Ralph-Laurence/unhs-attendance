@@ -160,6 +160,11 @@ Button Overrides
     opacity: .85;
 }
 
+.flat-button.btn-secondary:disabled {
+    background-color: #F1F5FB;
+    color: #AFAFBB;
+}
+
 .flat-button.btn-primary {
     background-color: var(--primary-color);
 }
