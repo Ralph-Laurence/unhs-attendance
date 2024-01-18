@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\backoffice;
 
+use App\Http\Controllers\Controller;
 use App\Http\Text\Messages;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
@@ -40,6 +41,7 @@ class AttendanceController extends Controller
             'scannerRoute' => route(RouteNames::Scanner['index'])
         ];
 
+        // Role filters will be used for <select> dropdowns
         $roleFilters = [];
 
         foreach (Employee::RoleToString as $k => $v) 
@@ -107,31 +109,3 @@ class AttendanceController extends Controller
         Attendance::autoAbsentEmployees();
     }
 }
-
-
-/**
-$user = User::find(1);
-
-if ($user->trashed()) {
-    // The user was soft-deleted
-}
-* In this code, trashed will return true if the user was soft-deleted, 
-* and false otherwise. This can be useful if we’re using soft deletes 
-* in our Laravel application. If we’re not using soft deletes, we can 
-* ignore this part.
- */
-
- /**
-  * To show all employees including their total ‘late’ timestamps, you can use the following query:
-SELECT
-	CONCAT(e.firstname,' ', e.middlename,' ', e.lastname) as 'name',
-    COUNT(a.late) as 'late_count',
-    GROUP_CONCAT(a.late SEPARATOR ', ') as 'late_timestamps'
-FROM employees as e
-LEFT JOIN attendances as a ON a.emp_fk_id = e.id
-GROUP BY e.id```
-
-This query will return the name of each employee, the number of times they were late, and a comma-separated list of all the late timestamps for each employee [^1^][1].
-
-I hope this helps!
-  */

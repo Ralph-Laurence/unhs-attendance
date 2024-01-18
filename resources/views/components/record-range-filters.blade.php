@@ -1,6 +1,6 @@
 @once
     @push('styles')
-        <link rel="stylesheet" href="{{ asset('css/main/components/month-select.css') }}" />
+        <link rel="stylesheet" href="{{ asset('css/main/components/record-range-filters.css') }}" />
     @endpush 
 @endonce
 

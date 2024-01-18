@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\backoffice\AttendanceController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\backoffice\TeachersController;

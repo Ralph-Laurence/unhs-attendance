@@ -185,6 +185,24 @@ Button Overrides
     background-color: #F6BE48;
 }
 
+/*
+Dropdown Menu Overrides
+*/
+.dropdown .dropdown-item:active {
+    background-color: var(--primary-lighter);
+}
+
+.dropdown .dropdown-item.selected-option {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.dropdown .dropdown-item.selected-option::after {
+    font-family: var(--font-awesome);
+    content: '\f00c';
+    float: right;
+}
+
 /* Text Color Utilities */
 .text-darker {
     color: var(--dark-color);

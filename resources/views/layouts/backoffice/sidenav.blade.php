@@ -6,7 +6,7 @@ $routeItems =
     ['wildcard' => '',      'icon' => 'fa-chart-pie',    'text' => 'Dashboard',      'target' => ''], //route(RouteNames::DASHBOARD['index'])
     ['wildcard' => 'backoffice.attendance',             'icon' => 'fa-calendar-check',      'text' => 'Attendance',     'target' => route(RouteNames::Attendance['index'])],
     ['wildcard' => 'backoffice.attendance.absence',     'icon' => 'fa-calendar-xmark',      'text' => 'Absence',        'target' => '', 'menu_type' => 'sub'],
-    ['wildcard' => 'backoffice.attendance.tardiness',   'icon' => 'fa-calendar-minus',      'text' => 'Tardiness',      'target' => '', 'menu_type' => 'sub' ],
+    ['wildcard' => 'backoffice.attendance.tardiness',   'icon' => 'fa-calendar-minus',      'text' => 'Late',           'target' => '', 'menu_type' => 'sub' ],
     ['wildcard' => 'backoffice.attendance.tardiness',   'icon' => 'fa-calendar-week',       'text' => 'Leave',          'target' => '', 'menu_type' => 'sub' ],
     ['wildcard' => 'backoffice.attendance.tardiness',   'icon' => 'fa-qrcode',              'text' => 'Scanner',        'target' => route(RouteNames::Scanner['index']), 'menu_type' => 'sub' ],
     ['wildcard' => 'backoffice.teachers',               'icon' => 'fa-person-chalkboard',   'text' => 'Teachers',       'target' => route(RouteNames::Teachers['index'])],

@@ -19,7 +19,7 @@
             <h6 class="card-title me-auto">
                 <span>Daily Time Records</span>
                 <i class="fas fa-caret-right mx-2 opacity-60"></i>
-                <span class="opacity-60 attendance-range text-14"></span>
+                <span class="opacity-90 attendance-range text-14 text-primary-dark"></span>
             </h6>
 
             {{-- RECORD DATE RANGE FILTERS --}}

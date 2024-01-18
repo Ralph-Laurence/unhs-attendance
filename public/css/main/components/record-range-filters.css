@@ -4,8 +4,8 @@
 }
 
 .month-select .month-item {
-    min-width: 60px; 
-    width: 60px; 
+    min-width: 60px;
+    width: 60px;
     max-width: 60px;
 }
 
@@ -29,9 +29,6 @@
     padding-right: 4px;
 }
 
-.record-range-filter .dropdown-item.selected-option::after {
-    font-family: var(--font-awesome);
-    content: '\f00c';
-    color: var(--primary-color);
-    float: right;
+.month-range-dropstart .dropdown-item.selected-option::before {
+    color: white;
 }

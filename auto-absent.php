@@ -15,4 +15,4 @@ $response = $kernel->handle(
 );
 
 // Call your controller method
-app()->make('App\Http\Controllers\AttendanceController')->autoAbsentEmployees();
+app()->make('App\Http\Controllers\backoffice\AttendanceController')->autoAbsentEmployees();

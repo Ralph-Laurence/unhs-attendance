@@ -32,7 +32,7 @@ class Attendance extends Model
     public const f_WeekNo       = 'week_no';
 
     public const STATUS_PRESENT = 'Present';
-    public const STATUS_BREAK   = 'Lunch';//'Break';
+    public const STATUS_BREAK   = 'Lunch';
     public const STATUS_ABSENT  = 'Absent';
     
     public const STATUS_UNDERTIME = 'Undertime';
@@ -131,22 +131,18 @@ class Attendance extends Model
     /**
      * Select all employees who do not have an attendance record for the current day, 
      * then insert an “Absent” record for each of them in the attendance table.
+     * We will exclude those who are on leave.
      */
     public static function autoAbsentEmployees()
     {
-        $tblAttendance = self::getTableName(); //Attendance::getTableName();
+        $tblAttendance = self::getTableName();
 
-        // Get today's date
-        $today = Carbon::today();
         $currentDate = Carbon::now();
 
-        // Get all employees who do not have an attendance record 
-        // for today and are not on leave
         $employees = DB::table(Employee::getTableName() . ' as e')
-            ->leftJoin("$tblAttendance as a", function ($join) use ($today, $currentDate) 
+            ->leftJoin("$tblAttendance as a", function ($join) use ($currentDate) 
             {
                 $join->on('e.id', '=', 'a.' . Attendance::f_Emp_FK_ID)
-                //->whereDate('a.created_at', '=', $today);
                 ->whereBetween('a.created_at', 
                 [
                     $currentDate->startOfDay()->format(Constants::TimestampFormat), 
@@ -184,9 +180,7 @@ class Attendance extends Model
                 $currentDate->endOfDay()->format(Constants::TimestampFormat)
             ]);
 
-        if ($request->has('employeeType') && $request->filled('employeeType'))
-            $dataset->where('e.role', '=', $request->get('employeeType'));
-
+        $this->applyRoleFilter($request, $dataset);
         $dataset = $dataset->get();
 
         Extensions::hashRowIds($dataset);
@@ -194,19 +188,15 @@ class Attendance extends Model
         return $this->encodeAttendanceData($dataset, 'Today');
     }
 
-    /**
-     * Retrieve all attendances this week
-     */
     public function getWeeklyAttendances(Request $request)
     {
         $currentWeek = Extensions::getCurrentWeek();
 
         $dataset = $this->buildAttendanceQuery()
-            ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek)
-            ->get();
+                   ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek);
 
-        if ($request->has('employeeType') && $request->filled('employeeType'))
-            $dataset->where('e.role', '=', $request->get('employeeType'));
+        $this->applyRoleFilter($request, $dataset);
+        $dataset = $dataset->get();
 
         Extensions::hashRowIds($dataset);
 
@@ -215,22 +205,28 @@ class Attendance extends Model
 
     public function getMonthlyAttendances(Request $request)
     {
-        //error_log(print_r($request->all(), true));
-
         if (!$request->filled('monthIndex'))
             return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
 
         $monthIndex = $request->input('monthIndex');
 
         $dataset = $this->buildAttendanceQuery()
-            ->whereMonth('a.created_at', '=', $monthIndex)
-            ->get();
+            ->whereMonth('a.created_at', '=', $monthIndex);
+        
+        $this->applyRoleFilter($request, $dataset);
+        $dataset = $dataset->get();
 
         Extensions::hashRowIds($dataset);
 
         $monthName = Carbon::createFromFormat('!m', $monthIndex)->monthName;
 
         return $this->encodeAttendanceData($dataset, "Month of $monthName");
+    }
+
+    private function applyRoleFilter(Request &$request, &$dataset)
+    {
+        if ($request->has('roleFilter') && $request->filled('roleFilter'))
+            $dataset->where('e.'.Employee::f_Position, '=', $request->get('employeeType'));
     }
 
     /**
@@ -242,7 +238,6 @@ class Attendance extends Model
             Employee::f_FirstName  . ' as fname',
             Employee::f_MiddleName . ' as mname',
             Employee::f_LastName   . ' as lname',
-            Employee::f_Position   . ' as role',
         ]);
         $attendanceFields = Extensions::prefixArray('a.', [
             Attendance::f_TimeIn   . ' as timein',
@@ -255,9 +250,9 @@ class Attendance extends Model
 
         $fields  = array_merge($attendanceFields, $employeeFields);
         $query = DB::table(self::getTableName() . ' as a')
-        ->select($fields)
-        ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
-        ->orderBy('a.created_at', 'desc');
+                ->select($fields)
+                ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
+                ->orderBy('a.created_at', 'desc');
 
         return $query;
     }
