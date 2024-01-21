@@ -37,21 +37,20 @@ class EmployeeController extends Controller
 
         try 
         {
-            $insertResults = $this->addEmployee($inputs);
+            $insertResults = $this->addEmployee($inputs)->toArray();
 
             // Convert the collection to array so that we can use
             // these into the frontend such as adding a new row to
             // the datatable
-            $employeeData = $insertResults->toArray();
-            $encodedId    = $this->hashids->encode($employeeData['id']);
-            $empNum       = $employeeData[Employee::f_EmpNo];
+            $encodedId    = $this->hashids->encode($insertResults['id']);
+            $empNum       = $insertResults[Employee::f_EmpNo];
 
             $rowData = [
                 'emp_num'       => $empNum,
-                'fname'         => $employeeData[Employee::f_FirstName],
-                'mname'         => $employeeData[Employee::f_MiddleName],
-                'lname'         => $employeeData[Employee::f_LastName],
-                'emp_status'    => $employeeData[Employee::f_Status],
+                'fname'         => $insertResults[Employee::f_FirstName],
+                'mname'         => $insertResults[Employee::f_MiddleName],
+                'lname'         => $insertResults[Employee::f_LastName],
+                'emp_status'    => $insertResults[Employee::f_Status],
                 'total_lates'   => 0,
                 'total_leave'   => 0,
                 'total_absents' => 0,
@@ -76,9 +75,12 @@ class EmployeeController extends Controller
             // If the email was provided, send the qr code via email
             if (!empty($email))
             {
-                // Replace the #recipient# with firstname
-                $mailMessage = str_replace('#recipient#', $employeeData[Employee::f_FirstName], Messages::EMAIL_REGISTER_EMPLOYEE);
+                $str_search  = ['#recipient#', '#pin#'];
+                $str_replace = [ $insertResults[Employee::f_FirstName], $insertResults[Employee::f_PINCode] ];
 
+                // Replace the #recipient# with firstname
+                $mailMessage = str_replace($str_search, $str_replace, Messages::EMAIL_REGISTER_EMPLOYEE);
+                
                 // Build the email then send it
                 Mail::raw($mailMessage, function ($message) use ($qrcode, $email) {
 
@@ -127,8 +129,6 @@ class EmployeeController extends Controller
 
     private function addEmployee($inputs)
     {
-        error_log(print_r($inputs, true));
-
         $inputs['input-role'] = array_flip(Employee::RoleToString)[
             $inputs['input-role']
         ];
@@ -141,7 +141,8 @@ class EmployeeController extends Controller
             Employee::f_Email       => $inputs['input-email'],
             Employee::f_Contact     => $inputs['input-contact'],
             Employee::f_Position    => $inputs['input-role'],
-            Employee::f_Status      => Employee::ON_STATUS_DUTY
+            Employee::f_Status      => Employee::ON_STATUS_DUTY,
+            Employee::f_PINCode     => random_int(1000, 9999)       // 4-digit PIN
         ];
 
         // Save the newly created employee into database
@@ -281,8 +282,14 @@ class EmployeeController extends Controller
             'input-email.unique'   => ValidationMessages::unique('Email'),
         ];
 
+        $employeeTable = Employee::getTableName();
+        
         $validationFields = array(
-            'input-id-no'   => 'required|regex:'        . RegexPatterns::NUMERIC_DASH,// . $employeesUnique,
+            'input-id-no'   => [
+                'required',
+                'regex:' . RegexPatterns::NUMERIC_DASH,
+                Rule::unique($employeeTable, Employee::f_EmpNo)
+            ],
             'input-fname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-mname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-lname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
@@ -290,8 +297,8 @@ class EmployeeController extends Controller
                 'required',
                 'email',
                 'max:64',
-                Rule::unique('users', 'email'),
-                Rule::unique(Employee::getTableName(), Employee::f_Email),
+                Rule::unique('users', Employee::f_Email),
+                Rule::unique($employeeTable, Employee::f_Email),
             ],
             'input-contact' => 'nullable|regex:'        . RegexPatterns::MOBILE_NO,
             'input-role'    => 'required|not_in:'       . implode(',', array_keys(Employee::RoleToString))
@@ -308,6 +315,12 @@ class EmployeeController extends Controller
                 'max:64',
                 Rule::unique('users', 'email')->ignore($ignoreId),
                 Rule::unique(Employee::getTableName(), Employee::f_Email)->ignore($ignoreId),
+            ];
+
+            $validationFields['input-id-no'] = [
+                'required',
+                'regex:' . RegexPatterns::NUMERIC_DASH,
+                Rule::unique($employeeTable, Employee::f_EmpNo)->ignore($ignoreId)
             ];
         }
 

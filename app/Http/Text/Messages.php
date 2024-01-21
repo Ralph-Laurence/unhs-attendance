@@ -22,8 +22,11 @@ class Messages
     public const STAFF_DELETE_OK         = 'Employee successfully removed from staff records.';
     public const STAFF_DELETE_FAIL       = 'Failed to remove employee from the staff records.';
 
-    public const EMAIL_REGISTER_EMPLOYEE = 
-    "Hello #recipient#, this QR code will be used for your authentication in our Attendance Monitoring System.\n\nTo use it, simply present the QR code at the attendance scanner. This will automatically log your attendance in our system.";
+    public const EMAIL_REGISTER_EMPLOYEE = "Hello #recipient#, this QR code will be used for your " . 
+                                           "authentication in our Attendance Monitoring System.\n\n". 
+                                           "To use it, simply present the QR code at the attendance scanner. " . 
+                                           "This will automatically log your attendance in our system.\n\n" . 
+                                           "In case the QR code is unavailable, you can use your PIN code for authentication.\n\nPIN Code: #pin#";
     // 
     // \n\n For added security, we also offer the option to enable 2-factor authentication. By setting a PIN number, you can ensure that your attendance record is doubly secure. To enable this feature, please visit the link we have provided in this email.
     public const EMAIL_SUBJECT_QRCODE    = 'QR Code for Attendance Monitoring System';
