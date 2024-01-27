@@ -16,8 +16,8 @@
 
         {{-- TABLE TITLE HEADER --}}
         <div class="d-flex align-items-center gap-1">
-            <a href="{{ url()->previous() }}" class="text-primary-dark text-sm border rounded-6 px-2 py-1 me-auto">
-                <i class="fas fa-arrow-left"></i>
+            <a href="{{ url()->previous() }}" class="btn btn-sm btn-warning flat-button px-2 py-1 me-auto shadow-0">
+                <i class="fas fa-arrow-left me-1"></i>
                 Back
             </a>
             <div class="dropdown">

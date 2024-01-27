@@ -24,6 +24,24 @@ class RouteNames
         'autoAbsent' => 'backoffice.attendance.auto-absent'
     ];
 
+    public const Absence = [
+        'get'        => 'backoffice.absence.get',
+        'index'      => 'backoffice.absence',
+        'delete'     => 'backoffice.absence.delete'
+    ];
+
+    public const Late = [
+        'get'        => 'backoffice.late.get',
+        'index'      => 'backoffice.late',
+        'delete'     => 'backoffice.late.delete'
+    ];
+
+    public const Leave = [
+        'get'        => 'backoffice.leave.get',
+        'index'      => 'backoffice.leave',
+        'delete'     => 'backoffice.leave.delete'
+    ];
+
     public const Teachers = [
         'index'     => 'backoffice.teachers',
         'all'       => 'backoffice.teachers.all',
@@ -46,5 +64,9 @@ class RouteNames
         'update'    => 'backoffice.staff.update',
         'details'   => 'backoffice.staff.details',
         'destroy'   => 'backoffice.staff.destroy',
+    ];
+
+    public const AJAX = [
+        'list-empno' => 'backoffice.staff.list.empno',
     ];
 }

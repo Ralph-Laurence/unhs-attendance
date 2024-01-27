@@ -87,7 +87,7 @@ class ScannerController extends Controller
         // they are filled and meets the required criteria
         $validationFields = [
             'input-id-no'  => 'required|regex:' . RegexPatterns::NUMERIC_DASH,
-            'input-pin-no' => 'required|regex:' . RegexPatterns::NUMERIC_DASH
+            'input-pin-no' => 'required|regex:' . RegexPatterns::NUMERIC
         ];
 
         $validationMessages = 
@@ -112,15 +112,24 @@ class ScannerController extends Controller
 
         // We assume successful validation. 
         // Find the employee with that matching credentials
-        $employee = Employee::select('id')
+        $employee = Employee::select(['id', Employee::f_PINCode . ' as pin'])
                   ->where(Employee::f_EmpNo,   '=', $inputs['input-id-no'])
-                  ->where(Employee::f_PINCode, '=', $inputs['input-pin-no'])
                   ->first();
 
-        if (!$employee)
-            return Extensions::encodeFailMessage(Messages::ATTENDANCE_CRED_FAIL, Constants::RecordNotFound);
+        $errMessage = Extensions::encodeFailMessage(Messages::ATTENDANCE_CRED_FAIL, Constants::RecordNotFound);
 
-        return $this->handleAttendance($employee->id);
+        if (!$employee)
+            return $errMessage;
+
+        $emp = $employee->toArray();
+        $pin = decrypt($emp['pin']);
+
+        if ($pin != $inputs['input-pin-no'])
+            return $errMessage;
+
+        error_log(print_r($emp, true));
+        
+        return $this->handleAttendance($emp['id']);
     }
 
     // Process Attendance From Scanner
@@ -264,18 +273,42 @@ class ScannerController extends Controller
         $overtime   = $workHours > 8 ? $workHours - 8 : 0;
 
         // Check if TimeOut is before dismissal time 4:50 PM
-        $status = $timeOut->lt(Carbon::parse(Attendance::$earlyDismissal)) ? 
-                  Attendance::STATUS_UNDERTIME : 
-                  Attendance::STATUS_PRESENT;
+        // $status = $timeOut->lt(Carbon::parse(Attendance::$earlyDismissal)) ? 
+        //           Attendance::STATUS_UNDERTIME : 
+        //           Attendance::STATUS_PRESENT;
 
         $attendance->update([
             Attendance::f_TimeOut   => $timeOut,
-            Attendance::f_Status    => $status,
+            Attendance::f_Status    => Attendance::STATUS_PRESENT, //$status,
             Attendance::f_Duration  => Attendance::formatTimeDuration($duration),
             Attendance::f_UnderTime => Attendance::formatTimeDuration($undertime),
             Attendance::f_OverTime  => Attendance::formatTimeDuration($overtime),
         ]);
 
-        return Extensions::encodeSuccessMessage('Good Bye!', ['status' => $status]);
+        return Extensions::encodeSuccessMessage('Good Bye!');//, ['status' => $status]);
     }
 }
+
+/**
+* The total duration can be calculated by subtracting the time spent on lunch from the 
+* total time spent at work. Here’s how:
+
+timestamp [
+    'clockin'     => '2024-01-21 17:18:16', // 5:18pm
+    'lunch_start' => '2024-01-21 17:19:49', // 5:19pm
+    'lunch_end'   => '2024-01-21 23:32:25', 
+    'clock_out'   => '2024-01-21 23:32:34'
+]
+
+Calculate the total time spent at work: clock_out - clockin
+Calculate the total time spent on lunch: lunch_end - lunch_start
+Subtract the lunch time from the total work time to get the total duration.
+Let’s calculate:
+
+Total time at work: 23:32:34 - 17:18:16 = 6 hours, 14 minutes and 18 seconds
+Total time at lunch: 23:32:25 - 17:19:49 = 6 hours, 12 minutes and 36 seconds
+Total duration: 6 hours, 14 minutes and 18 seconds - 6 hours, 12 minutes and 36 seconds = 1 minute and 42 seconds
+So, the total duration is 1 minute and 42 seconds. Please note that this is a very short duration for a workday, 
+and the timestamps for lunch seem to be incorrect as they indicate that lunch ended after clocking out. 
+Please check the timestamps again.
+*/

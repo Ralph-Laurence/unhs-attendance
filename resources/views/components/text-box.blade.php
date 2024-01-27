@@ -36,6 +36,23 @@
 
     {{-- ERROR LABEL --}}
     <h6 class="px-2 my-1 text-danger text-xs error-label">{{ $errors->first($as) }}</h6>
+
+    @if ($attributes->has('suggest'))
+        <div class="auto-suggest-combobox position-absolute invisible" id="{{ $as .'-intellisense'}}"></div>
+        @once 
+            @push('scripts')
+                <script src="{{ asset('js/lib/bs5-autocomplete/autocomplete.js') }}"></script>
+            @endpush 
+        @endonce
+    
+    @elseif ($attributes->has('datepicker'))
+        <div class="x-datepicker position-absolute invisiblex border" id="{{ $as .'-x-datepicker'}}">
+            
+            <div class="date-picker-header bg-primary">
+                test
+            </div>
+        </div>
+    @endif
 </div>
 
 @once

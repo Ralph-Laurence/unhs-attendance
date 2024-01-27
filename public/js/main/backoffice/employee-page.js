@@ -184,8 +184,9 @@ function bindTableDataSource(url)
                 className: 'td-employee-name text-truncate',
                 width: '300px',
                 data: null,
-                render: function (data, type, row) {  
-                    return `<span class="text-darker">${[data.fname, data.mname, data.lname].join(' ')}</span>`;
+                render: function (data, type, row) 
+                {  
+                    return `<span class="text-darker">${data.emp_fullname}</span>`;
                 },
                 defaultContent: ''
             },

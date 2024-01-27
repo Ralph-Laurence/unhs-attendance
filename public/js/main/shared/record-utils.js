@@ -17,6 +17,19 @@ function createRowActions(recordKey)
     return html;
 }
 
+function createRowDeleteAction(recordKey)
+{
+    var html = 
+    `<div class="row-actions" data-record-key="${recordKey}">
+        <div class="loader d-none"></div>
+        <button class="btn btn-sm btn-delete"> 
+            <i class="fa-solid fa-trash"></i> 
+        </button>
+    </div>`;
+
+    return html;
+}
+
 function showRowActionButtons(showButtons, container)
 {
     if (!container)
@@ -34,4 +47,17 @@ function showRowActionSpinner(show, spinner)
         return;
 
     $(spinner).toggleClass('d-none', !show);
+}
+
+function updateRowEntryNumbers(dataTable)
+{
+    // Update the row numbers
+    // dataTable.rows().every(function (index)
+    // {
+    //     var pageInfo = dataTable.page.info();
+    //     var newRowIndex = pageInfo.start + index + 1;
+    //     $('td:eq(0)', this.node()).html(newRowIndex);
+    // });
+
+    
 }

@@ -9,6 +9,7 @@
     margin-right: 4px;
 }
 
+.status-badge.positive::before,
 .attendance-status.present::before {
     content: '\f058';
     color: var(--accent-color);
@@ -30,7 +31,13 @@
     color: var(--primary-color);
 }
 
+.status-badge.negative::before,
 .attendance-status.absent::before {
     content: '\f057';
     color: var(--danger-color);
+}
+
+.attendance-status.late::before {
+    content: '\f058';
+    color: var(--warning-color);
 }

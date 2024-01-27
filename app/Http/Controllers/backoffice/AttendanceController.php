@@ -8,6 +8,7 @@ use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Shared\Filters;
 use Hashids\Hashids;
 use Illuminate\Http\Request;
 use Exception;
@@ -16,21 +17,9 @@ class AttendanceController extends Controller
 {
     private $hashids;
 
-    private $attendanceRanges;
-
-    private const RANGE_TODAY = 'this_day';
-    private const RANGE_WEEK  = 'this_week';
-    private const RANGE_MONTH = 'by_month';
-
     public function __construct() 
     {
         $this->hashids = new Hashids();
-
-        $this->attendanceRanges = [
-            'today' => self::RANGE_TODAY,
-            'week'  => self::RANGE_WEEK,
-            'month' => self::RANGE_MONTH
-        ];
     }
 
     public function index()
@@ -79,15 +68,15 @@ class AttendanceController extends Controller
 
         // Make sure that the select range is one of the allowed values.
         // If not, set its default select period
-        if (!in_array($selectRange, $this->attendanceRanges, true))
+        if (!in_array($selectRange, Filters::getDateRangeFilters(), true))
             return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
 
         $model = new Attendance;
 
         $transactions = [
-            self::RANGE_TODAY => $model->getDailyAttendances($request),
-            self::RANGE_WEEK  => $model->getWeeklyAttendances($request),
-            self::RANGE_MONTH => $model->getMonthlyAttendances($request)
+            Filters::RANGE_TODAY => $model->getDailyAttendances($request),
+            Filters::RANGE_WEEK  => $model->getWeeklyAttendances($request),
+            Filters::RANGE_MONTH => $model->getMonthlyAttendances($request)
         ];
 
         $dataset = $transactions[$selectRange];

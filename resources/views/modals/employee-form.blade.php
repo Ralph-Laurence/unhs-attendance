@@ -26,7 +26,7 @@ $icons = [
                 <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismissx="modal"
                     aria-label="Close"></button>
             </div>
-            <div class="modal-body opacity-75 py-2">
+            <div class="modal-body py-2">
                 <small class="text-sm d-block mb-2">Please fill out all fields with an asterisk(*) as they are
                     required.</small>
                 <form data-post-create-target="{{ $postCreate }}" data-post-update-target="{{ $postUpdate }}" method="post">

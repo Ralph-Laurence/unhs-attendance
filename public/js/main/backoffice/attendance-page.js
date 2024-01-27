@@ -13,6 +13,7 @@ let last_selected_range;
 
 let roleFilterEl;
 let roleFilterDropdown;
+let lblAttendanceRange;
 
 const RANGE_TODAY = 'this_day';
 const RANGE_WEEK  = 'this_week';
@@ -33,6 +34,8 @@ function initialize()
     dataSrcTarget = $(teachers_datasetTable).data('src-default');
     roleFilterEl  = $("#role-filters-dropdown-button");
     roleFilterDropdown = new mdb.Dropdown(roleFilterEl);
+
+    lblAttendanceRange = $('.card-title .lbl-attendance-range');
 
     bindTableDataSource(RANGE_TODAY);
 }
@@ -81,7 +84,7 @@ function handleEvents()
         $('.role-filters .dropdown-item').removeClass('selected-option');
         option.addClass('selected-option');
 
-        $(this).closest('.dropdown').find('.dropdown-toggle').text(global_roleFilter);
+        $(this).closest('.dropdown').find('.dropdown-toggle .button-text').text(global_roleFilter);
         bindTableDataSource(last_selected_range, global_monthFilter, global_roleFilter);
     });
 }
@@ -95,6 +98,8 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
     global_rangeFilter  = ref_range;
     global_roleFilter   = ref_roleFilter;
     global_monthFilter  = ref_monthIndex;
+
+    // dataTable.column('empname:name').search('Donald').draw()
 
     let options = {
         "deferRender"  : true,
@@ -116,7 +121,19 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
             var isEmpty = this.api().rows().count() === 0;
 
             if (isEmpty)
+            {
                 snackbar.showInfo('No records to show');
+                return;
+            }
+
+            //updateRowEntryNumbers(dataTable);
+            // var api = dataTable.api();
+            // var startIndex = api.context[0]._iDisplayStart; // get the start index
+
+            // api.column(0, { page: 'current' }).nodes().each(function (cell, i)
+            // {
+            //     cell.innerHTML = startIndex + i + 1; // update cell content
+            // });
         },
 
         ajax: {
@@ -137,7 +154,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
                 {
                     if (json.code == -1) 
                     {
-                        $('.card-title .attendance-range').text('No data');
+                        lblAttendanceRange.text('No data');
                         alertModal.showDanger(json.message);
 
                         return [];
@@ -148,7 +165,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
                 if ('range' in json)
                 {
                     if (json.range)
-                        $('.card-title .attendance-range').text(json.range);
+                        lblAttendanceRange.text(json.range);
                 }
 
                 // Last Selected Range Filters
@@ -230,14 +247,16 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
             // Fourth Column -> Employee Name
             {
                 className: 'td-employee-name text-truncate',
-                width: '280px',
+                // width: '280px',
                 data: null,
-                render: function (data, type, row) {  
-                    return `<span class="text-darker">${[data.fname, data.mname, data.lname].join(' ')}</span>`;
+                name: 'empname',
+                render: function (data, type, row) 
+                {  
+                    return `<span class="text-darker">${data.emp_fullname}</span>`;
                 },
                 defaultContent: ''
             },
-            // Fifth Column -> Clockin Time
+            // Fifth Column -> Clockin Time 
             {
                 width: '100px',
                 data: 'timein',
@@ -256,7 +275,11 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
                 }
             },
             // Seventh Column -> Work Hours (Duration)
-            {data: 'duration', defaultContent: ''},
+            {
+                data: 'duration', 
+                width: '180px',
+                defaultContent: ''
+            },
 
             // Eighth Column -> Actions
             {

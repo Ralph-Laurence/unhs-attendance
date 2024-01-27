@@ -7,6 +7,7 @@
 <div class="dropdown record-range-dropdown">
     <button class="btn btn-secondary flat-button dropdown-toggle shadow-0" id="record-date-dropdown-button"
         data-mdb-toggle="dropdown" aria-expanded="false" data-mdb-auto-close="outside" disabled>
+        <i class="fas fa-calendar me-1 opacity-65"></i>
         <span class="me-1 button-text">Today</span>
         <i class="fas fa-chevron-down opacity-65"></i>
     </button>
@@ -32,9 +33,9 @@
                         @endif
                             
                             @if ($i == $currentMonthIndex)
-                                <button class="btn btn-sm btn-secondary flat-button mb-2 month-item current-month" 
+                                <button class="btn btn-sm flat-button mb-2 month-item current-month" 
                             @else
-                                <button class="btn btn-sm btn-secondary flat-button mb-2 month-item" 
+                                <button class="btn btn-sm btn-link text-primary-dark flat-button mb-2 month-item" 
                             @endif
                                 data-month="{{ $i }}">
                                 {{ date('M', mktime(0, 0, 0, $i, 1)) }}

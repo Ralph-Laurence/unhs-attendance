@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\backoffice\AbsenceController;
 use App\Http\Controllers\backoffice\AttendanceController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
+use App\Http\Controllers\backoffice\EmployeeController;
 use App\Http\Controllers\backoffice\TeachersController;
 use App\Http\Controllers\backoffice\StaffController;
+use App\Http\Controllers\backoffice\LateAttendanceController;
+use App\Http\Controllers\backoffice\LeaveRequestsController;
 use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
@@ -57,6 +61,33 @@ Route::controller(AttendanceController::class)->middleware(['auth'])
     Route::post('/backoffice/attendance/delete', 'destroy')->name(RouteNames::Attendance['delete']);
 });
 
+Route::controller(AbsenceController::class)->middleware(['auth'])
+->group(function()
+{
+    Route::get('/backoffice/attendance/absence', 'index')->name(RouteNames::Absence['index']);
+
+    Route::post('/backoffice/attendance/absence/get',    'getAbsences')->name(RouteNames::Absence['get']);
+    Route::post('/backoffice/attendance/absence/delete', 'destroy')->name(RouteNames::Absence['delete']);
+});
+
+Route::controller(LateAttendanceController::class)->middleware(['auth'])
+->group(function()
+{
+    Route::get('/backoffice/attendance/late', 'index')->name(RouteNames::Late['index']);
+
+    Route::post('/backoffice/attendance/late/get',    'getRecords')->name(RouteNames::Late['get']);
+    Route::post('/backoffice/attendance/late/delete', 'destroy')->name(RouteNames::Late['delete']);
+});
+
+Route::controller(LeaveRequestsController::class)->middleware(['auth'])
+->group(function()
+{
+    Route::get('/backoffice/leave', 'index')->name(RouteNames::Leave['index']);
+
+    Route::post('/backoffice/leave/get',    'getRecords')->name(RouteNames::Leave['get']);
+    Route::post('/backoffice/leave/delete', 'destroy')->name(RouteNames::Leave['delete']);
+});
+
 // Route::get('/home', function() {
 //     return view('home');
 // })->middleware(['auth']);
@@ -88,9 +119,16 @@ Route::controller(StaffController::class)->middleware(['auth'])
     Route::post('/backoffice/employees/staff/update',   'update')->name(RouteNames::Staff['update']);
 });
 
+Route::controller(EmployeeController::class)->middleware(['auth'])
+->group(function()
+{
+    Route::post('/ajax/employees/list/empno', 'listEmpNo')->name(RouteNames::AJAX['list-empno']);
+});
+
 Route::controller(TestController::class)->group(function(){
     Route::get('/test',     'index');
     Route::get('/qrtest',   'qrsamples');
+    Route::get('/pintest',  'pinsamples');
 });
 
 Route::get('/download/qr-code/{filename}/{outputname?}', function($filename)

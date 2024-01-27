@@ -18,13 +18,13 @@ class Employee extends Model
     public const HASH_SALT = 'EB7A1F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
 
+    public const RoleTeacher    = 0;
+    public const RoleStaff      = 1;
+    
     public const RoleToString = [
         self::RoleTeacher   => 'Teacher',
         self::RoleStaff     => 'Staff'
     ];
-
-    public const RoleTeacher    = 0;
-    public const RoleStaff      = 1;
 
     public const ON_STATUS_LEAVE = 'Leave';
     public const ON_STATUS_DUTY  = 'On Duty';
@@ -124,11 +124,10 @@ class Employee extends Model
         $employeeFields = Extensions::prefixArray('e.', [
             'id',
             $empNo  . ' as emp_num',
-            $fname  . ' as fname',
-            $mname  . ' as mname',
-            $lname  . ' as lname',
             $status . ' as emp_status',
         ]);
+
+        $employeeFields[] = DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as emp_fullname");
 
         $a_field_status = Attendance::f_Status;
         $absents = Attendance::STATUS_ABSENT;

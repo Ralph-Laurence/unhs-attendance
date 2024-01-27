@@ -19,21 +19,19 @@ class TestController extends Controller
 
     public function index()
     {
-        $dataset = Attendance::where(Attendance::f_Emp_FK_ID, '=', 1)
-        ->select([
-            Attendance::f_TimeIn      . ' as am_in',
-            Attendance::f_LunchStart  . ' as am_out',
-            Attendance::f_LunchEnd    . ' as pm_in',
-            Attendance::f_TimeOut     . ' as pm_out',
-            Attendance::f_Duration    . ' as duration',
-            Attendance::f_Late        . ' as late',
-            Attendance::f_UnderTime   . ' as undertime',
-            Attendance::f_OverTime    . ' as overtime',
-            Attendance::f_Status      . ' as status',
-        ])
-            ->get();
+        return view('tests.test');
+    }
 
-        return view('tests.test')->with('dataset', $dataset);
+    public function pinsamples()
+    {
+        $dataset = Employee::select([
+            Employee::f_EmpNo . ' as empno',
+            Employee::f_PINCode . ' as pin'
+        ])
+        ->get()
+        ->toArray();
+
+        return view('tests.pin-test')->with('dataset', $dataset);
     }
 
     public function qrsamples() 

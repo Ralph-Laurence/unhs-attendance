@@ -34,7 +34,7 @@ class CreateEmployeesTable extends Migration
             // PIN FLAG 2FA -> PIN Enabled for 2-Factor Auth (Scanner)
 
             $table->string(Employee::f_PINFlags,     8)->default(Constants::FLAG_OFF);
-            $table->string(Employee::f_PINCode,     16)->nullable();
+            $table->string(Employee::f_PINCode);
 
             $table->timestamps();
         });

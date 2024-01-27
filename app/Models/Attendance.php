@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
+use App\Models\Shared\Filters;
 use Carbon\Carbon;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,6 +35,7 @@ class Attendance extends Model
     public const STATUS_PRESENT = 'Present';
     public const STATUS_BREAK   = 'Lunch';
     public const STATUS_ABSENT  = 'Absent';
+    public const STATUS_LATE    = 'Late';
     
     public const STATUS_UNDERTIME = 'Undertime';
     public const STATUS_OVERTIME  = 'Overtime';
@@ -45,7 +47,7 @@ class Attendance extends Model
 
     public const HASH_SALT = 'FA610E'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
-    
+
     public static function createTimeIn(int $empId) : Attendance
     {
         $timeIn = Carbon::now();
@@ -78,7 +80,8 @@ class Attendance extends Model
             Attendance::STATUS_PRESENT     => 'present',
             Attendance::STATUS_BREAK       => 'break',
             Attendance::STATUS_UNDERTIME   => 'undertime',
-            Attendance::STATUS_ABSENT      => 'absent'
+            Attendance::STATUS_ABSENT      => 'absent',
+            Attendance::STATUS_LATE        => 'late'
         ];
     }
 
@@ -248,11 +251,14 @@ class Attendance extends Model
     */
     private function buildAttendanceQuery()
     {
-        $employeeFields = Extensions::prefixArray('e.', [
-            Employee::f_FirstName  . ' as fname',
-            Employee::f_MiddleName . ' as mname',
-            Employee::f_LastName   . ' as lname',
-        ]);
+        $fname = Employee::f_FirstName;
+        $mname = Employee::f_MiddleName;
+        $lname = Employee::f_LastName;
+
+        $employeeFields = [
+            DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as emp_fullname")
+        ];
+        
         $attendanceFields = Extensions::prefixArray('a.', [
             Attendance::f_TimeIn   . ' as timein',
             Attendance::f_TimeOut  . ' as timeout',
@@ -266,6 +272,7 @@ class Attendance extends Model
         $query = DB::table(self::getTableName() . ' as a')
                 ->select($fields)
                 ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
+                ->where('a.' . Attendance::f_Status, '!=', Attendance::STATUS_ABSENT)
                 ->orderBy('a.created_at', 'desc');
 
         return $query;

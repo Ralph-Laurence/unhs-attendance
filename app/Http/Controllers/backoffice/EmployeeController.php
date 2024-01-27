@@ -109,13 +109,7 @@ class EmployeeController extends Controller
             return Extensions::encodeSuccessMessage("Success!", $rowData);
         } 
         catch (\Exception $ex) 
-        {    
-            // if (Str::contains($ex->getMessage(), "for key 'employees_emp_no_unique'") )
-            // {
-            //     return ['validation_stat' => Constants::ValidationStat_Failed] + 
-            //            ['errors' => $validator->errors()];
-            // }
-
+        {
             $emailError = "failed with errno=10054 An existing connection was forcibly closed by the remote host";
           
             if (Str::contains($ex->getMessage(), $emailError) )
@@ -142,7 +136,7 @@ class EmployeeController extends Controller
             Employee::f_Contact     => $inputs['input-contact'],
             Employee::f_Position    => $inputs['input-role'],
             Employee::f_Status      => Employee::ON_STATUS_DUTY,
-            Employee::f_PINCode     => random_int(1000, 9999)       // 4-digit PIN
+            Employee::f_PINCode     => encrypt(random_int(1000, 9999))       // 4-digit PIN
         ];
 
         // Save the newly created employee into database
@@ -335,6 +329,23 @@ class EmployeeController extends Controller
                      ['errors' => $validator->validated()] + $validator->validated();
 
         return $inputData;
+    }
+
+    public function listEmpNo()
+    {
+        $f_empNo  = Employee::f_EmpNo;
+        $fname = Employee::f_FirstName;
+        $mname = Employee::f_MiddleName;
+        $lname = Employee::f_LastName;
+
+        $empIds = Employee::orderBy($f_empNo)->select([
+            $f_empNo . ' as idNo',
+            DB::raw("CONCAT_WS(' ', $lname, ',', $fname, NULLIF($mname, '')) as name")
+        ])
+        ->get()
+        ->toArray();
+
+        return json_encode($empIds);
     }
 }
 

@@ -19,25 +19,39 @@
             <h6 class="card-title me-auto">
                 <span>Daily Time Records</span>
                 <i class="fas fa-caret-right mx-2 opacity-60"></i>
-                <span class="opacity-90 attendance-range text-14 text-primary-dark"></span>
+                <span class="opacity-90 lbl-attendance-range text-14 text-primary-dark"></span>
                 <i class="fas fa-caret-right mx-2 opacity-60"></i>
                 <span class="opacity-90 lbl-employee-filter text-14 text-primary-dark"></span>
             </h6>
+
+            {{-- STATUS FILTERS --}}
+            {{-- <div class="dropdown">
+                <button class="btn btn-secondary flat-button dropdown-toggle shadow-0"
+                    id="status-filters-dropdown-button" data-mdb-toggle="dropdown" aria-expanded="false" disabled>
+                    <i class="fas fa-stopwatch me-1 opacity-65"></i>
+                    <span class="me-1 button-text">All</span>
+                    <i class="fas fa-chevron-down opacity-65"></i>
+                </button>
+                <ul class="dropdown-menu status-filters" aria-labelledby="status-filters-dropdown-button">
+                    <li><a class="dropdown-item selected-option" role="button" data-role="All">All</a></li>
+                </ul>
+            </div> --}}
 
             {{-- RECORD DATE RANGE FILTERS --}}
             @include('components.record-range-filters')
 
             {{-- EMPLOYEE ROLE FILTERS --}}
             <div class="dropdown">
-                <button class="btn btn-secondary flat-button dropdown-toggle shadow-0" 
-                    id="role-filters-dropdown-button" data-mdb-toggle="dropdown" aria-expanded="false" disabled>
+                <button class="btn btn-secondary flat-button dropdown-toggle shadow-0" id="role-filters-dropdown-button"
+                    data-mdb-toggle="dropdown" aria-expanded="false" disabled>
+                    <i class="fas fa-users me-1 opacity-65"></i>
                     <span class="me-1 button-text">All</span>
                     <i class="fas fa-chevron-down opacity-65"></i>
                 </button>
                 <ul class="dropdown-menu role-filters" aria-labelledby="role-filters-dropdown-button">
                     <li><a class="dropdown-item selected-option" role="button" data-role="All">All</a></li>
                     @foreach ($roleFilters as $role)
-                        <li><a class="dropdown-item" role="button" data-role="{{ $role }}">{{ $role }}</a></li>
+                    <li><a class="dropdown-item" role="button" data-role="{{ $role }}">{{ $role }}</a></li>
                     @endforeach
                 </ul>
             </div>

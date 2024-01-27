@@ -66,3 +66,19 @@
     font-size: 9px;
     color: var(--primary-dark);
 }
+
+/*
+Auto Suggest Textbox
+*/
+.auto-suggest-combobox {
+    z-index: 100;
+}
+
+.auto-suggest-highlight {
+    padding-left: 1px;
+    padding-right: 1px;
+    /* color: #FF7400; */
+    color: var(--primary-600);
+    font-weight: 600;
+    font-family: var(--accent-font);
+}

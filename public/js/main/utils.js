@@ -61,3 +61,11 @@ function getCurrentDateParts()
 
     return parts;
 }
+
+// remove all empty strings from the array 
+// and then concatenate the remaining elements with a separator.
+function concat_ws(array, separator = ' ')
+{
+    let concat = array.filter(e => e.length).join(separator);
+    return concat;
+}
