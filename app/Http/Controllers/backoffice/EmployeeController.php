@@ -331,16 +331,22 @@ class EmployeeController extends Controller
         return $inputData;
     }
 
-    public function listEmpNo()
+    public function loadAutoSuggest_EmpNo()
     {
         $f_empNo  = Employee::f_EmpNo;
-        $fname = Employee::f_FirstName;
-        $mname = Employee::f_MiddleName;
-        $lname = Employee::f_LastName;
+        $fname    = Employee::f_FirstName;
+        $mname    = Employee::f_MiddleName;
+        $lname    = Employee::f_LastName;
 
+        // These data will be applied to the options of the auto-suggest input.
+        // For consistency, the displayed text will be called as 'label' while
+        // the actual data will be called 'value'.
+        //
         $empIds = Employee::orderBy($f_empNo)->select([
-            $f_empNo . ' as idNo',
-            DB::raw("CONCAT_WS(' ', $lname, ',', $fname, NULLIF($mname, '')) as name")
+            $f_empNo . ' as value',
+
+            // Concatenate the names then do not include spaces if mname is empty
+            DB::raw("CONCAT_WS(' ', $lname, ',', $fname, NULLIF($mname, '')) as label")
         ])
         ->get()
         ->toArray();
@@ -348,5 +354,3 @@ class EmployeeController extends Controller
         return json_encode($empIds);
     }
 }
-
-// {"validation_stat":400,"errors":{"input-id-no":["ID Number may only contain numbers and dashes."]}}

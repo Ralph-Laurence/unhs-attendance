@@ -47,76 +47,79 @@ function initialize()
     formErrorBox = $('#leaveRequestForm .error-box');
     inputEmployeeName = $('#input-employee-name');
 
-    bindTableDataSource(RANGE_TODAY);
+    //bindTableDataSource(RANGE_TODAY);
 
     // Load employee ids for auto suggestions
     bindEmployeeSuggestions();
+
+    to_date_picker("#input-leave-start");
+    to_date_picker("#input-leave-end");
 }
 //
 // Handle events here
 //
 function handleEvents() 
 {
-    $(document).on('click', '.row-actions .btn-delete', function() 
-    {
-        let row = $(this).closest('tr');
+    // $(document).on('click', '.row-actions .btn-delete', function() 
+    // {
+    //     let row = $(this).closest('tr');
         
-        let employeeName = row.find('.td-employee-name').text();
-        let recordDate   = row.find('.absent-date').attr('data-date-attr');
+    //     let employeeName = row.find('.td-employee-name').text();
+    //     let recordDate   = row.find('.absent-date').attr('data-date-attr');
 
-        recordDate = convertToFullMonth(recordDate);
+    //     recordDate = convertToFullMonth(recordDate);
 
-        if (employeeName)
-            employeeName = employeeName.trim();
+    //     if (employeeName)
+    //         employeeName = employeeName.trim();
 
-        let message = sanitize(`You are about to delete the record of tardiness for the employee <span class="me-1"><i><b>"${employeeName}"</b></i></span> which was created on <i>${recordDate}</i>. Once deleted, it cannot be recovered.<br><br>Do you wish to proceed?`);
+    //     let message = sanitize(`You are about to delete the record of tardiness for the employee <span class="me-1"><i><b>"${employeeName}"</b></i></span> which was created on <i>${recordDate}</i>. Once deleted, it cannot be recovered.<br><br>Do you wish to proceed?`);
 
-        alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
-    });
+    //     alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
+    // });
 
-    $('.record-range-filter .daily').on('click', function() {
-        bindTableDataSource(RANGE_TODAY, undefined, global_roleFilter);
-    });
+    // $('.record-range-filter .daily').on('click', function() {
+    //     bindTableDataSource(RANGE_TODAY, undefined, global_roleFilter);
+    // });
 
-    $('.record-range-filter .weekly').on('click', function() {
-        bindTableDataSource(RANGE_WEEK, undefined, global_roleFilter);
-    });
+    // $('.record-range-filter .weekly').on('click', function() {
+    //     bindTableDataSource(RANGE_WEEK, undefined, global_roleFilter);
+    // });
 
-    $('.month-select-dropmenu #selected-month-index').on('change', function()
-    {
-        global_monthFilter = $(this).val();
-        bindTableDataSource(RANGE_MONTH, global_monthFilter, global_roleFilter);
-    });
+    // $('.month-select-dropmenu #selected-month-index').on('change', function()
+    // {
+    //     global_monthFilter = $(this).val();
+    //     bindTableDataSource(RANGE_MONTH, global_monthFilter, global_roleFilter);
+    // });
 
-    $('.role-filters .dropdown-item').on('click', function() 
-    {        
-        let option = $(this);
+    // $('.role-filters .dropdown-item').on('click', function() 
+    // {        
+    //     let option = $(this);
 
-        global_roleFilter = option.data('role');
+    //     global_roleFilter = option.data('role');
 
-        $('.role-filters .dropdown-item').removeClass('selected-option');
-        option.addClass('selected-option');
+    //     $('.role-filters .dropdown-item').removeClass('selected-option');
+    //     option.addClass('selected-option');
 
-        $(this).closest('.dropdown').find('.dropdown-toggle .button-text').text(global_roleFilter);
-        bindTableDataSource(last_selected_range, global_monthFilter, global_roleFilter);
-    });
+    //     $(this).closest('.dropdown').find('.dropdown-toggle .button-text').text(global_roleFilter);
+    //     bindTableDataSource(last_selected_range, global_monthFilter, global_roleFilter);
+    // });
 
     // Auto Employee Suggestions
-    $('#input-id-no').on('valueSelected', function()
-    {
-        let needle = $(this).val();
+    // $('#input-id-no').on('valueSelected', function()
+    // {
+    //     let needle = $(this).val();
 
-        if ( !(needle in employeesMap) )
-        {
-            //showFormErrorBox(`The employee with ID "${needle}" could not be found.`);
-            inputEmployeeName.val('');
-            return;
-        }
+    //     if ( !(needle in employeesMap) )
+    //     {
+    //         //showFormErrorBox(`The employee with ID "${needle}" could not be found.`);
+    //         inputEmployeeName.val('');
+    //         return;
+    //     }
         
-        //hideFormErrorBox();
-        inputEmployeeName.val(employeesMap[needle]);
-    })
-    .on('valueCleared', () => inputEmployeeName.val(''));
+    //     //hideFormErrorBox();
+    //     inputEmployeeName.val(employeesMap[needle]);
+    // })
+    // .on('valueCleared', () => inputEmployeeName.val(''));
 }
 
 function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
@@ -461,13 +464,3 @@ function disableControlButtons()
     roleFilterDropdown.hide();
     roleFilterEl.prop('disabled', true);
 }
-
-// function showFormErrorBox(msg) 
-// {
-//     formErrorBox.text(msg).fadeIn();
-// }
-
-// function hideFormErrorBox() 
-// {
-//     formErrorBox.text('').hide();
-// }

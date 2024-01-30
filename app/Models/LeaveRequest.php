@@ -26,6 +26,18 @@ class LeaveRequest extends Model
     public const LEAVE_STATUS_APPROVED = 'Approved';
     public const LEAVE_STATUS_REJECTED = 'Rejected';
 
+    public const LEAVE_TYPE_SERVICE_INCENTIVE = 0;
+    public const LEAVE_TYPE_SICK              = 1;
+    public const LEAVE_TYPE_VACATION          = 2;
+    public const LEAVE_TYPE_MATERNITY         = 3;
+    public const LEAVE_TYPE_PATERNITY         = 4;
+    public const LEAVE_TYPE_SOLO_PARENT       = 5;
+    public const LEAVE_TYPE_SPECIAL           = 6;
+    public const LEAVE_TYPE_VAWC              = 7;
+
+    public const HASH_SALT = 'FCD61F'; // Just random string, nothing special
+    public const MIN_HASH_LENGTH = 10;
+    
     public static function getTableName() : string {
         return (new self)->getTable();
     }
@@ -33,6 +45,20 @@ class LeaveRequest extends Model
     protected $guarded = [
         'id'
     ];
+
+    public static function getLeaveTypes() 
+    {
+        return [
+            Constants::LEAVE_SICK        => self::LEAVE_TYPE_SICK,
+            Constants::LEAVE_VACATION    => self::LEAVE_TYPE_VACATION,
+            Constants::LEAVE_MATERNITY   => self::LEAVE_TYPE_MATERNITY,
+            Constants::LEAVE_PATERNITY   => self::LEAVE_TYPE_PATERNITY,
+            Constants::LEAVE_SIL         => self::LEAVE_TYPE_SERVICE_INCENTIVE,
+            Constants::LEAVE_SOLO_PARENT => self::LEAVE_TYPE_SOLO_PARENT,
+            Constants::LEAVE_SPECIAL     => self::LEAVE_TYPE_SPECIAL,
+            Constants::LEAVE_VAWC        => self::LEAVE_TYPE_VAWC,
+        ];
+    }
 
     public function getDailyLates(Request $request)
     {

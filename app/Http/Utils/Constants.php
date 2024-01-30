@@ -28,4 +28,13 @@ class Constants
     public const XHR_STAT_FAIL  = -1;
 
     public const RECORD_FILTER_ALL = 'All';
+
+    public const LEAVE_SICK        = 'Sick Leave';
+    public const LEAVE_VACATION    = 'Vacation Leave';
+    public const LEAVE_SIL         = 'Service Incentive Leave';
+    public const LEAVE_MATERNITY   = 'Maternity Leave';
+    public const LEAVE_PATERNITY   = 'Paternity Leave';
+    public const LEAVE_SOLO_PARENT = 'Parental Leave for Solo Parents';
+    public const LEAVE_SPECIAL     = 'Special Leave Benefit for Women';
+    public const LEAVE_VAWC        = 'Violence Against Women Leave';
 }

@@ -72,6 +72,7 @@
 
         {{-- DATASET TABLE --}}
         <table class="table table-striped table-fixedx table-sm table-hover dataset-table"
+            id="records-table"
             data-src-default="{{ $routes['ajax_get_all'] }}"
             data-src-emp-ids="{{ $routes['ajax_load_empids'] }}">
             <thead class="user-select-none">
@@ -111,7 +112,7 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <x-text-box as="input-id-no" placeholder="Employee ID" maxlength="32" aria-autocomplete="none" 
-                                leading-icon-s="fa-user" suggest/>
+                                leading-icon-s="fa-user" suggest readonly/>
                             </div>
                             <div class="col">
                                 <x-text-box as="input-employee-name" placeholder="Name" maxlength="64" aria-autocomplete="none" 
@@ -121,20 +122,27 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <h6 class="text-14">Start Date</h6>
-                                <x-month-day-picker as="leave-start"/>
+                                <x-moment-picker as="input-leave-start" />
                             </div>
                             <div class="col">
                                 <h6 class="text-14">End Date</h6>
-                                <x-month-day-picker as="leave-end"/>
+                                <x-moment-picker as="input-leave-end" />
                             </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <h6 class="text-14">Leave Type</h6>
+                                <x-drop-list :items="$leaveTypes" button-classes="w-100"/>
+                            </div>
+                            <div class="col"></div>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-cancel btn-secondary flat-button" data-mdb-ripple-init
-                    data-mdb-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-save btn-primary flat-button shadow-0" data-mdb-dismiss="modal"
+                    data-mdb-dismissx="modal">Cancel</button>
+                <button type="button" class="btn btn-save btn-primary flat-button shadow-0" data-mdb-dismissx="modal"
                     data-mdb-ripple-init>Save</button>
             </div>
         </div>
@@ -149,5 +157,7 @@
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
-<script src="{{ asset('js/main/backoffice/leave-request-page.js') }}"></script>
+{{-- <script src="{{ asset('js/main/backoffice/leave-request-page.js') }}"></script> --}}
+<script src="{{ asset('js/components/auto-suggest-field.js') }}"></script>
+<script src="{{ asset('js/main/tests/leave-request-page.js') }}"></script>
 @endpush

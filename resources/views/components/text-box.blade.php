@@ -57,7 +57,8 @@
 
 @once
     @push('scripts')
-    <script>
+    <script src="{{ asset('js/components/textbox.js') }}"></script>
+    {{-- <script>
         $(document).ready(function() 
         {
             // Force numeric input texts to accept only numbers 0-9
@@ -104,6 +105,6 @@
             root.removeClass('has-error');
             root.find('.error-label').text('');
         }
-    </script>
+    </script> --}}
     @endpush
 @endonce

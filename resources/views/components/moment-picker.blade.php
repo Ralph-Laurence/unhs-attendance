@@ -48,11 +48,11 @@
 
     <div class="moment-picker-popover dropdown-menu bg-white border rounded-3 overflow-hidden">
         <div class="control-ribbon p-2 gap-2 flex-center bg-color-primary">
-            <button class="btn-sm btn-secondary flat-button shadow-0 px-2 btn-month-picker">
+            <button type="button" class="btn-sm btn-secondary flat-button shadow-0 px-2 btn-month-picker">
                 <span class="me-1 btn-text">{{ $currentMonth }}</span>
                 <i class="fas fa-chevron-down text-sm"></i>
             </button>
-            <button class="btn-sm btn-secondary flat-button shadow-0 px-2 btn-year-picker">
+            <button type="button" class="btn-sm btn-secondary flat-button shadow-0 px-2 btn-year-picker">
                 <span class="me-1 btn-text">{{ $currentYear }}</span>
                 <i class="fas fa-chevron-down text-sm"></i>
             </button>
@@ -70,7 +70,8 @@
                             <tr>
                         @endif
                         <td>
-                            <button class="btn btn-sm btn-link text-primary-dark flat-button mb-2 month-item {{ $isSelected }}" 
+                            <button type="button"
+                            class="btn btn-sm btn-link text-primary-dark flat-button mb-2 month-item {{ $isSelected }}" 
                             data-month="{{ $i-1 }}" data-month-name="{{ $monthStr }}">
                                 {{ $monthStr }}
                             </button>
@@ -95,7 +96,7 @@
                     @endif
                     <td>
                         <button class="btn btn-sm btn-link flat-button text-primary-dark text-14 mb-2 year-item {{ $isSelected }}" 
-                        data-year="{{ $year }}">
+                        data-year="{{ $year }}" type="button">
                             {{ $year }}
                         </button>
                     </td>
@@ -130,6 +131,6 @@
 
 @once
     @push('scripts')
-    <script src="{{ asset('js/main/tests/momentpicker.js') }}"></script>
+    <script src="{{ asset('js/components/momentpicker.js') }}"></script>
     @endpush
 @endonce

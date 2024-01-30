@@ -10,10 +10,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Employee extends Model
+class Employee extends Model implements Auditable
 {
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
 
     public const HASH_SALT = 'EB7A1F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;

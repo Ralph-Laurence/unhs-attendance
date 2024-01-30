@@ -14,6 +14,15 @@
 
 function set_autocomplete(id_formfield, auto_suggest_items, start_at_letters = 3, count_results = 5) 
 {
+    // The `startsWith()` method checks if the ID string starts with the "#" symbol. 
+    // If it does, the `substring()` method is used to remove the first character of 
+    // the string (which is the "#") and assign the modified string back to the `id` 
+    // attribute of the element.
+
+    if (id_formfield.startsWith('#')) {
+        id_formfield = id_formfield.substring(1);
+    }
+
     let input = document.getElementById(id_formfield);
     let autocomplete_div = document.getElementById(`${id_formfield}-intellisense`);
 
@@ -59,6 +68,8 @@ function set_autocomplete(id_formfield, auto_suggest_items, start_at_letters = 3
             }
         }
     }
+
+    return input;
 }
 
 /**

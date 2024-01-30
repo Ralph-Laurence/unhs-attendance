@@ -18,7 +18,7 @@ class LeaveRequestsController extends Controller
 
     public function __construct() 
     {
-        $this->hashids = new Hashids();
+        $this->hashids = new Hashids(LeaveRequest::HASH_SALT, LeaveRequest::MIN_HASH_LENGTH);
     }
     
     public function index()
@@ -32,14 +32,27 @@ class LeaveRequestsController extends Controller
         // Role filters will be used for <select> dropdowns
         $roleFilters = array_values(Employee::RoleToString);
 
+        // Hash option values
+        $leaveTypes = array_map(function($value) 
+        {
+            return $this->hashids->encode($value);
+        }, 
+        LeaveRequest::getLeaveTypes());
+
         return view('backoffice.leave.index')
             ->with('routes'             , $routes)
-            ->with('roleFilters'        , $roleFilters);
+            ->with('roleFilters'        , $roleFilters)
+            ->with('leaveTypes'         , $leaveTypes);
     }
 
     public function destroy(Request $request)
     {
 
+    }
+
+    public function store(Request $request)
+    {
+        
     }
 
     public function getRecords(Request $request)

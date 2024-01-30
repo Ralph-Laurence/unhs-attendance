@@ -122,7 +122,7 @@ Route::controller(StaffController::class)->middleware(['auth'])
 Route::controller(EmployeeController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::post('/ajax/employees/list/empno', 'listEmpNo')->name(RouteNames::AJAX['list-empno']);
+    Route::post('/ajax/employees/list/empno', 'loadAutoSuggest_EmpNo')->name(RouteNames::AJAX['list-empno']);
 });
 
 Route::controller(TestController::class)->group(function(){
