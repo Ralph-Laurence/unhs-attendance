@@ -27,6 +27,11 @@ $(document).ready(function ()
         var regexp = /[^a-zA-Z0-9.@]/g;
         $(this).val($(this).val().replace(regexp, ''));
     });
+
+    $('.textbox').on('input', function() 
+    {
+        hideTextboxError($(this));
+    });
 });
 
 function showTextboxError(target, message)

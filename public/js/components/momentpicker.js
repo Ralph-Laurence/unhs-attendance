@@ -29,6 +29,24 @@ function to_date_picker(selector)
     var className_currentYear  = 'current-year';
     var className_currentDay   = 'current-day';
 
+    //
+    // Hide error labels when interacted
+    //
+    if (hideTextboxError && typeof hideTextboxError === 'function')
+    {
+        hideTextboxError($input);
+    }
+    else
+    {
+        $input.on('input', function() 
+        {
+            var root = $(this).closest('.textbox');
+
+            root.removeClass('has-error');
+            root.find('.error-label').text('');
+        });
+    }
+
     // When either the month select or year select changes,
     // update the calendar table
     $monthSelect.add($yearSelect).on('change', updateDaysTable);
@@ -124,7 +142,8 @@ function to_date_picker(selector)
     {
         // Update the input field with the selected date in the format 'Y-m-d'
         $input.val(year + '-' + (month + 1)
-            .toString().padStart(2, '0') + '-' + day.padStart(2, '0'));
+            .toString().padStart(2, '0') + '-' + day.padStart(2, '0'))
+            .trigger('input');
     }
 
     $rootDiv.on('show.bs.dropdown', function()

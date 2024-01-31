@@ -69,3 +69,7 @@ function concat_ws(array, separator = ' ')
     let concat = array.filter(e => e.length).join(separator);
     return concat;
 }
+
+function nl2br(str) {
+    return str.replace(/\r?\n/g, '<br>');
+}

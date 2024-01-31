@@ -4,6 +4,7 @@
 var leaveRequestPage = (function ()
 {
     const tableSelector = "#records-table";
+    const formSelector  = "#frm-leave-request";
 
     let csrfToken;
     let employeeMapping;
@@ -27,10 +28,12 @@ var leaveRequestPage = (function ()
         inputEmployeeName = $('#input-employee-name');
         leaveRequestForm  = $('#leaveRequestForm');
 
-        requestFormInputs = {
-            'ID Number' : $("#input-id-no"),
-            'Start Date': $("#input-leave-start"),
-            'End Date'  : $("#input-leave-start")
+        requestFormInputs = 
+        {
+            'input-id-no'       : { label: 'ID Number' , input : $(inputEmpIdSelector)    },
+            'input-leave-start'  : { label: 'Start Date', input : $("#input-leave-start") },
+            'input-leave-end'    : { label: 'End Date'  , input : $("#input-leave-end")   },
+            'input-leave-type'  : { label: 'Leave Type', input : $("#input-leave-type")  , type: 'droplist' },
         };
 
         btnSave = leaveRequestForm.find('.btn-save');
@@ -44,6 +47,11 @@ var leaveRequestPage = (function ()
             },
             (dataSource) => employeeMapping = dataSource
         );
+
+        to_date_picker("#input-leave-start");
+        to_date_picker("#input-leave-end");
+
+        to_droplist('#input-leave-type');
     };
     
     //============================
@@ -66,21 +74,27 @@ var leaveRequestPage = (function ()
         })
         .on('valueCleared', () => inputEmployeeName.val(''));
 
-        btnSave.on('click', () => {
-            
-            var validation = validateEntries();
+        // Handle form submission when save button was clicked
+        btnSave.on('click', () => 
+        {
+            let validation = validateEntries();
+            console.warn(validation);
 
-            if (validation != null && 'fieldName' in validation)
+            //if (validation != null && 'status' in validation && validation.status === -1)
+            if (validation?.status ?? null === -1)
             {
-                showTextboxError(validation.target, `${validation.fieldName} must be filled out`);
-                validation.target.focus()
+                let msg = `${validation.label} must be filled out`;
+
+                //if ('type' in validation && validation.type === 'droplist')
+                (validation.type === 'droplist') ?
+                    showDroplistError(validation.input, msg) :
+                    showTextboxError(validation.input, msg);
+
+                validation.input.focus();
+                return;
             }
-        });
 
-        // Hide the textbox error messages when they are interacted
-        Object.values(requestFormInputs).forEach(input => {
-
-            input.on('input', () => hideTextboxError(input));
+            submitForm(validation.validated);
         });
     };
 
@@ -92,20 +106,80 @@ var leaveRequestPage = (function ()
     {
         for (const key in requestFormInputs)
         {
-            var input = requestFormInputs[key];
+            var field = requestFormInputs[key];
 
-            if (input.val().trim() === '')
+            if (field.input.val().trim() === '')
             {
-                return {
-                    fieldName: key,
-                    target: input
-                };
+                field['status'] = -1;
+                return field;
             }
         }
 
-        return null;
+        return {
+            status: 0,
+            validated: requestFormInputs
+        };
     };
 
+    function submitForm(formData)
+    {
+        btnSave.prop('disabled', true);
+
+        let postData = {
+            '_token': csrfToken
+        };
+
+        Object.keys(formData).forEach(key => postData[key] = formData[key].input.val() );
+
+        $.ajax({
+            url: $(formSelector).data('post-create-target'),
+            type: 'POST',
+            data: postData,
+            success: function(response)
+            {
+                if (response)
+                {
+                    console.warn(response)
+                    response = JSON.parse(response);
+
+                    // Validation Failed
+                    if (response.validation_stat == 400)
+                    {
+                        for (var field in response.errors)
+                        {
+                            var fieldType = requestFormInputs[field].type;
+                            
+                            if (fieldType == 'droplist')
+                                showDroplistError(`#${field}`, response.errors[field]);
+                            else
+                                showTextboxError(`#${field}`, response.errors[field]);
+                        }
+
+                        return;
+                    }
+
+                    if ('code' in response && response.code != 0)
+                    {
+                        //closeForm();
+                        let message = nl2br(data.message);
+                        //alertModal.showDanger(message);
+                        alert(message)
+                        return;
+                    }
+                }
+            },
+            error: function(xhr, status, error) 
+            {
+                console.warn(xhr.responseText);
+            },
+            complete: function() 
+            {
+                btnSave.prop('disabled', false);
+            }
+        });
+    }
+
+    // End of Revealing Module Pattern
     return {
         init: initialize,
         handle: handleEvents

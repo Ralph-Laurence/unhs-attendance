@@ -26,14 +26,14 @@ class LeaveRequest extends Model
     public const LEAVE_STATUS_APPROVED = 'Approved';
     public const LEAVE_STATUS_REJECTED = 'Rejected';
 
-    public const LEAVE_TYPE_SERVICE_INCENTIVE = 0;
-    public const LEAVE_TYPE_SICK              = 1;
-    public const LEAVE_TYPE_VACATION          = 2;
-    public const LEAVE_TYPE_MATERNITY         = 3;
-    public const LEAVE_TYPE_PATERNITY         = 4;
-    public const LEAVE_TYPE_SOLO_PARENT       = 5;
-    public const LEAVE_TYPE_SPECIAL           = 6;
-    public const LEAVE_TYPE_VAWC              = 7;
+    public const LEAVE_TYPE_SERVICE_INCENTIVE = 1;
+    public const LEAVE_TYPE_SICK              = 2;
+    public const LEAVE_TYPE_VACATION          = 3;
+    public const LEAVE_TYPE_MATERNITY         = 4;
+    public const LEAVE_TYPE_PATERNITY         = 5;
+    public const LEAVE_TYPE_SOLO_PARENT       = 6;
+    public const LEAVE_TYPE_SPECIAL           = 7;
+    public const LEAVE_TYPE_VAWC              = 8;
 
     public const HASH_SALT = 'FCD61F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
@@ -46,9 +46,9 @@ class LeaveRequest extends Model
         'id'
     ];
 
-    public static function getLeaveTypes() 
+    public static function getLeaveTypes($onlyValues = false) : array
     {
-        return [
+        $leaveTypes = [
             Constants::LEAVE_SICK        => self::LEAVE_TYPE_SICK,
             Constants::LEAVE_VACATION    => self::LEAVE_TYPE_VACATION,
             Constants::LEAVE_MATERNITY   => self::LEAVE_TYPE_MATERNITY,
@@ -57,6 +57,20 @@ class LeaveRequest extends Model
             Constants::LEAVE_SOLO_PARENT => self::LEAVE_TYPE_SOLO_PARENT,
             Constants::LEAVE_SPECIAL     => self::LEAVE_TYPE_SPECIAL,
             Constants::LEAVE_VAWC        => self::LEAVE_TYPE_VAWC,
+        ];
+
+        if ($onlyValues)
+            return array_values($leaveTypes);
+
+        return $leaveTypes;
+    }
+
+    public static function getLeaveStatuses()
+    {
+        return [
+            Constants::LEAVE_PENDING  => 0,
+            Constants::LEAVE_APPROVED => 1,
+            Constants::LEAVE_REJECTED => 2,
         ];
     }
 

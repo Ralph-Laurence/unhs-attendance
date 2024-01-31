@@ -37,4 +37,8 @@ class Constants
     public const LEAVE_SOLO_PARENT = 'Parental Leave for Solo Parents';
     public const LEAVE_SPECIAL     = 'Special Leave Benefit for Women';
     public const LEAVE_VAWC        = 'Violence Against Women Leave';
+
+    public const LEAVE_PENDING     = 'Pending';
+    public const LEAVE_APPROVED    = 'Approved';
+    public const LEAVE_REJECTED    = 'Rejected';
 }

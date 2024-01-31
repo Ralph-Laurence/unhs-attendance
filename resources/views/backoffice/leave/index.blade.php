@@ -107,7 +107,9 @@
             </div>
             <div class="modal-body">
                 <div class="alert alert-danger text-center py-2 text-14 error-box d-hidden"></div>
-                <form action="" method="POST" class="frm-leave-request">
+                <form data-post-create-target="{{ $routes['insertPostRoute'] }}" data-post-update-target="{{ $routes['updatePostRoute'] }}" method="post"
+                      id="frm-leave-request">
+
                     <div class="container">
                         <div class="row mb-3">
                             <div class="col">
@@ -130,11 +132,15 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col">
+                            <div class="col-6">
                                 <h6 class="text-14">Leave Type</h6>
-                                <x-drop-list :items="$leaveTypes" button-classes="w-100"/>
+                                <x-drop-list as="input-leave-type" :items="$leaveTypes" button-classes="w-100"/>
                             </div>
-                            <div class="col"></div>
+                            <div class="col-6">
+                                <h6 class="text-14">Leave Status</h6>
+                                <x-drop-list as="input-leave-status" :items="$leaveTypes" button-classes="w-100" disabled input-off />
+                                <small class="text-sm fst-italic">(you may change this later)</small>
+                            </div>
                         </div>
                     </div>
                 </form>

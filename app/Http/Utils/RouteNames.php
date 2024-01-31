@@ -39,6 +39,7 @@ class RouteNames
     public const Leave = [
         'get'        => 'backoffice.leave.get',
         'index'      => 'backoffice.leave',
+        'create'     => 'backoffice.leave.create',
         'delete'     => 'backoffice.leave.delete'
     ];
 

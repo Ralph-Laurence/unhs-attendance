@@ -85,6 +85,7 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
     Route::get('/backoffice/leave', 'index')->name(RouteNames::Leave['index']);
 
     Route::post('/backoffice/leave/get',    'getRecords')->name(RouteNames::Leave['get']);
+    Route::post('/backoffice/leave/create', 'store')->name(RouteNames::Leave['create']);
     Route::post('/backoffice/leave/delete', 'destroy')->name(RouteNames::Leave['delete']);
 });
 
