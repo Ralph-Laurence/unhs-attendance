@@ -4,11 +4,16 @@ function to_droplist(selector)
 
     let root    = $input.closest('.dropdown');
     let btnText = root.find('.dropdown-toggle .button-text');
+    let items   = root.find('.dropdown-menu .dropdown-item');
 
-    root.find('.dropdown-menu .dropdown-item').on('click', function()
+    items.on('click', function()
     {
+        items.removeClass('selected');
+
         let value = $(this).data('value');
         $input.val(value).trigger('input');
+        
+        $(this).addClass('selected');
 
         btnText.text( $(this).text() );
     });
@@ -19,8 +24,24 @@ function to_droplist(selector)
     $input.on('input', function()
     {
         hideDroplistError($(this));
+
+        $(this).trigger('valueChanged', $(this).val());
     });
-}
+
+    return {
+        inputElem: $input,
+        onValueChanged: function(callback) 
+        {
+            $input.on('valueChanged', function(event, value) {
+                // output the current value
+                callback(value);
+            });
+        },
+        getValue:   () => $input.val(),
+        enable:     () => root.find('.dropdown-toggle').prop('disabled' , false),
+        disable:    () => root.find('.dropdown-toggle').prop('disabled' , true),
+    };
+};
 
 function showDroplistError(target, message)
 {

@@ -25,18 +25,8 @@
             </h6>
 
             {{-- RECORD MONTH RANGE FILTERS --}}
-            <div class="dropdown">
-                <button class="btn btn-secondary flat-button dropdown-toggle shadow-0" 
-                    id="role-filters-dropdown-button" data-mdb-toggle="dropdown" aria-expanded="false" disabled>
-                    <span class="me-1 button-text">{{ date('F') }}</span>
-                    <i class="fas fa-chevron-down opacity-65"></i>
-                </button>
-                <ul class="dropdown-menu role-filters" aria-labelledby="role-filters-dropdown-button">
-                    @for ($i = 1; $i <= 12; $i++)
-                    <li><a class="dropdown-item" role="button" data-month="{{ $i }}">{{ date('F', mktime(0, 0, 0, $i, 1)) }}</a></li>
-                    @endfor
-                </ul>
-            </div>
+            <x-drop-list as="input-month-filter" :items="$monthOptions"
+            text="{{ date('F') }}" initial="{{ date('n') }}" input-off/>
 
             {{-- EMPLOYEE ROLE FILTERS --}}
             <div class="dropdown">

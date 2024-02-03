@@ -12,9 +12,11 @@ use App\Http\Utils\ValidationMessages;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\Shared\Filters;
+use Carbon\Carbon;
 use Hashids\Hashids;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class LeaveRequestsController extends Controller
@@ -49,7 +51,8 @@ class LeaveRequestsController extends Controller
         return view('backoffice.leave.index')
             ->with('routes'             , $routes)
             ->with('roleFilters'        , $roleFilters)
-            ->with('leaveTypes'         , $leaveTypes);
+            ->with('leaveTypes'         , $leaveTypes)
+            ->with('monthOptions'       , Extensions::getMonthsAssoc());
     }
 
     public function destroy(Request $request)
@@ -59,14 +62,11 @@ class LeaveRequestsController extends Controller
 
     public function store(Request $request)
     {
-        error_log(print_r($request->all(), true));
-
         $inputs = $this->validateFields($request);
 
         if ($inputs['validation_stat'] == 400)
             return json_encode($inputs);
 
-        // error_log(print_r($inputs, true));
         // Find the employee ID by the employee number
         $empId = Employee::where(Employee::f_EmpNo, '=', $inputs['input-id-no'])->value('id');
 
@@ -74,27 +74,52 @@ class LeaveRequestsController extends Controller
         $endDate   = $inputs['input-leave-end'];
 
         if ($this->leaveOverlaps($empId, $startDate, $endDate))
-            return response()->json(['error' => 'Leave request overlaps with an existing one.'], 400);
+            return Extensions::encodeFailMessage(Messages::LEAVE_REQUEST_OVERLAP);
+            //response()->json(['error' => ], 400);
+
+        try 
+        {
+            $insert = DB::transaction(function() use($inputs)
+            {
+
+                $leaveStart = $inputs['input-leave-start']; 
+                $leaveEnd   = $inputs['input-leave-end'];
+
+                $leaveDuration = $leaveStart == $leaveEnd ? 1 :
+                                 Carbon::parse($leaveStart)->diffInDays( Carbon::parse($leaveEnd) );
+
+                return LeaveRequest::create([
+                    LeaveRequest::f_Emp_FK_ID   => $inputs['input-id-no'],
+                    LeaveRequest::f_StartDate   => $leaveStart,
+                    LeaveRequest::f_EndDate     => $leaveEnd,
+                    LeaveRequest::f_LeaveType   => $inputs['input-leave-type'],
+                    LeaveRequest::f_Duration    => $leaveDuration == 1 ? "$leaveDuration day" : "$leaveDuration days",
+                    LeaveRequest::f_LeaveStatus => LeaveRequest::LEAVE_STATUS_APPROVED
+                ]);
+            });
+
+            //if ($insert)
+
+            return Extensions::encodeSuccessMessage('Success', $insert->toArray());
+        } 
+        catch (\Throwable $th) 
+        {
+            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED . '\n\n' . $th->getMessage());
+        }
     }
 
     public function getRecords(Request $request)
     {
-        $selectRange = $request->input('range');
+        //$selectRange = $request->input('range');
 
         // Make sure that the select range is one of the allowed values.
         // If not, set its default select period
-        if (!in_array($selectRange, Filters::getDateRangeFilters(), true))
-            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
+        // if (!in_array($selectRange, Filters::getDateRangeFilters(), true))
+        //     return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
 
         $model = new LeaveRequest();
 
-        $transactions = [
-            Filters::RANGE_TODAY => $model->getDailyLates($request),
-            Filters::RANGE_WEEK  => $model->getWeeklyLates($request),
-            Filters::RANGE_MONTH => $model->getMonthlyLates($request)
-        ];
-
-        $dataset = $transactions[$selectRange];
+        $dataset = $model->getLeaveRequests($request); //$transactions[$selectRange];
         
         return $dataset;
     }
@@ -114,11 +139,11 @@ class LeaveRequestsController extends Controller
             'input-leave-start.required'    => ValidationMessages::required('Start Date'),
             'input-leave-end.required'      => ValidationMessages::required('End Date'),
 
-            'input-leave-end.date'          => $errEndDate,
             'input-leave-start.date'        => $errStartDate,
-
-            'input-leave-end.date_format'   => $errEndDate,
             'input-leave-start.date_format' => $errStartDate,
+            
+            'input-leave-end.date'          => $errEndDate,
+            'input-leave-end.date_format'   => $errEndDate,
         ];
         
         $validationFields = array(
@@ -148,11 +173,14 @@ class LeaveRequestsController extends Controller
         if (!$leaveType || (!in_array($leaveType[0], LeaveRequest::getLeaveTypes(true))))
             return $err_leaveType;
 
+        // Assume successful validation
+        $validated = $validator->validated();
+
+        // Apply the decoded leave type
+        $validated['input-leave-type'] = $leaveType[0];
+
         // Validation Passed
-        return array_merge(
-            $validator->validated(), 
-            ['validation_stat' => Constants::ValidationStat_Success]
-        );
+        return array_merge( $validated, ['validation_stat' => Constants::ValidationStat_Success] );
     }
 
     private function sendValidationFailed($extraData = []) 

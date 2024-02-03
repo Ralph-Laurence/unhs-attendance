@@ -229,12 +229,8 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
             {
                 className: 'td-employee-name text-truncate',
                 width: '280px',
-                data: null,
+                data: 'empname',
                 name: 'empname',
-                render: function (data, type, row) 
-                {  
-                    return `<span class="text-darker">${data.emp_fullname}</span>`;
-                },
                 defaultContent: ''
             },
             // Sixth Column -> Employee Role

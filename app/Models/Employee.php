@@ -129,7 +129,7 @@ class Employee extends Model implements Auditable
             $status . ' as emp_status',
         ]);
 
-        $employeeFields[] = DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as emp_fullname");
+        $employeeFields[] = DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname");
 
         $a_field_status = Attendance::f_Status;
         $absents = Attendance::STATUS_ABSENT;

@@ -250,10 +250,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
                 // width: '280px',
                 data: null,
                 name: 'empname',
-                render: function (data, type, row) 
-                {  
-                    return `<span class="text-darker">${data.emp_fullname}</span>`;
-                },
+                data: 'empname',
                 defaultContent: ''
             },
             // Fifth Column -> Clockin Time 

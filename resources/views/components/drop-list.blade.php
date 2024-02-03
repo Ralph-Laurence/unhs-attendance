@@ -12,25 +12,30 @@
 <div class="dropdown droplist">
     <button {{ $disabled }} class="btn btn-secondary flat-button dropdown-toggle shadow-0 d-block text-truncate {{ $buttonClasses }}" 
         id="{{ $as }}-drop-btn" data-mdb-toggle="dropdown" aria-expanded="false">
-        <div class="w-100 d-flex align-items-center">
-            <span class="me-1 button-text d-inline text-truncate me-auto">{{ $text }}</span>
+        <div class="w-100 d-flex align-items-center gap-2">
+            <span class="button-text d-inline text-truncate me-auto">{{ $text }}</span>
             <i class="fas fa-chevron-down opacity-65"></i>
         </div>
     </button>
 
-    <ul class="dropdown-menu" aria-labelledby="{{ $as }}-drop-btn">
+    <ul class="dropdown-menu overflow-hidden" aria-labelledby="{{ $as }}-drop-btn">
+       <div data-simple-bar class="dropdown-menu-scrollview overflow-y-auto" style="height: 200px;">
         @if (!is_null($items))
             @foreach ($items as $k => $v)
             <li>
-                <a class="dropdown-item" role="button" data-value="{{ $v }}">
+                @php
+                    $isSelected = $v == $initial ? 'selected' : '';
+                @endphp
+                <a class="dropdown-item {{ $isSelected }}" role="button" data-value="{{ $v }}">
                     {{ $k }}
                 </a>
             </li>
             @endforeach
         @endif
+       </div>
     </ul>
     
-    <input type="text" name="{{ $as }}" id="{{ $as }}" {{ $attributes->merge(['class' => 'main-control d-none' ]) }} />
+    <input type="text" name="{{ $as }}" id="{{ $as }}" {{ $attributes->merge(['class' => 'main-control d-none' ]) }} value="{{ old($as, $initial) }}"/>
 
     {{-- ERROR LABEL --}}
     <h6 class="px-2 my-1 text-danger text-xs error-label">{{ $errors->first($as) }}</h6>

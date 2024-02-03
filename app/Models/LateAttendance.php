@@ -119,7 +119,7 @@ class LateAttendance extends Model
         $lname = Employee::f_LastName;
 
         $employeeFields = [
-            DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as emp_fullname"),
+            DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname"),
             'e.'. Employee::f_EmpNo . ' as idNo',
         ];
 

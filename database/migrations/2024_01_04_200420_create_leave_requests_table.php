@@ -28,7 +28,7 @@ class CreateLeaveRequestsTable extends Migration
             $table->date(LeaveRequest::f_EndDate);
             $table->string(LeaveRequest::f_Duration, 24);
             $table->string(LeaveRequest::f_LeaveType);
-            $table->string(LeaveRequest::f_LeaveStatus, 16)->default(LeaveRequest::LEAVE_STATUS_PENDING);    // Approved | Rejected | Pending
+            $table->tinyInteger(LeaveRequest::f_LeaveStatus)->default(LeaveRequest::LEAVE_STATUS_PENDING);    // Approved | Rejected | Pending
             
             $defaultTimestamp = DB::raw('CURRENT_TIMESTAMP');
 

@@ -22,9 +22,9 @@ class LeaveRequest extends Model
     public const f_LeaveType    = 'leave_type';
     public const f_LeaveStatus  = 'leave_status';
 
-    public const LEAVE_STATUS_PENDING  = 'Pending';
-    public const LEAVE_STATUS_APPROVED = 'Approved';
-    public const LEAVE_STATUS_REJECTED = 'Rejected';
+    public const LEAVE_STATUS_PENDING  = 0; //'Pending';
+    public const LEAVE_STATUS_APPROVED = 1; //'Approved';
+    public const LEAVE_STATUS_REJECTED = 2; //'Rejected';
 
     public const LEAVE_TYPE_SERVICE_INCENTIVE = 1;
     public const LEAVE_TYPE_SICK              = 2;
@@ -74,60 +74,26 @@ class LeaveRequest extends Model
         ];
     }
 
-    public function getDailyLates(Request $request)
-    {
-        // The current timestamp
-        $currentDate = Carbon::now();
-
-        // Instead of whereDate($today), we will use where between
-        $dataset = $this->buildAbsenceQuery()
-            ->whereBetween('a.created_at', 
-            [
-                $currentDate->startOfDay()->format(Constants::TimestampFormat), 
-                $currentDate->endOfDay()->format(Constants::TimestampFormat)
-            ]);
-
-        $this->applyRoleFilter($request, $dataset);
-        $dataset = $dataset->get();
-
-        Extensions::hashRowIds($dataset);
-        
-        return $this->encodeAttendanceData($request, $dataset, 'Today');
-    }
-
-    public function getWeeklyLates(Request $request)
-    {
-        $currentWeek = Extensions::getCurrentWeek();
-
-        $dataset = $this->buildAbsenceQuery()
-                   ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek);
-
-        $this->applyRoleFilter($request, $dataset);
-        $dataset = $dataset->get();
-
-        Extensions::hashRowIds($dataset);
-
-        return $this->encodeAttendanceData($request, $dataset, "This Week (week #$currentWeek)");
-    }
-
-    public function getMonthlyLates(Request $request)
+    public function getLeaveRequests(Request $request)
     {
         if (!$request->filled('monthIndex'))
             return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
 
         $monthIndex = $request->input('monthIndex');
 
-        $dataset = $this->buildAbsenceQuery()
-            ->whereMonth('a.created_at', '=', $monthIndex);
-        
+        // Build the query with role filter applied
+        $dataset = $this->buildQuery()->whereMonth('a.created_at', '=', $monthIndex);
+
         $this->applyRoleFilter($request, $dataset);
+
+        // Execute the query then expect results
         $dataset = $dataset->get();
 
         Extensions::hashRowIds($dataset);
 
         $monthName = Carbon::createFromFormat('!m', $monthIndex)->monthName;
 
-        return $this->encodeAttendanceData($request, $dataset, "Month of $monthName");
+        return $this->encodeData($request, $dataset, "Month of $monthName");
     }
 
     private function applyRoleFilter(Request &$request, &$dataset)
@@ -151,51 +117,41 @@ class LeaveRequest extends Model
     }
 
     /**
-    * Base query builder for retrieving attendances 
+    * Base query builder for retrieving leave reqyests
     */
-    private function buildAbsenceQuery()
+    private function buildQuery()
     {
-        $role = 'e.' . Employee::f_Position;
-        $roles = Employee::RoleToString;
+        $roleMapping      = Extensions::mapCaseWhen(Employee::RoleToString,             'e.' . Employee::f_Position, 'role');
+        $leaveTypeMapping = Extensions::mapCaseWhen(array_flip($this->getLeaveTypes()), 'a.' . self::f_LeaveType, 'type');
 
-        $roleMapping = "CASE ";
-        
-        foreach ($roles as $key => $value) {
-            $roleMapping .= "WHEN $role = $key THEN '$value' ";
-        }
+        $fname  = Employee::f_FirstName;
+        $mname  = Employee::f_MiddleName;
+        $lname  = Employee::f_LastName;
 
-        $roleMapping .= "END as role";
-        
-        $employeeFields = Extensions::prefixArray('e.', [
-            Employee::f_FirstName  . ' as fname',
-            Employee::f_MiddleName . ' as mname',
-            Employee::f_LastName   . ' as lname',
-            Employee::f_EmpNo      . ' as idNo',
-        ]);
+        $employeeFields = [
+            'e.' . Employee::f_EmpNo      . ' as idNo',
+            DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname")
+        ];
 
-        $attendanceFields = Extensions::prefixArray('a.', [
+        $leaveReqFields = Extensions::prefixArray('a.', [
             'id',
-            'created_at' ,
+            LeaveRequest::f_StartDate   . ' as start',
+            LeaveRequest::f_EndDate     . ' as end',
+            LeaveRequest::f_Duration    . ' as duration',
+            LeaveRequest::f_LeaveStatus . ' as status'
         ]);
 
-        $fields = array_merge([
-            DB::raw("'" . Attendance::STATUS_LATE . "' as status"),
-            DB::raw($roleMapping)
-        ], $attendanceFields, $employeeFields);
+        $fields = array_merge([ DB::raw($roleMapping), DB::raw($leaveTypeMapping) ], $leaveReqFields, $employeeFields);
         
-        $query = DB::table(Attendance::getTableName() . ' as a')
+        $query = DB::table(LeaveRequest::getTableName() . ' as a')
                 ->select($fields)
-                ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
-                ->whereNotNull('a.' . Attendance::f_Late)
-                ->where('a.' . Attendance::f_Late, '<>', '')
+                ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.LeaveRequest::f_Emp_FK_ID)
                 ->orderBy('a.created_at', 'desc');
-
-        error_log($query->toSql());
 
         return $query;
     }
 
-    private function encodeAttendanceData(Request &$request, $dataset, $descriptiveRange = null)
+    private function encodeData(Request &$request, $dataset, $descriptiveRange = null)
     {
         $filters = [
             'select_range' => $request->input('range')
@@ -213,7 +169,7 @@ class LeaveRequest extends Model
             'data'      => $dataset->toArray(),
             'range'     => $descriptiveRange,
             'filters'   => $filters,
-            'icon'      => Attendance::getIconClasses()
+            //'icon'      => Attendance::getIconClasses()
         ]);
     }
 }

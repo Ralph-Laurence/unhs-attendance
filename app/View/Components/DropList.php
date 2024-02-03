@@ -10,18 +10,23 @@ class DropList extends Component
     public $as;
     public $text;
     public $items;
+    public $initial;
 
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($as = null, $text = null, $items = null)
+    public function __construct($as = null, $text = null, $items = null, $initial = null)
     {
         $this->as = !is_null($as) ? $as : 'input-' . Str::random(6);
 
         if (is_null($text))
             $this->text = 'Select';
+        else
+            $this->text = $text;
+
+        $this->initial = $initial;
 
         $this->items = $items;
     }

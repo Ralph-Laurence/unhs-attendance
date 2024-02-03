@@ -4,6 +4,7 @@ namespace App\Http\Utils;
 
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use DateTime;
 use Hashids\Hashids;
 
 class Extensions
@@ -119,5 +120,38 @@ class Extensions
     public static function getQRCode_assetPath($append_filename)
     {
         return asset("storage/qrcodes/$append_filename");
+    }
+
+    /**
+     * "range(1, 12)" generates an array of numbers from 1 to 12.
+     * "collect()" turns this array into a Laravel collection.
+     * "mapWithKeys" transforms each element of the collection into 
+     *               an associative array where the key is the month 
+     *               name and the value is the month index.
+     * "DateTime::createFromFormat('!m', $index)->format('F')" 
+     *              converts the month index into a full month 
+     *              name, such as January through December.
+     * "$months->all()" returns the resulting associative array.
+     */
+    public static function getMonthsAssoc()
+    {
+        $months = collect(range(1, 12))->mapWithKeys(function ($index) {
+            return [DateTime::createFromFormat('!m', $index)->format('F') => $index];
+        });
+        
+        return $months->all();
+    }
+
+    public static function mapCaseWhen($haystack = array(), $needle = '', $as = '') : string
+    {
+        $mapping = "CASE ";
+        
+        foreach ($haystack as $key => $value) {
+            $mapping .= "WHEN $needle = $key THEN '$value' ";
+        }
+
+        $mapping .= "END as $as";
+
+        return $mapping;
     }
 }

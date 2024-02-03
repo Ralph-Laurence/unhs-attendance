@@ -1,0 +1,10 @@
+.droplist .dropdown-menu .dropdown-item.selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.droplist .dropdown-menu .dropdown-item.selected::after {
+    font-family: var(--font-awesome);
+    content: '\f00c';
+    float: right;
+}

@@ -246,7 +246,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
                 name: 'empname',
                 render: function (data, type, row) 
                 {  
-                    return `<span class="text-darker">${data.emp_fullname}</span>`;
+                    return `<span class="text-darker">${data.empname}</span>`;
                 },
                 defaultContent: ''
             },
