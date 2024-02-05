@@ -22,9 +22,9 @@ class LeaveRequest extends Model
     public const f_LeaveType    = 'leave_type';
     public const f_LeaveStatus  = 'leave_status';
 
-    public const LEAVE_STATUS_PENDING  = 0; //'Pending';
-    public const LEAVE_STATUS_APPROVED = 1; //'Approved';
-    public const LEAVE_STATUS_REJECTED = 2; //'Rejected';
+    public const LEAVE_STATUS_PENDING  = 1;
+    public const LEAVE_STATUS_APPROVED = 2;
+    public const LEAVE_STATUS_REJECTED = 3;
 
     public const LEAVE_TYPE_SERVICE_INCENTIVE = 1;
     public const LEAVE_TYPE_SICK              = 2;
@@ -34,6 +34,19 @@ class LeaveRequest extends Model
     public const LEAVE_TYPE_SOLO_PARENT       = 6;
     public const LEAVE_TYPE_SPECIAL           = 7;
     public const LEAVE_TYPE_VAWC              = 8;
+
+    public const LEAVE_SICK        = 'Sick Leave';
+    public const LEAVE_VACATION    = 'Vacation Leave';
+    public const LEAVE_SIL         = 'Service Incentive Leave';
+    public const LEAVE_MATERNITY   = 'Maternity Leave';
+    public const LEAVE_PATERNITY   = 'Paternity Leave';
+    public const LEAVE_SOLO_PARENT = 'Parental Leave for Solo Parents';
+    public const LEAVE_SPECIAL     = 'Special Leave Benefit for Women';
+    public const LEAVE_VAWC        = 'Violence Against Women Leave';
+
+    public const LEAVE_PENDING     = 'Pending';
+    public const LEAVE_APPROVED    = 'Approved';
+    public const LEAVE_REJECTED    = 'Rejected';
 
     public const HASH_SALT = 'FCD61F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
@@ -49,14 +62,14 @@ class LeaveRequest extends Model
     public static function getLeaveTypes($onlyValues = false) : array
     {
         $leaveTypes = [
-            Constants::LEAVE_SICK        => self::LEAVE_TYPE_SICK,
-            Constants::LEAVE_VACATION    => self::LEAVE_TYPE_VACATION,
-            Constants::LEAVE_MATERNITY   => self::LEAVE_TYPE_MATERNITY,
-            Constants::LEAVE_PATERNITY   => self::LEAVE_TYPE_PATERNITY,
-            Constants::LEAVE_SIL         => self::LEAVE_TYPE_SERVICE_INCENTIVE,
-            Constants::LEAVE_SOLO_PARENT => self::LEAVE_TYPE_SOLO_PARENT,
-            Constants::LEAVE_SPECIAL     => self::LEAVE_TYPE_SPECIAL,
-            Constants::LEAVE_VAWC        => self::LEAVE_TYPE_VAWC,
+            self::LEAVE_SICK        => self::LEAVE_TYPE_SICK,
+            self::LEAVE_VACATION    => self::LEAVE_TYPE_VACATION,
+            self::LEAVE_MATERNITY   => self::LEAVE_TYPE_MATERNITY,
+            self::LEAVE_PATERNITY   => self::LEAVE_TYPE_PATERNITY,
+            self::LEAVE_SIL         => self::LEAVE_TYPE_SERVICE_INCENTIVE,
+            self::LEAVE_SOLO_PARENT => self::LEAVE_TYPE_SOLO_PARENT,
+            self::LEAVE_SPECIAL     => self::LEAVE_TYPE_SPECIAL,
+            self::LEAVE_VAWC        => self::LEAVE_TYPE_VAWC,
         ];
 
         if ($onlyValues)
@@ -68,9 +81,9 @@ class LeaveRequest extends Model
     public static function getLeaveStatuses()
     {
         return [
-            Constants::LEAVE_PENDING  => 0,
-            Constants::LEAVE_APPROVED => 1,
-            Constants::LEAVE_REJECTED => 2,
+            self::LEAVE_PENDING  => self::LEAVE_STATUS_PENDING,
+            self::LEAVE_APPROVED => self::LEAVE_STATUS_APPROVED,
+            self::LEAVE_REJECTED => self::LEAVE_STATUS_REJECTED,
         ];
     }
 
@@ -85,6 +98,7 @@ class LeaveRequest extends Model
         $dataset = $this->buildQuery()->whereMonth('a.created_at', '=', $monthIndex);
 
         $this->applyRoleFilter($request, $dataset);
+        $this->applyStatusFilter($request, $dataset);
 
         // Execute the query then expect results
         $dataset = $dataset->get();
@@ -104,15 +118,36 @@ class LeaveRequest extends Model
         )
         {
             $role  = $request->input('role');
-            $roles = Employee::RoleToString; 
             
-            if (!in_array($role, $roles))
+            if (!in_array($role, Employee::getRoles()))
             {
                 $request->replace(['role' => Constants::RECORD_FILTER_ALL]);
                 return;
             }
 
-            $dataset->where('e.'.Employee::f_Position, '=', array_flip($roles)[ $role ]);
+            $dataset->where('e.'.Employee::f_Position, '=', $role);
+        }
+    }
+    
+    private function applyStatusFilter(Request &$request, &$dataset)
+    {
+        if (
+            !empty($request->input('status')) && 
+            ($request->input('status') != Constants::RECORD_FILTER_ALL)
+        )
+        {
+            $status   = $request->input('status');
+            $statuses = self::getLeaveStatuses();
+
+            if (!in_array($status, array_values( $statuses )))
+            {
+                $request->replace(['status' => Constants::RECORD_FILTER_ALL]);
+                return;
+            }
+
+            $dataset->where('a.' . self::f_LeaveStatus, '=', $status);
+
+            error_log($dataset->toSql());
         }
     }
 
@@ -121,8 +156,9 @@ class LeaveRequest extends Model
     */
     private function buildQuery()
     {
-        $roleMapping      = Extensions::mapCaseWhen(Employee::RoleToString,             'e.' . Employee::f_Position, 'role');
-        $leaveTypeMapping = Extensions::mapCaseWhen(array_flip($this->getLeaveTypes()), 'a.' . self::f_LeaveType, 'type');
+        $roleMapping        = Extensions::mapCaseWhen(Employee::RoleToString,                'e.' . Employee::f_Position, 'role');
+        $leaveTypeMapping   = Extensions::mapCaseWhen(array_flip($this->getLeaveTypes()),    'a.' . self::f_LeaveType, 'type');
+        $leaveStatusMapping = Extensions::mapCaseWhen(array_flip($this->getLeaveStatuses()), 'a.' . self::f_LeaveStatus, 'status');
 
         $fname  = Employee::f_FirstName;
         $mname  = Employee::f_MiddleName;
@@ -138,10 +174,13 @@ class LeaveRequest extends Model
             LeaveRequest::f_StartDate   . ' as start',
             LeaveRequest::f_EndDate     . ' as end',
             LeaveRequest::f_Duration    . ' as duration',
-            LeaveRequest::f_LeaveStatus . ' as status'
         ]);
 
-        $fields = array_merge([ DB::raw($roleMapping), DB::raw($leaveTypeMapping) ], $leaveReqFields, $employeeFields);
+        $fields = array_merge($leaveReqFields, $employeeFields, [ 
+            DB::raw($roleMapping), 
+            DB::raw($leaveTypeMapping),
+            DB::raw($leaveStatusMapping)
+        ]);
         
         $query = DB::table(LeaveRequest::getTableName() . ' as a')
                 ->select($fields)

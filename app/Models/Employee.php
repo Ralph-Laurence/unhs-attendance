@@ -20,12 +20,15 @@ class Employee extends Model implements Auditable
     public const HASH_SALT = 'EB7A1F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
 
-    public const RoleTeacher    = 0;
-    public const RoleStaff      = 1;
+    public const RoleTeacher    = 1;
+    public const RoleStaff      = 2;
+
+    private const TEACHER = 'Teacher';
+    private const STAFF = 'Staff';
     
     public const RoleToString = [
-        self::RoleTeacher   => 'Teacher',
-        self::RoleStaff     => 'Staff'
+        self::RoleTeacher   => self::TEACHER,
+        self::RoleStaff     => self::STAFF
     ];
 
     public const ON_STATUS_LEAVE = 'Leave';
@@ -75,6 +78,15 @@ class Employee extends Model implements Auditable
         GROUP BY 
             e.id;
      */
+
+    public static function getRoles() 
+    {
+        return [
+            self::TEACHER  => self::RoleTeacher,
+            self::STAFF    => self::RoleStaff
+        ];
+    }
+
     public function getTeachers()
     {
         $dataset = $this->getEmployees(Employee::RoleTeacher);

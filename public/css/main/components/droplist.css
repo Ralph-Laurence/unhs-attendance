@@ -1,3 +1,8 @@
+.droplist .dropdown-menu-scrollview {
+    max-height: 200px;
+    height: fit-content;
+}
+
 .droplist .dropdown-menu .dropdown-item.selected {
     background-color: var(--primary-color);
     color: white;
@@ -7,4 +12,8 @@
     font-family: var(--font-awesome);
     content: '\f00c';
     float: right;
+}
+
+.droplist .dropdown-toggle {
+    font-weight: 600;
 }

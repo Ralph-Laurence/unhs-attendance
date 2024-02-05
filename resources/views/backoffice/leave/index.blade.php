@@ -6,7 +6,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/main/shared/attendance-common-styles.css') }}" />
-<link rel="stylesheet" href="{{ asset('css/main/backoffice/attendance-page.css') }}" />
+<link rel="stylesheet" href="{{ asset('css/main/backoffice/leave-request-page.css') }}" />
 @endpush
 
 @section('content')
@@ -14,71 +14,145 @@
 <div class="card content-card">
     <div class="card-body">
 
-        {{-- TABLE TITLE HEADER --}}
-        <div class="d-flex align-items-center gap-1">
-            <h6 class="card-title me-auto">
-                <span>Leave Requests</span>
-                <i class="fas fa-caret-right mx-2 opacity-60"></i>
-                <span class="opacity-90 lbl-attendance-range text-14 text-primary-dark"></span>
-                <i class="fas fa-caret-right mx-2 opacity-60"></i>
-                <span class="opacity-90 lbl-employee-filter text-14 text-primary-dark"></span>
-            </h6>
-
-            {{-- RECORD MONTH RANGE FILTERS --}}
-            <x-drop-list as="input-month-filter" :items="$monthOptions"
-            text="{{ date('F') }}" initial="{{ date('n') }}" input-off/>
-
-            {{-- EMPLOYEE ROLE FILTERS --}}
-            <div class="dropdown">
-                <button class="btn btn-secondary flat-button dropdown-toggle shadow-0" 
-                    id="role-filters-dropdown-button" data-mdb-toggle="dropdown" aria-expanded="false" disabled>
-                    <span class="me-1 button-text">All</span>
-                    <i class="fas fa-chevron-down opacity-65"></i>
-                </button>
-                <ul class="dropdown-menu role-filters" aria-labelledby="role-filters-dropdown-button">
-                    <li><a class="dropdown-item selected-option" role="button" data-role="All">All</a></li>
-                    @foreach ($roleFilters as $role)
-                        <li><a class="dropdown-item" role="button" data-role="{{ $role }}">{{ $role }}</a></li>
-                    @endforeach
-                </ul>
+        <div class="row">
+            <div class="col-2 flex-start">
+                <h6 class="card-title m-0">Leave Requests</h6>
             </div>
+            <div class="col flex-start gx-0 flex-row">
+                <div class="filter-indicators me-auto flex-start gap-2">
+                    <div class="filter-arrow filter-arrow-head-cap px-2">
+                        <i class="fas fa-filter me-2"></i>
+                        <span class="text-uppercase">Filters</span>
+                    </div>
+                    {{-- MONTH FILTER --}}
+                    <div class="filter-arrow filter-arrow-item">
+                        <i class="fas fa-calendar-days me-2"></i>
+                        <span class="text-uppercase text-truncate lbl-month-filter">Filters</span>
+                    </div>
+                    {{-- EMPLOYEE FILTER --}}
+                    <div class="filter-arrow filter-arrow-item">
+                        <i class="fas fa-user-tie me-2"></i>
+                        <span class="text-uppercase text-truncate lbl-role-filter">Filters</span>
+                    </div>
+                    {{-- LEAVE TYPE FILTER --}}
+                    <div class="filter-arrow filter-arrow-item">
+                        <i class="fas fa-chart-area me-2"></i>
+                        <span class="text-uppercase text-truncate lbl-leave-filter">Filters</span>
+                    </div>
+                    {{-- LEAVE STATUS FILTER --}}
+                    <div class="filter-arrow filter-arrow-item">
+                        <i class="fas fa-chart-line me-2"></i>
+                        <span class="text-uppercase text-truncate lbl-status-filter">Filters</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4 flex-end gap-2">
 
-            {{-- ADD BUTTON --}}
-            <div class="dropdown">
-                <button class="btn btn-primary flat-button dropdown-toggle shadow-0" id="add-record-dropdown-button"
-                    data-mdb-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-plus"></i>
-                    <span class="ms-1">Add</span>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
-                    <li>
-                        <a class="dropdown-item" data-mdb-toggle="modal" data-mdb-target="#leaveRequestForm"
-                            role="button">Create Manually</a>
-                    </li>
-                    <li><a class="dropdown-item" href="#">Import Sheet</a></li>
-                </ul>
+                {{-- FILTERS BUTTON --}}
+                <div class="dropdown filter-options-dialog">
+                    <button class="btn btn-secondary flat-button shadow-0" 
+                        id="filters-dropdown-button" data-mdb-auto-close="false" 
+                        data-mdb-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-filter opacity-75"></i>
+                        <span class="ms-1">Filter</span>
+                    </button>
+                    <div class="dropdown-menu p-2 shadow shadow-4-strong user-select-none" 
+                         aria-labelledby="filters-dropdown-button" style="width: 320px;">
+                        <div class="container">
+                            <h6 class="text-14 fw-bold mb-3">
+                                <i class="fas fa-gear me-1"></i>
+                                Select Record Filters
+                            </h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    {{-- RECORD MONTH RANGE FILTERS --}}
+                                    <small> 
+                                        <i class="fas fa-calendar-days me-1"></i> Month
+                                    </small>
+                                    <x-drop-list as="input-month-filter" :items="$monthOptions" text="{{ date('F') }}" 
+                                    default="{{ date('n') }}" button-classes="w-100"/>
+                                </div>
+                                <div class="col-6">
+                                    {{-- EMPLOYEE ROLE FILTERS --}}
+                                    <small> 
+                                        <i class="fas fa-user-tie me-1"></i> Employee
+                                    </small>
+                                    <x-drop-list as="input-role-filter" :items="$roleFilters['filterItems']" 
+                                    text="{{ $roleFilters['defaultText'] }}" button-classes="w-100"
+                                    default="{{ $roleFilters['defaultValue'] }}"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    {{-- LEAVE TYPE FILTERS --}}
+                                    <small> 
+                                        <i class="fas fa-chart-area me-1"></i> Leave Type
+                                    </small>
+                                    <x-drop-list as="input-leave-filter" :items="$leaveFilters['filterItems']" 
+                                    text="{{ $leaveFilters['defaultText'] }}"  button-classes="w-100"
+                                    default="{{ $leaveFilters['defaultValue']  }}"/>
+                                </div>
+                                <div class="col-6">
+                                    {{-- LEAVE STATUS FILTERS --}}
+                                    <small> 
+                                        <i class="fas fa-chart-line me-1"></i> Leave Status
+                                    </small>
+                                    <x-drop-list as="input-status-filter" :items="$statusFilters['filterItems']" 
+                                    text="{{ $statusFilters['defaultText'] }}"  button-classes="w-100"
+                                    default="{{ $statusFilters['defaultValue']  }}"/>
+                                </div>
+                            </div>
+                            <hr class="my-3 opacity-10">
+                            <div class="row">
+                                <div class="col"></div>
+                                <div class="col">
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <button class="btn shadow-0 flat-button btn-cancel btn-secondary">Cancel</button>
+                                        <button class="btn shadow-0 flat-button btn-apply btn-primary">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                {{-- ADD BUTTON --}}
+                <div class="dropdown">
+                    <button class="btn btn-primary flat-button dropdown-toggle shadow-0" id="add-record-dropdown-button"
+                        data-mdb-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-plus"></i>
+                        <span class="ms-1">Add</span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
+                        <li>
+                            <a class="dropdown-item" data-mdb-toggle="modal" data-mdb-target="#leaveRequestForm"
+                                role="button">Create Manually</a>
+                        </li>
+                        <li><a class="dropdown-item" href="#">Import Sheet</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
         {{-- DATASET TABLE --}}
-        <table class="table table-striped table-fixedx table-sm table-hover dataset-table"
-            id="records-table"
-            data-src-default="{{ $routes['ajax_get_all'] }}"
-            data-src-emp-ids="{{ $routes['ajax_load_empids'] }}">
-            <thead class="user-select-none">
-                <tr>
-                    <th>#</th>
-                    <th class="ps-2">Employee Name</th>
-                    <th>Leave Type</th>
-                    <th>Date From</th>
-                    <th>Date End</th>
-                    <th>Duration</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>{{-- CONTENT WILL COME FROM AJAX SOURCE --}}</tbody>
-        </table>
+        <div class="w-100 position-relative overflow-hidden">
+            <table class="table table-striped table-fixed w-100 table-sm table-hover dataset-table" id="records-table"
+                data-src-default="{{ $routes['ajax_get_all'] }}" data-src-emp-ids="{{ $routes['ajax_load_empids'] }}">
+                <thead class="user-select-none">
+                    <tr>
+                        <th class="record-counter sticky-header">#</th>
+                        <th class="ps-2">Employee Name</th>
+                        <th>Leave Type</th>
+                        <th>Date From</th>
+                        <th>Date End</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th class="sticky-header">Action</th>
+                    </tr>
+                </thead>
+                <tbody>{{-- CONTENT WILL COME FROM AJAX SOURCE --}}</tbody>
+            </table>
+        </div>
     </div>
 </div>
 

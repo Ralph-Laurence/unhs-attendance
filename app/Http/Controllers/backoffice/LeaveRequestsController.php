@@ -39,7 +39,26 @@ class LeaveRequestsController extends Controller
         ];
 
         // Role filters will be used for <select> dropdowns
-        $roleFilters = array_values(Employee::RoleToString);
+        $defaultFilterValueAll = Constants::FILTER_VALUE_ALL;
+        $defaultFilterTextAll  = Constants::RECORD_FILTER_ALL;
+ 
+        $roleFilters = [
+            'defaultText'  => $defaultFilterTextAll,
+            'defaultValue' => $defaultFilterValueAll,
+            'filterItems'  => [ $defaultFilterTextAll => $defaultFilterValueAll ] + array_flip(Employee::RoleToString)
+        ];
+
+        $leaveFilters = [
+            'defaultText'  => $defaultFilterTextAll,
+            'defaultValue' => $defaultFilterValueAll,
+            'filterItems'  => [ $defaultFilterTextAll => $defaultFilterValueAll ] + LeaveRequest::getLeaveTypes()
+        ];
+
+        $statusFilters = [
+            'defaultText'  => $defaultFilterTextAll,
+            'defaultValue' => $defaultFilterValueAll,
+            'filterItems'  => [ $defaultFilterTextAll => $defaultFilterValueAll ] + LeaveRequest::getLeaveStatuses()
+        ];
 
         // Hash option values
         $leaveTypes = array_map(function($value) 
@@ -52,6 +71,8 @@ class LeaveRequestsController extends Controller
             ->with('routes'             , $routes)
             ->with('roleFilters'        , $roleFilters)
             ->with('leaveTypes'         , $leaveTypes)
+            ->with('leaveFilters'       , $leaveFilters)
+            ->with('statusFilters'      , $statusFilters)
             ->with('monthOptions'       , Extensions::getMonthsAssoc());
     }
 

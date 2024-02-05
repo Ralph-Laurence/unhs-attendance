@@ -20,12 +20,14 @@ var leaveRequestPage = (function ()
 
     let global_monthFilter;
     let global_roleFilter;
+    let global_typeFilter;
+    let global_statusFilter;
 
-    let last_selected_range;
-    let monthSelect;
+    let monthFilter;
+    let roleFilter;
+    let leaveFilter;
+    let statusFilter;
 
-    let roleFilterEl;
-    let roleFilterDropdown;
     let lblAttendanceRange;
 
     let btnSave;
@@ -62,11 +64,14 @@ var leaveRequestPage = (function ()
 
         to_date_picker("#input-leave-start");
         to_date_picker("#input-leave-end");
-
         to_droplist('#input-leave-type');
-        monthSelect = to_droplist('#input-month-filter');
-        
-        bindTableDataSource(monthSelect.getValue());
+
+        monthFilter  = to_droplist('#input-month-filter');
+        roleFilter   = to_droplist('#input-role-filter');
+        leaveFilter  = to_droplist('#input-leave-filter');
+        statusFilter = to_droplist('#input-status-filter');
+
+        bindTableDataSource(monthFilter.getValue(), roleFilter.getValue());
     };
     
     //============================
@@ -112,7 +117,24 @@ var leaveRequestPage = (function ()
             submitForm(validation.validated);
         });
 
-        monthSelect.onValueChanged( val => bindTableDataSource(val) );
+        $('.filter-options-dialog .btn-cancel').on('click', function() 
+        {    
+            monthFilter.reset();
+            roleFilter.reset();
+            statusFilter.reset();
+            leaveFilter.reset();
+
+            applyFilters();
+
+            $('.filter-indicators').hide();
+        });
+
+        $('.filter-options-dialog .btn-apply').on('click', function () 
+        {
+            applyFilters();
+
+            $('.filter-indicators').show();
+        });
     };
 
     //============================
@@ -196,14 +218,16 @@ var leaveRequestPage = (function ()
         });
     }
 
-    function bindTableDataSource(ref_monthIndex, ref_roleFilter)
+    function bindTableDataSource(ref_monthIndex, ref_roleFilter, ref_typeFilter, ref_statusFilter)
     {
         disableControlButtons();
 
         let currentDate = getCurrentDateParts();
 
-        global_roleFilter = ref_roleFilter;
-        global_monthFilter = ref_monthIndex;
+        global_roleFilter   = ref_roleFilter;
+        global_monthFilter  = ref_monthIndex;
+        global_typeFilter   = ref_typeFilter;
+        global_statusFilter = ref_statusFilter;
         
         // dataTable.column('empname:name').search('Kim').draw()
 
@@ -211,8 +235,9 @@ var leaveRequestPage = (function ()
             "deferRender": true,
             'searching': false,
             'ordering': false,
-            'bAutoWidth': false,
-
+            'autoWidth': true,
+            'scrollX': true,
+            'sScrollXInner': "80%",
             'drawCallback': function () 
             {
                 // dataTable_isFirstDraw is when the "Loading..." was first shown.
@@ -258,25 +283,6 @@ var leaveRequestPage = (function ()
                         // }
                     }
 
-                    // Descriptive Range
-                    if ('range' in json)
-                    {
-                        // if (json.range)
-                        //     lblAttendanceRange.text(json.range);
-                    }
-
-                    // Last Selected Range Filters
-                    if ('filters' in json)
-                    {
-                        // last_selected_range = json.filters.select_range;
-
-                        // if (last_selected_range == RANGE_MONTH)
-                        //     global_monthFilter = json.filters['month_index'];
-
-                        // if (json.filters.select_role)
-                        //     $('.lbl-employee-filter').text(json.filters.select_role);
-                    }
-
                     // After AJAX response, reenable the control buttons
                     enableControlButtons();
 
@@ -285,9 +291,11 @@ var leaveRequestPage = (function ()
                 data: function () 
                 {
                     return {
-                        '_token': csrfToken,
-                        'monthIndex': global_monthFilter,
-                        'role': global_roleFilter
+                        '_token':       csrfToken,
+                        'monthIndex':   global_monthFilter,
+                        'role':         global_roleFilter,
+                        'type':         global_typeFilter,
+                        'status':       global_statusFilter
                     }
                 }
             },
@@ -296,7 +304,7 @@ var leaveRequestPage = (function ()
                 // First Column -> Record Counter
                 {
                     width: '50px',
-                    className: 'record-counter text-truncate opacity-45',
+                    className: 'record-counter text-truncate position-sticky start-0 sticky-cell',
                     data: null,
                     render: function (data, type, row, meta)
                     {
@@ -306,19 +314,21 @@ var leaveRequestPage = (function ()
                 // Second Column -> Employee Name
                 {
                     className: 'td-employee-name text-truncate',
+                    width: '280px',
                     data: 'empname',
                     name: 'empname',
                     defaultContent: ''
                 },
                 // Third Column -> Leave Type
                 {
+                    className: 'text-truncate',
                     width: '180px',
                     data: 'type',
                     defaultContent: ''
                 },
                 // Fourth Column -> Date From
                 {
-                    className: 'text-truncate text-center',
+                    className: 'text-truncate',
                     width: '120px',
                     data: 'start',
                     render: function (data, type, row) 
@@ -330,7 +340,7 @@ var leaveRequestPage = (function ()
                 },
                 // Fifth Column -> Date End
                 {
-                    className: 'text-truncate text-center',
+                    className: 'text-truncate',
                     width: '120px',
                     data: 'end',
                     render: function (data, type, row) 
@@ -355,7 +365,7 @@ var leaveRequestPage = (function ()
                 // Seventh Column -> Actions
                 {
                     data: null,
-                    className: 'text-center',
+                    className: 'text-center position-sticky end-0 z-100 sticky-cell',
                     width: '100px',
                     render: function (data, type, row)
                     {
@@ -379,20 +389,33 @@ var leaveRequestPage = (function ()
         dataTable = $('.dataset-table').DataTable(options);
     }
 
+    function applyFilters()
+    {
+        bindTableDataSource(
+            monthFilter.getValue(),
+            roleFilter.getValue(),
+            leaveFilter.getValue(),
+            statusFilter.getValue()
+        );
+
+        $('.lbl-month-filter').text( monthFilter.getText() );
+        $('.lbl-role-filter').text( roleFilter.getText() );
+        $('.lbl-leave-filter').text( leaveFilter.getText() );
+        $('.lbl-status-filter').text( statusFilter.getText() );
+
+        $().text( statusFilter.getText() )
+    }
+
     function enableControlButtons()
     {
-        monthSelect.enable();
-        //enableRangeFilter();
-        //roleFilterEl.prop('disabled', false);
+        monthFilter.enable();
+        roleFilter.enable();
     }
 
     function disableControlButtons()
     {
-        monthSelect.disable();
-        //finishRangeFilter();
-
-        //roleFilterDropdown.hide();
-        //roleFilterEl.prop('disabled', true);
+        monthFilter.disable();
+        roleFilter.disable();
     }
 
     // End of Revealing Module Pattern

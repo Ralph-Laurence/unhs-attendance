@@ -35,7 +35,7 @@
     </div>
 
     {{-- ERROR LABEL --}}
-    <h6 class="px-2 my-1 text-danger text-xs error-label">{{ $errors->first($as) }}</h6>
+    <h6 class="px-2 my-1 text-danger text-sm error-label">{{ $errors->first($as) }}</h6>
 
     @if ($attributes->has('suggest'))
         <div class="auto-suggest-combobox position-absolute invisible" id="{{ $as .'-intellisense'}}"></div>

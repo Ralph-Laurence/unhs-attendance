@@ -46,7 +46,7 @@
     {{-- ERROR LABEL --}}
     <h6 class="px-2 my-1 text-danger text-xs error-label">{{ $errors->first($as) }}</h6>
 
-    <div class="moment-picker-popover dropdown-menu bg-white border rounded-3 overflow-hidden">
+    <div class="moment-picker-popover dropdown-menu bg-white shadow shadow-4-strong rounded-3 overflow-hidden">
         <div class="control-ribbon p-2 gap-2 flex-center bg-color-primary">
             <button type="button" class="btn-sm btn-secondary flat-button shadow-0 px-2 btn-month-picker">
                 <span class="me-1 btn-text">{{ $currentMonth }}</span>
@@ -121,7 +121,6 @@
                     </tr>
                 </thead>
                 <tbody>
-
                 </tbody>
             </table>
         </div>
