@@ -99,6 +99,7 @@ class LeaveRequest extends Model
 
         $this->applyRoleFilter($request, $dataset);
         $this->applyStatusFilter($request, $dataset);
+        $this->applyLeaveFilter($request, $dataset);
 
         // Execute the query then expect results
         $dataset = $dataset->get();
@@ -113,16 +114,17 @@ class LeaveRequest extends Model
     private function applyRoleFilter(Request &$request, &$dataset)
     {
         if (
-            ($request->has('role') && $request->filled('role')) && 
+            !empty($request->input('role')) && 
             ($request->input('role') != Constants::RECORD_FILTER_ALL)
         )
         {
-            $role  = $request->input('role');
+            $role = $request->input('role');
             
             if (!in_array($role, Employee::getRoles()))
             {
-                $request->replace(['role' => Constants::RECORD_FILTER_ALL]);
-                return;
+                //$request->replace(['role' => Constants::RECORD_FILTER_ALL]);
+                $role = Constants::RECORD_FILTER_ALL;
+                //return;
             }
 
             $dataset->where('e.'.Employee::f_Position, '=', $role);
@@ -136,18 +138,28 @@ class LeaveRequest extends Model
             ($request->input('status') != Constants::RECORD_FILTER_ALL)
         )
         {
-            $status   = $request->input('status');
-            $statuses = self::getLeaveStatuses();
+            $status = $request->input('status');
 
-            if (!in_array($status, array_values( $statuses )))
-            {
-                $request->replace(['status' => Constants::RECORD_FILTER_ALL]);
-                return;
-            }
+            if (!in_array($status, array_values( self::getLeaveStatuses() )))
+                $status = Constants::RECORD_FILTER_ALL;
 
             $dataset->where('a.' . self::f_LeaveStatus, '=', $status);
+        }
+    }
 
-            error_log($dataset->toSql());
+    private function applyLeaveFilter(Request &$request, &$dataset)
+    {
+        if (
+            !empty($request->input('type')) && 
+            ($request->input('type') != Constants::RECORD_FILTER_ALL)
+        )
+        {
+            $type = $request->input('type');
+
+            if (!in_array($type, array_values( self::getLeaveTypes() )))
+                $type = Constants::RECORD_FILTER_ALL;
+
+            $dataset->where('a.' . self::f_LeaveType, '=', $type);
         }
     }
 

@@ -28,6 +28,8 @@ var leaveRequestPage = (function ()
     let leaveFilter;
     let statusFilter;
 
+    let filterOptions;
+
     let lblAttendanceRange;
 
     let btnSave;
@@ -41,6 +43,8 @@ var leaveRequestPage = (function ()
         csrfToken         = $('meta[name="csrf-token"]').attr('content');
         inputEmployeeName = $('#input-employee-name');
         leaveRequestForm  = $('#leaveRequestForm');
+
+        filterOptions = new mdb.Dropdown( '.filter-options-dialog' );
 
         requestFormInputs = 
         {
@@ -125,6 +129,7 @@ var leaveRequestPage = (function ()
             leaveFilter.reset();
 
             applyFilters();
+            filterOptions.hide();
 
             $('.filter-indicators').hide();
         });
@@ -132,9 +137,12 @@ var leaveRequestPage = (function ()
         $('.filter-options-dialog .btn-apply').on('click', function () 
         {
             applyFilters();
-
+            filterOptions.hide();
+            
             $('.filter-indicators').show();
         });
+
+        $('.filter-options-dialog .dropdown-menu .btn-close').on('click', () => filterOptions.hide());
     };
 
     //============================

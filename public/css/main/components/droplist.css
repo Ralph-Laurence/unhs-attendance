@@ -1,6 +1,18 @@
+.droplist .dropdown-menu {
+    width: fit-content;
+    max-width: 300px;
+}
+
 .droplist .dropdown-menu-scrollview {
     max-height: 200px;
     height: fit-content;
+}
+
+.droplist .dropdown-menu .dropdown-item {
+    margin-right: 30px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .droplist .dropdown-menu .dropdown-item.selected {

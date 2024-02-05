@@ -59,10 +59,13 @@
                     <div class="dropdown-menu p-2 shadow shadow-4-strong user-select-none" 
                          aria-labelledby="filters-dropdown-button" style="width: 320px;">
                         <div class="container">
-                            <h6 class="text-14 fw-bold mb-3">
-                                <i class="fas fa-gear me-1"></i>
-                                Select Record Filters
-                            </h6>
+                            <div class="d-flex align-items-center mb-3">
+                                <h6 class="text-14 fw-bold my-0 me-auto">
+                                    <i class="fas fa-gear me-1"></i>
+                                    Select Record Filters
+                                </h6>
+                                <button class="btn btn-close shadow-0"></button>
+                            </div>
                             <div class="row">
                                 <div class="col-6">
                                     {{-- RECORD MONTH RANGE FILTERS --}}
@@ -107,7 +110,7 @@
                                 <div class="col"></div>
                                 <div class="col">
                                     <div class="d-flex align-items-center justify-content-end gap-2">
-                                        <button class="btn shadow-0 flat-button btn-cancel btn-secondary">Cancel</button>
+                                        <button class="btn shadow-0 flat-button btn-cancel btn-secondary">Clear</button>
                                         <button class="btn shadow-0 flat-button btn-apply btn-primary">Apply</button>
                                     </div>
                                 </div>
