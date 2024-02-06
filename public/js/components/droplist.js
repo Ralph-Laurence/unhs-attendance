@@ -5,6 +5,8 @@ function to_droplist(selector)
     let root    = $input.closest('.dropdown');
     let btnText = root.find('.dropdown-toggle .button-text');
     let items   = root.find('.dropdown-menu .dropdown-item');
+    
+    let lastValue = '';
 
     items.on('click', function()
     {
@@ -62,6 +64,8 @@ function to_droplist(selector)
         inputElem:  $input,
         reset:      __reset,
         setValue:   __setValue,
+        setLastValue: (value) => lastValue = value,
+        getLastValue: () => lastValue,
         onValueChanged: function(callback) 
         {
             $input.on('valueChanged', function(event, value) {

@@ -19,7 +19,7 @@
                 <h6 class="card-title m-0">Leave Requests</h6>
             </div>
             <div class="col flex-start gx-0 flex-row">
-                <div class="filter-indicators me-auto flex-start gap-2">
+                <div class="filter-indicators me-auto flex-start gap-2 d-hidden">
                     <div class="filter-arrow filter-arrow-head-cap px-2">
                         <i class="fas fa-filter me-2"></i>
                         <span class="text-uppercase">Filters</span>
@@ -110,7 +110,7 @@
                                 <div class="col"></div>
                                 <div class="col">
                                     <div class="d-flex align-items-center justify-content-end gap-2">
-                                        <button class="btn shadow-0 flat-button btn-cancel btn-secondary">Clear</button>
+                                        <button class="btn shadow-0 flat-button btn-clear btn-secondary">Clear</button>
                                         <button class="btn shadow-0 flat-button btn-apply btn-primary">Apply</button>
                                     </div>
                                 </div>
