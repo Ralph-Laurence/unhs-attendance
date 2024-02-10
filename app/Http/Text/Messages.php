@@ -16,6 +16,9 @@ class Messages
     public const GENERIC_DELETE_FAIL     = 'A problem has occurred while trying to delete the record.';
     public const GENERIC_DELETE_OK       = 'Record successfully deleted.';
 
+    public const READ_FAIL_INEXISTENT    = 'It seems the record doesn\'t exist or has already been removed.';
+    public const DELETE_FAIL_INEXISTENT  = 'It seems the record you\'re trying to modify doesn\'t exist or has already been removed.';
+
     public const TEACHER_DELETE_OK       = 'Faculty member successfully removed from records.';
     public const TEACHER_DELETE_FAIL     = 'Failed to remove faculty member from the records.';
 
@@ -36,5 +39,7 @@ class Messages
 
     public const LEAVE_REQUEST_OVERLAP   = 'Leave request overlaps with an existing one.';
 
-    public const PROCESS_REQUEST_FAILED = "Unable to process your request because of an error.";
+    public const PROCESS_REQUEST_FAILED  = "Unable to process your request because of an error.";
+
+    public const END_DATE_LESS_THAN      = 'The end date must not be earlier than the start date.';
 }

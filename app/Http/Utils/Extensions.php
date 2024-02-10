@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use DateTime;
 use Hashids\Hashids;
+use Illuminate\Support\Facades\Validator;
 
 class Extensions
 {
@@ -14,6 +15,9 @@ class Extensions
         return preg_filter('/^/', $prefix, $array);
     }
 
+    /**
+     * Gets the week number (1 - 52) of current year.
+     */
     public static function getCurrentWeek()
     {
         return Carbon::now()->weekOfYear;
@@ -98,19 +102,52 @@ class Extensions
     //
     public static function encodeSuccessMessage($message, $extraRows = []) : string 
     {
-        // Use the array union operator (+) to merge the arrays
+        // Include optional extra rows
         $result = ['code' => Constants::XHR_STAT_OK, 'message' => $message] + $extraRows;
     
         return json_encode($result);
     }
 
-    public static function encodeFailMessage($message, $code = null) : string 
+    public static function encodeFailMessage($message, $code = null, $extraRows = []) : string 
     {
-        return json_encode([
-            'code'    => !is_null($code) ? $code : Constants::XHR_STAT_FAIL,
-            'message' => $message
-        ]);
+        // Include optional extra rows
+        $statCode = !is_null($code) ? $code : Constants::XHR_STAT_FAIL;
+
+        $result = ['code' => $statCode, 'message' => $message] + $extraRows;
+    
+        return json_encode($result);
+
+        // return json_encode([
+        //     'code'    => !is_null($code) ? $code : Constants::XHR_STAT_FAIL,
+        //     'message' => $message
+        // ]);
     }
+
+    public static function validationFailResponse($validator, $extraRows = []) : array
+    {
+        $errors = $validator->errors();
+
+        if ($extraRows)
+        {
+            foreach ($extraRows as $field => $message) {
+                $errors->add($field, $message);
+            }
+        }
+        return [
+            'code'   => Constants::ValidationStat_Failed,
+            'errors' => $errors
+        ];
+    }
+    
+    public static function validationSuccessResponse($validator) : array
+    {
+        return [
+            'code' => Constants::ValidationStat_Success,
+            'data' => $validator
+        ];
+    }
+
+    //'code' => Constants::ValidationStat_Failed
 
     public static function getQRCode_storagePath($append_filename) 
     {

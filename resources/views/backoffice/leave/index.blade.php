@@ -51,7 +51,7 @@
                 {{-- FILTERS BUTTON --}}
                 <div class="dropdown filter-options-dialog">
                     <button class="btn btn-secondary flat-button shadow-0" 
-                        id="filters-dropdown-button" data-mdb-auto-close="false" 
+                        id="filters-dropdown-button" data-mdb-auto-close="outside" 
                         data-mdb-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-filter opacity-75"></i>
                         <span class="ms-1">Filter</span>
@@ -128,8 +128,9 @@
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
                         <li>
-                            <a class="dropdown-item" data-mdb-toggle="modal" data-mdb-target="#leaveRequestForm"
-                                role="button">Create Manually</a>
+                            <a class="dropdown-item" data-mdb-toggle="modal" 
+                               data-mdb-target="#leaveRequestModal"
+                               role="button">Create Manually</a>
                         </li>
                         <li><a class="dropdown-item" href="#">Import Sheet</a></li>
                     </ul>
@@ -162,13 +163,13 @@
 @endsection
 
 @push('dialogs')
-<div class="modal fade" data-mdb-backdrop="static" id="leaveRequestForm" tabindex="-1" aria-labelledby="leaveRequestFormLabel" aria-hidden="true">
+<div class="modal fade" data-mdb-backdrop="static" id="leaveRequestModal" tabindex="-1" aria-labelledby="leaveRequestModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header py-2">
                 <div class="d-flex align-items-center gap-2">
                     <img src="{{ asset('images/internal/icons/modal_icon_leave.png') }}" width="28" height="28" alt="icon" class="modal-icon" />
-                    <h6 class="modal-title mb-0" id="leaveRequestFormLabel">Employee Leave</h6>
+                    <h6 class="modal-title mb-0" id="leaveRequestModalLabel">Employee Leave</h6>
                 </div>
                 <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -191,11 +192,11 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <h6 class="text-14">Start Date</h6>
-                                <x-moment-picker as="input-leave-start" />
+                                <x-moment-picker as="input-leave-start"/>
                             </div>
                             <div class="col">
                                 <h6 class="text-14">End Date</h6>
-                                <x-moment-picker as="input-leave-end" />
+                                <x-moment-picker as="input-leave-end"/>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -205,8 +206,7 @@
                             </div>
                             <div class="col-6">
                                 <h6 class="text-14">Leave Status</h6>
-                                <x-drop-list as="input-leave-status" :items="$leaveTypes" button-classes="w-100" disabled input-off />
-                                <small class="text-sm fst-italic">(you may change this later)</small>
+                                <x-drop-list as="input-leave-status" :items="$leaveStatuses" button-classes="w-100" />
                             </div>
                         </div>
                     </div>

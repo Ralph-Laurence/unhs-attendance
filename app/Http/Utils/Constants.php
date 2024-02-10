@@ -12,6 +12,7 @@ class Constants
 
     public const BasicTimeFormat        = 'g:i A';
     public const TimestampFormat        = 'Y-m-d H:i:s';
+    public const DateFormat             = 'Y-m-d';
 
     public const ValidationStat_Failed  = 400;
     public const ValidationStat_Success = 200;

@@ -3,69 +3,79 @@
 //
 var leaveRequestPage = (function ()
 {
-    const tableSelector = "#records-table";
-    const formSelector  = "#frm-leave-request";
+    // JQuery selectors prefixed with 'jq'
+    const jq_RECORDS_TABLE   = "#records-table";
+    const jq_INPUT_EMP_NO    = '#input-id-no';
+    const jq_LEAVE_REQ_MODAL = '#leaveRequestModal';
 
-    let csrfToken;
+    const STATUS_PENDING     = 'pending';
+
+    let leaveReqModal;
     let employeeMapping;
     let dataTable;
-    let dataTable_isFirstDraw = true;
     let iconStyles;
     
-    let leaveRequestForm;
-    let requestFormInputs;
-
-    let inputEmployeeName;
-    let inputEmpIdSelector = '#input-id-no';
+    let formElements;
 
     let recordFilters = {};
-    let filterOptions;
-
-    let btnSave;
+    let filtersContainer;
     
+    // State Flags
+    let dataTable_isFirstDraw = true;
+
     //============================
     // Initialization
     //============================
 
     var initialize = function ()
     {
-        csrfToken         = $('meta[name="csrf-token"]').attr('content');
-        inputEmployeeName = $('#input-employee-name');
-        leaveRequestForm  = $('#leaveRequestForm');
+        filtersContainer = new mdb.Dropdown('.filter-options-dialog');
+        leaveReqModal    = new mdb.Modal( $(jq_LEAVE_REQ_MODAL) );
 
-        filterOptions     = new mdb.Dropdown('.filter-options-dialog');
+        // $(document).on('keypress', function(e) {
+        //     if (e.which == 117)
+        //         leaveReqModal.show();
+        // });
 
-        requestFormInputs = 
-        {
-            'input-id-no'       : { label: 'ID Number' , input : $(inputEmpIdSelector)    },
-            'input-leave-start' : { label: 'Start Date', input : $("#input-leave-start") },
-            'input-leave-end'   : { label: 'End Date'  , input : $("#input-leave-end")   },
-            'input-leave-type'  : { label: 'Leave Type', input : $("#input-leave-type")  , type: 'droplist' },
+        formElements = {
+            mainForm      : $('#frm-leave-request'),
+            inputEmpName  : $('#input-employee-name'),
+            btnSave       : $(jq_LEAVE_REQ_MODAL).find('.btn-save'),
+            isDirty       : false,
+            fields        : {
+                'idNo'        : { label: 'ID Number'    , input : $(jq_INPUT_EMP_NO)      },
+                'startDate'   : { label: 'Start Date'   , input : $("#input-leave-start") },
+                'endDate'     : { label: 'End Date'     , input : $("#input-leave-end")   },
+                'leaveType'   : { label: 'Leave Type'   , input : $("#input-leave-type")   ,type: 'droplist' },
+                'leaveStatus' : { label: 'Leave Status' , input : $("#input-leave-status") ,type: 'droplist' },
+            }
         };
 
-        btnSave = leaveRequestForm.find('.btn-save');
+        recordFilters = {
+            'month'  : to_droplist('#input-month-filter'),
+            'role'   : to_droplist('#input-role-filter'),
+            'leave'  : to_droplist('#input-leave-filter'),
+            'status' : to_droplist('#input-status-filter')
+        };
+
+        $(jq_LEAVE_REQ_MODAL).on('hidden.mdb.modal', function() {
+            // alert('closed')
+        });
 
         // Load employee id numbers into autocomplete textbox
-        to_auto_suggest_ajax(
-            inputEmpIdSelector, 
+        to_auto_suggest_ajax(jq_INPUT_EMP_NO, 
             {
-                action: $(tableSelector).data('src-emp-ids'),
-                csrfToken: csrfToken,
+                'action'    : $(jq_RECORDS_TABLE).data('src-emp-ids'),
+                'csrfToken' : getCsrfToken(),
             },
             (dataSource) => employeeMapping = dataSource
         );
 
         to_date_picker("#input-leave-start");
         to_date_picker("#input-leave-end");
-        to_droplist('#input-leave-type');
 
-        recordFilters = 
-        {
-            'month'  : to_droplist('#input-month-filter'),
-            'role'   : to_droplist('#input-role-filter'),
-            'leave'  : to_droplist('#input-leave-filter'),
-            'status' : to_droplist('#input-status-filter')
-        };
+        to_droplist('#input-leave-type');
+        to_droplist('#input-leave-status');
 
         bindTableDataSource();
     };
@@ -77,21 +87,22 @@ var leaveRequestPage = (function ()
     var handleEvents = function ()
     {
         // An option was selected in the auto-suggest input
-        $(inputEmpIdSelector).on('valueSelected', function ()
+        $(jq_INPUT_EMP_NO).on('valueSelected', function ()
         {
             let needle = $(this).val();
 
-            if (!(needle in employeeMapping)) {
-                inputEmployeeName.val('');
+            if (!(needle in employeeMapping)) 
+            {
+                formElements.inputEmpName.val('');
                 return;
             }
 
-            inputEmployeeName.val(employeeMapping[needle]);
+            formElements.inputEmpName.val(employeeMapping[needle]);
         })
-        .on('valueCleared', () => inputEmployeeName.val(''));
+        .on('valueCleared', () => formElements.inputEmpName.val(''));
 
         // Handle form submission when save button was clicked
-        btnSave.on('click', () => 
+        formElements.btnSave.on('click', () => 
         {
             let validation = validateEntries();
 
@@ -112,34 +123,21 @@ var leaveRequestPage = (function ()
             submitForm(validation.validated);
         });
 
-        $('.filter-options-dialog .btn-clear').on('click', function() 
+        $(document).on('click', '.row-actions .btn-delete',  function () 
         {
-            Object.values(recordFilters).forEach( f => f.reset() );
+            let row = $(this).closest('tr');
+            let employeeName = row.find('.td-employee-name').text();
+            let date = row.find('.td-date-from').text();
 
-            applyFilters();
-            filterOptions.hide();
+            let message = sanitize(`Are you sure you want to delete the leave request of "<b><i>${employeeName}</i></b>" which was made on <b><i>${date}</i></b> ?`);
 
-            $('.filter-indicators').addClass('d-hidden'); //.hide();
+            alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
         });
 
-        $('.filter-options-dialog .btn-apply').on('click', function () 
-        {
-            applyFilters();
-            filterOptions.hide();
-            
-            $('.filter-indicators').removeClass('d-hidden'); //.show();
-        });
-
-        $('.filter-options-dialog .dropdown-menu .btn-close').on('click', () => filterOptions.hide());
-
-        // $(document).on('keypress', (e) => {
-            
-        //     if (e.which === 121)    // Y
-        //         alert( monthFilter.getLastValue() );
-
-        //     if (e.which == 117) // U
-        //         monthFilter.setLastValue('hello');
-        // });
+        $('.filter-options-dialog .btn-clear').on('click',   () => applyFilters(false));
+        $('.filter-options-dialog .btn-apply').on('click',   () => applyFilters(true));
+        $('.filter-options-dialog .btn-close').on('click',   () => cancelFilter());
+        $("#filters-dropdown-button").on('hide.bs.dropdown', () => cancelFilter());
     };
 
     //============================
@@ -152,6 +150,7 @@ var leaveRequestPage = (function ()
         {
             width: '50px',
             className: 'record-counter text-truncate position-sticky start-0 sticky-cell',
+            name: 'record-number',
             data: null,
             render: function (data, type, row, meta)
             {
@@ -175,7 +174,7 @@ var leaveRequestPage = (function ()
         },
         // Fourth Column -> Date From
         {
-            className: 'text-truncate',
+            className: 'td-date-from text-truncate',
             width: '120px',
             data: 'start',
             render: function (data, type, row) 
@@ -216,8 +215,38 @@ var leaveRequestPage = (function ()
             width: '100px',
             render: function (data, type, row)
             {
-                //return data
-                return createRowDeleteAction(data.id);
+
+                var html = `<div class="row-actions" data-record-key="${data.id}">
+                                <div class="loader d-none"></div>
+                                {-actions-}
+                            </div>`;
+
+                if (data.status.toLowerCase() == STATUS_PENDING)
+                {
+                    var actionButtons =
+                        `<button class="btn btn-sm btn-approve"> 
+                            <i class="fa-solid fa-thumbs-up"></i> 
+                        </button>
+                        <button class="btn btn-sm btn-disapprove"> 
+                            <i class="fa-solid fa-thumbs-down"></i> 
+                        </button>`;
+
+                    html = html.replace(/{-actions-}/g, actionButtons);
+                }
+                else
+                {
+                    var actionButtons =
+                        `<button class="btn btn-sm btn-edit"> 
+                            <i class="fa-solid fa-pen"></i> 
+                        </button>
+                        <button class="btn btn-sm btn-delete"> 
+                            <i class="fa-solid fa-trash"></i> 
+                        </button>`;
+
+                    html = html.replace(/{-actions-}/g, actionButtons);
+                }
+                
+                return sanitize(html);
             }
         }
     ];
@@ -234,7 +263,7 @@ var leaveRequestPage = (function ()
             'scrollX'       : true,
             'sScrollXInner' : "80%",
             'columns'       : columnDefinitions,
-            'drawCallback'  : function () 
+            'drawCallback'  : function (settings) 
             {
                 // dataTable_isFirstDraw is when the "Loading..." was first shown.
                 // We need to show the alert message only when it is not on first draw
@@ -250,6 +279,14 @@ var leaveRequestPage = (function ()
                     snackbar.showInfo('No records to show');
                     return;
                 }
+
+                // Re assign the row numbers
+                var api = this.api();
+                var startIndex = api.context[0]._iDisplayStart;
+
+                api.column(0, {page: 'current'}).nodes().each( 
+                    (cell, i) => cell.innerHTML = startIndex + i + 1 
+                );
             },
             ajax: {
 
@@ -282,7 +319,7 @@ var leaveRequestPage = (function ()
                 data: function () 
                 {
                     return {
-                        '_token':       csrfToken,
+                        '_token':       getCsrfToken(),
                         'monthIndex':   recordFilters.month.getValue(),
                         'role':         recordFilters.role.getValue(),
                         'type':         recordFilters.leave.getValue(),
@@ -304,27 +341,55 @@ var leaveRequestPage = (function ()
         dataTable = $('.dataset-table').DataTable(options);
     }
 
-    function applyFilters()
+    function applyFilters(applyFilter)
     {
+        // Do not apply filter if param is invalid
+        if (applyFilter && (typeof applyFilter !== 'boolean') )
+            return;
+
+        // Clear the filters ...
+        if (applyFilter === false)
+        {
+            // Reset the filters to default value, then hide the indicators
+            Object.values(recordFilters).forEach( f => f.reset() );
+            $('.filter-indicators').addClass('d-hidden');
+        }
+        else
+        {
+            // Show filter indicators
+            $('.filter-indicators').removeClass('d-hidden');
+        }
+
         // Execute the record filters
         bindTableDataSource();
 
         // Push the last filter applied into its history
         Object.values(recordFilters).forEach( f => {
-            f.setLastValue( f.getValue() );
+            f.pushHistory( f.getValue() );
         });
 
+        // Update the filter indicator texts
         $('.lbl-month-filter').text( recordFilters.month.getText() );
         $('.lbl-role-filter').text( recordFilters.role.getText() );
         $('.lbl-leave-filter').text( recordFilters.leave.getText() );
         $('.lbl-status-filter').text( recordFilters.status.getText() );
+
+        filtersContainer.hide();
+    }
+
+    function cancelFilter() 
+    {
+        // Read the last filter values from their history
+        Object.values(recordFilters).forEach( f => f.pullHistory());
+
+        filtersContainer.hide();
     }
 
     var validateEntries = function() 
     {
-        for (const key in requestFormInputs)
+        for (const key in formElements.fields)
         {
-            var field = requestFormInputs[key];
+            var field = formElements.fields[key];
 
             if (field.input.val().trim() === '')
             {
@@ -335,64 +400,135 @@ var leaveRequestPage = (function ()
 
         return {
             status: 0,
-            validated: requestFormInputs
+            validated: formElements.fields
         };
     };
 
     function submitForm(formData)
     {
-        btnSave.prop('disabled', true);
+        formElements.btnSave.prop('disabled', true);
 
         let postData = {
-            '_token': csrfToken
+            '_token': getCsrfToken()
         };
 
         Object.keys(formData).forEach(key => postData[key] = formData[key].input.val() );
 
         $.ajax({
-            url: $(formSelector).data('post-create-target'),
+            url: formElements.mainForm.data('post-create-target'),
             type: 'POST',
             data: postData,
             success: function(response)
             {
-                if (response)
+                if (!response)
                 {
-                    console.warn(response)
-                    response = JSON.parse(response);
+                    onServerNoResponse();
+                    return;
+                }
 
-                    // Validation Failed
-                    if (response.validation_stat == 400)
+                response = JSON.parse(response);
+
+                var statusActions =
+                {
+                    // Success
+                    '0': function () 
+                    {
+                        closeLeaveRequestModal();
+                        snackbar.showSuccess(response.message);
+                    },
+
+                    // Validation Error
+                    '400': function () 
                     {
                         for (var field in response.errors)
                         {
-                            var fieldType = requestFormInputs[field].type;
-                            
-                            if (fieldType == 'droplist')
-                                showDroplistError(`#${field}`, response.errors[field]);
+                            var element = formElements.fields[field];
+
+                            if (element.type == 'droplist')
+                                showDroplistError(element.input, response.errors[field]);
                             else
-                                showTextboxError(`#${field}`, response.errors[field]);
+                                showTextboxError(element.input, response.errors[field]);
                         }
-
-                        return;
                     }
+                };
 
-                    if ('code' in response && response.code != 0)
-                    {
-                        let message = nl2br(response.message);
-                        
-                        alert(message)
-                    }
-                }
+                statusActions[response.code]();
             },
             error: function(xhr, status, error) 
             {
+                alertModal.showDanger( 'An unexpected has occurred. Please try again later.' );
                 console.warn(xhr.responseText);
             },
             complete: function() 
             {
-                btnSave.prop('disabled', false);
+                formElements.btnSave.prop('disabled', false);
             }
         });
+    }
+
+    function deleteRecord(row) 
+    {
+        let rowActionsDiv = row.find('.row-actions');
+        let rowKey  = rowActionsDiv.attr('data-record-key');
+        let spinner = rowActionsDiv.find('.loader');
+    
+        showRowActionSpinner(true, spinner);
+        showRowActionButtons(false, rowActionsDiv);
+    
+        $.ajax({
+            url: route_deleteRecord,
+            type: 'POST',
+            data: {
+                '_token' : getCsrfToken(),
+                'rowKey' : rowKey
+            },
+            success: function(response) 
+            {
+                closeLeaveRequestModal();
+
+                if (response)
+                {
+                    response = JSON.parse(response);
+                    
+                    // Success
+                    if (response.code === 0)
+                    {
+                        dataTable.row(row).remove().draw();
+                        snackbar.showSuccess(response.message);
+                    }
+
+                    // Other Failure response
+                    else
+                        alertModal.showDanger(response.message);
+                }
+                else
+                    onServerNoResponse();
+            },
+            error: function(xhr, status, error) 
+            {
+                alertModal.showDanger('An unexpected error occurred while trying to delete the record.');
+            },
+            complete: function()
+            {
+                showRowActionSpinner(false, spinner);
+                showRowActionButtons(true, rowActionsDiv);
+            }
+        })
+    }
+
+    function onServerNoResponse()
+    {
+        alertModal.showDanger('The server did not respond. Please try again later.');
+    }
+
+    function closeLeaveRequestModal(clear) 
+    {
+        if (clear && typeof clear === 'boolean' && clear === true)
+        {
+
+        }
+
+        leaveReqModal.hide();
     }
 
     function enableControlButtons()

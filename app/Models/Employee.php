@@ -58,27 +58,6 @@ class Employee extends Model implements Auditable
         'id'
     ];
 
-    /**
-        SELECT 
-            e.id, 
-            e.firstname, 
-            e.middlename, 
-            e.lastname, 
-            e.status AS employee_status,
-            SUM(CASE WHEN a.status = 'Late' THEN 1 ELSE 0 END) AS total_lates,
-            SUM(CASE WHEN a.late IS NOT NULL THEN 1 ELSE 0 END) AS total_lates,
-            SUM(CASE WHEN a.status = 'Absent' THEN 1 ELSE 0 END) AS total_absents,
-            COUNT(l.id) AS total_leaves
-        FROM 
-            employees e
-        LEFT JOIN 
-            attendance a ON e.id = a.emp_fk_id
-        LEFT JOIN
-            leave_requests l ON e.id = l.emp_fk_id
-        GROUP BY 
-            e.id;
-     */
-
     public static function getRoles() 
     {
         return [

@@ -78,13 +78,18 @@ class LeaveRequest extends Model
         return $leaveTypes;
     }
 
-    public static function getLeaveStatuses()
+    public static function getLeaveStatuses($onlyValues = false) : array
     {
-        return [
+        $leaveStatuses = [
             self::LEAVE_PENDING  => self::LEAVE_STATUS_PENDING,
             self::LEAVE_APPROVED => self::LEAVE_STATUS_APPROVED,
             self::LEAVE_REJECTED => self::LEAVE_STATUS_REJECTED,
         ];
+
+        if ($onlyValues)
+            return array_values($leaveStatuses);
+
+        return $leaveStatuses;
     }
 
     public function getLeaveRequests(Request $request)
@@ -104,7 +109,7 @@ class LeaveRequest extends Model
         // Execute the query then expect results
         $dataset = $dataset->get();
 
-        Extensions::hashRowIds($dataset);
+        Extensions::hashRowIds($dataset, self::HASH_SALT, self::MIN_HASH_LENGTH);
 
         $monthName = Carbon::createFromFormat('!m', $monthIndex)->monthName;
 
@@ -120,12 +125,9 @@ class LeaveRequest extends Model
         {
             $role = $request->input('role');
             
+            // if the filter supplied is invalid, just select all records instead
             if (!in_array($role, Employee::getRoles()))
-            {
-                //$request->replace(['role' => Constants::RECORD_FILTER_ALL]);
                 $role = Constants::RECORD_FILTER_ALL;
-                //return;
-            }
 
             $dataset->where('e.'.Employee::f_Position, '=', $role);
         }
@@ -222,5 +224,42 @@ class LeaveRequest extends Model
             'filters'   => $filters,
             //'icon'      => Attendance::getIconClasses()
         ]);
+    }
+
+    public static function dissolve($recordId)
+    {
+        try 
+        {
+            // Make sure that the employee exists
+            // $employee = Employee::where(Employee::f_EmpNo, '=', $employeeId)->firstOrFail();
+            // $empId = $employee->id;
+
+            $delete = DB::transaction(function () use ($recordId) 
+            {
+                // Delete the leave request
+                $rowsDeleted = LeaveRequest::where('id', '=', $recordId)->delete();
+
+                if ($rowsDeleted > 0) 
+                {
+                    // To do later:
+                    // update employee status from leave to on-duty
+
+                    return Extensions::encodeSuccessMessage(Messages::GENERIC_DELETE_OK);
+                } 
+                else 
+                {
+                    return Extensions::encodeFailMessage(Messages::DELETE_FAIL_INEXISTENT);
+                }
+            });
+
+            return $delete;
+        } 
+        catch (\Illuminate\Database\Eloquent\ModelNotFoundException $ex) {
+            // Handle the error when no employee is found
+            return Extensions::encodeFailMessage('Employee not found');
+        }
+        catch (\Exception $ex) {
+            return Extensions::encodeFailMessage(Messages::GENERIC_DELETE_FAIL);
+        }
     }
 }

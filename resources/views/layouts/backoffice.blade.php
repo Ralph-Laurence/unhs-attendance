@@ -73,6 +73,10 @@
             var clean = DOMPurify.sanitize(dirty);
             return clean;
         }
+        
+        function getCsrfToken() {
+            return $('meta[name="csrf-token"]').attr('content');
+        }
     </script>
 
     <script src="{{ asset('js/lib/jquery/jquery-3.7.0.min.js') }}"></script>

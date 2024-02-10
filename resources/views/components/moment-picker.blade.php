@@ -31,10 +31,10 @@
 
     <div class="input-wrapper dropdown-toggle" data-mdb-toggle="dropdown" aria-expanded="false" data-mdb-auto-close="outside">
 
-        <i class="fas fa-calendar leading-icon text-sm ms-2 opacity-80"></i>
+        <i class="fas fa-calendar-days leading-icon text-sm ms-2 opacity-80"></i>
 
         <input type="text" name="{{ $as }}" id="{{ $as }}" {{ $attributes->merge(['class' => "main-control"]) }} 
-        value="{{ old($as, date('Y-m-d')) }}"/>
+        value="{{ old($as, date('Y-m-d')) }}" readonly/>
 
         @if ($attributes->has('trailing-icon'))
         <i class="fas trailing-icon {{ $attributes->get('trailing-icon') }}"></i>
@@ -44,7 +44,7 @@
     </div>
 
     {{-- ERROR LABEL --}}
-    <h6 class="px-2 my-1 text-danger text-xs error-label">{{ $errors->first($as) }}</h6>
+    <h6 class="px-2 my-1 text-danger text-sm error-label">{{ $errors->first($as) }}</h6>
 
     <div class="moment-picker-popover dropdown-menu bg-white shadow shadow-4-strong rounded-3 overflow-hidden">
         <div class="control-ribbon p-2 gap-2 flex-center bg-color-primary">

@@ -37,7 +37,7 @@ class CreateAttendancesTable extends Migration
             $table->string(Attendance::f_UnderTime  ,24)->nullable();
             $table->string(Attendance::f_OverTime   ,24)->nullable();
             $table->string(Attendance::f_Late       ,24)->nullable();
-            $table->integer(Attendance::f_WeekNo       )->default(date('W'));
+            $table->integer(Attendance::f_WeekNo       ); //->default(date('W'));
 
             $defaultTimestamp = DB::raw('CURRENT_TIMESTAMP');
 

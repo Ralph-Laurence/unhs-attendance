@@ -19,6 +19,16 @@
     color: #727272;
 }
 
+.row-actions button.btn-approve:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.row-actions button.btn-disapprove:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
 .row-actions button.btn-delete:hover {
     background-color: var(--danger-color);
     color: white;

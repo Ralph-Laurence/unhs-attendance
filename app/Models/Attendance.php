@@ -56,6 +56,7 @@ class Attendance extends Model
             self::f_Emp_FK_ID   => $empId,
             self::f_TimeIn      => $timeIn,
             self::f_Status      => self::STATUS_PRESENT,
+            self::f_WeekNo      => Extensions::getCurrentWeek()
         ];
 
         $workStart  = Carbon::parse(Attendance::$workStartTime);
@@ -162,7 +163,8 @@ class Attendance extends Model
         {
             DB::table($tblAttendance)->insert([
                 Attendance::f_Emp_FK_ID => $employee->id,
-                Attendance::f_Status    => Attendance::STATUS_ABSENT
+                Attendance::f_Status    => Attendance::STATUS_ABSENT,
+                Attendance::f_WeekNo    => Extensions::getCurrentWeek()
             ]);
         }
     }

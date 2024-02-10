@@ -39,15 +39,32 @@ function to_droplist(selector)
         btnText.text( $input.data('default-text') );
     };
 
-    var __setValue = function(value) 
+    var __setValue = function(value, triggerEvent) 
     {
-        $input.val(value).trigger('input');
+        $input.val(value);
+
+        triggerEvent = triggerEvent || true;
+
+        if (triggerEvent !== false)
+            $input.trigger('input');
 
         let target = root.find(`.dropdown-item[data-value="${value}"]`);
 
         __setSelected(target);
 
         btnText.text( target.text() );
+    };
+
+    // Set a value without triggerring the input event.
+    // This also sets the value from the default
+    var __setValueSilent = function(value)
+    {
+        if (!value)
+            __setValue( $input.data('default-value'), false );
+        else
+            __setValue(value, false);
+
+        hideDroplistError( $input );
     };
 
     //
@@ -64,8 +81,6 @@ function to_droplist(selector)
         inputElem:  $input,
         reset:      __reset,
         setValue:   __setValue,
-        setLastValue: (value) => lastValue = value,
-        getLastValue: () => lastValue,
         onValueChanged: function(callback) 
         {
             $input.on('valueChanged', function(event, value) {
@@ -73,10 +88,12 @@ function to_droplist(selector)
                 callback(value);
             });
         },
-        getText:    () => btnText.text(),
-        getValue:   () => $input.val(),
-        enable:     () => root.find('.dropdown-toggle').prop('disabled' , false),
-        disable:    () => root.find('.dropdown-toggle').prop('disabled' , true),
+        pushHistory:  (value) => lastValue = value,
+        pullHistory:  () => __setValueSilent( lastValue ),
+        getText:      () => btnText.text(),
+        getValue:     () => $input.val(),
+        enable:       () => root.find('.dropdown-toggle').prop('disabled' , false),
+        disable:      () => root.find('.dropdown-toggle').prop('disabled' , true),
     };
 };
 
@@ -85,7 +102,11 @@ function showDroplistError(target, message)
     var root = $(target).closest('.dropdown');
 
     //root.addClass('has-error');
-    root.find('.error-label').text(message);
+    //root.find('.error-label').text(message);
+    if (typeof message === 'object' && message.length > 1)
+        root.find('.error-label').html( sanitize(message.join('<br><br>')) );
+    else
+        root.find('.error-label').text(message);
 }
 
 function hideDroplistError(target)

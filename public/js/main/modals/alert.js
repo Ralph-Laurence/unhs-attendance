@@ -33,6 +33,11 @@ var alertModal = {
         $('#alertModal .btn.btn-ok').off('click').on('click', okClicked);
         $('#alertModal .btn.btn-cancel, #alertModal .btn-close').off('click').on('click', cancelClicked);
 
+        if (type == 'danger')
+            $('#alertModal .btn.btn-cancel').hide();
+        else
+            $('#alertModal .btn.btn-cancel').show();
+
         // Set custom icon
         $('#alertModal .modal-icon').attr('src', config.icon);
 
@@ -51,10 +56,7 @@ var alertModal = {
     showWarn: function (message, title, okClicked, cancelClicked)
     {
         this.show(message, title, okClicked, cancelClicked, 'warn');
-    },
-    // set onClosed(fn) {
-    //     $('#alertModal').on('hidden.bs.modal', fn);
-    // }
+    }
 };
 
 

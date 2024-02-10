@@ -39,7 +39,13 @@ function showTextboxError(target, message)
     var root = $(target).closest('.textbox');
 
     root.addClass('has-error');
-    root.find('.error-label').text(message);
+
+    if (typeof message === 'object' && message.length > 1)
+        root.find('.error-label').html( sanitize(message.join('<br><br>')) );
+    else
+        root.find('.error-label').text(message);
+
+    // root.find('.error-label').text(message);
 }
 
 function hideTextboxError(target)
