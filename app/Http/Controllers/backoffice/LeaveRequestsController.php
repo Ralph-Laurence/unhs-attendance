@@ -87,8 +87,6 @@ class LeaveRequestsController extends Controller
         if ($inputs['code'] == Constants::ValidationStat_Failed)
             return json_encode($inputs);
 
-        error_log(print_r($inputs, true));
-        
         $inputs = $inputs['data'];
         
         // Find the employee ID by the employee number
@@ -126,9 +124,7 @@ class LeaveRequestsController extends Controller
     {
         $model = new LeaveRequest();
 
-        $dataset = $model->getLeaveRequests($request);
-        
-        return $dataset;
+        return $model->getLeaveRequests($request);
     }
 
     private function validateFields(Request $request)
@@ -201,25 +197,15 @@ class LeaveRequestsController extends Controller
         ));
     }
 
-    private function leaveOverlaps($employeeFK, $startDate, $endDate) : bool 
+    private function approveLeave(Request $request)
     {
-        // Check for overlapping dates
-        $overlappingLeave = LeaveRequest::where(LeaveRequest::f_Emp_FK_ID, $employeeFK)
-            ->where(function ($query) use ($startDate, $endDate) 
-            {
-                $f_start_date   = LeaveRequest::f_StartDate;
-                $f_end_date     = LeaveRequest::f_EndDate;
+        // $employeeFK, $requestId
+        LeaveRequest::completeRequest(0, $request);
+    }
     
-                $query->whereBetween($f_start_date, [$startDate, $endDate])
-                ->orWhereBetween($f_end_date, [$startDate, $endDate])
-                ->orWhere(function ($query) use ($startDate, $endDate, $f_start_date, $f_end_date) 
-                {
-                    $query->where($f_start_date, '<=', $startDate)
-                        ->where($f_end_date, '>=', $endDate);
-                });
-            })
-        ->exists();
-    
-        return $overlappingLeave;
+    private function rejectLeave(Request $request)
+    {
+        // $employeeFK, $requestId
+        LeaveRequest::completeRequest(-1, $request);
     }
 }

@@ -10,14 +10,14 @@ function to_auto_suggest_ajax(selectorId, options, loadComplete)
         },
         success: function(response) 
         {
-            buildSuggestions(response, function() 
+            _buildSuggestions(response, function() 
             {
                 loadComplete(sourceMapping);
             });
         }
     });
 
-    var buildSuggestions = function (response, callback)
+    var _buildSuggestions = function (response, callback)
     {
         let suggestions = [];
 
@@ -39,4 +39,22 @@ function to_auto_suggest_ajax(selectorId, options, loadComplete)
         
         callback();
     };
+
+    let $input = $(selectorId);
+
+    var _setVal = function(value) {
+        $input.val(value).trigger('keyup');
+    };
+
+    return {
+        getInput : ()  => $(selectorId),
+        getType  : ()  => 'autosuggest',
+        getValue : ()  => $input.val(),
+        setValue : (v) => _setVal(v),
+
+        reset    : ()  => {
+            _setVal('');
+            hideTextboxError($input)
+        },
+    }
 }

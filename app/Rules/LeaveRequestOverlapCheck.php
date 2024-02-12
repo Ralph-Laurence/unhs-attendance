@@ -36,8 +36,13 @@ class LeaveRequestOverlapCheck implements Rule
         $start = $this->startDate;
         $end   = $this->endDate;
 
-        // Check for overlapping dates
         $overlappingLeave = LeaveRequest::where(LeaveRequest::f_Emp_FK_ID, $this->employeeFK)
+
+            // only check for overlapping leave requests that are not in a Rejected status
+            ->where(LeaveRequest::f_LeaveStatus, '!=', LeaveRequest::LEAVE_STATUS_REJECTED)
+
+            // Check for overlapping dates. A startDate or endDate that is within the existing
+            // date range will be considered overlapping.
             ->where(function ($query) use ($start, $end) 
             {
                 $f_start_date   = LeaveRequest::f_StartDate;

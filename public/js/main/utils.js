@@ -73,3 +73,7 @@ function concat_ws(array, separator = ' ')
 function nl2br(str) {
     return str.replace(/\r?\n/g, '<br>');
 }
+
+function isObjectEmpty(obj) {
+    return Object.keys(obj).length === 0;
+}

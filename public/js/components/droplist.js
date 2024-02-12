@@ -78,8 +78,9 @@ function to_droplist(selector)
     }
 
     return {
-        inputElem:  $input,
-        reset:      __reset,
+        getInput:  () => $input,
+        getType :  () => 'droplist',
+        reset   :   __reset,
         setValue:   __setValue,
         onValueChanged: function(callback) 
         {

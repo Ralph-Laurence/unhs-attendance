@@ -32,7 +32,7 @@ class EmployeeController extends Controller
     {
         $inputs = $this->validateFields($request);
 
-        if ($inputs['validation_stat'] == 400)
+        if ($inputs['validation_stat'] == Constants::ValidationStat_Failed)
             return json_encode($inputs);
 
         try 
@@ -173,7 +173,7 @@ class EmployeeController extends Controller
         $id = $this->hashids->decode($key);
         $input = $this->validateFields($request, $id[0]);
 
-        if ($input['validation_stat'] == 400)
+        if ($input['validation_stat'] == Constants::ValidationStat_Failed)
             return json_encode($input);
 
         $data = [

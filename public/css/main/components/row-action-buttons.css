@@ -24,7 +24,7 @@
     color: white;
 }
 
-.row-actions button.btn-disapprove:hover {
+.row-actions button.btn-reject:hover {
     background-color: var(--danger-color);
     color: white;
 }

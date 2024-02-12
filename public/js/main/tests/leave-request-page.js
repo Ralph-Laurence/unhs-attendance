@@ -14,7 +14,7 @@ var leaveRequestPage = (function ()
     let employeeMapping;
     let dataTable;
     let iconStyles;
-    
+
     let formElements;
 
     let recordFilters = {};
@@ -37,6 +37,15 @@ var leaveRequestPage = (function ()
         //         leaveReqModal.show();
         // });
 
+         // Load employee id numbers into autocomplete textbox
+        var inputIdNo = to_auto_suggest_ajax(jq_INPUT_EMP_NO, 
+            {
+                'action'    : $(jq_RECORDS_TABLE).data('src-emp-ids'),
+                'csrfToken' : getCsrfToken(),
+            },
+            (dataSource) => employeeMapping = dataSource
+        );
+
         formElements = {
             mainForm      : $('#frm-leave-request'),
             inputEmpName  : $('#input-employee-name'),
@@ -44,11 +53,11 @@ var leaveRequestPage = (function ()
             btnCancel     : $(jq_LEAVE_REQ_MODAL).find('.btn-cancel'),
             isDirty       : false,
             fields        : {
-                'idNo'        : { label: 'ID Number'    , input : $(jq_INPUT_EMP_NO)      },
-                'startDate'   : { label: 'Start Date'   , input : $("#input-leave-start") },
-                'endDate'     : { label: 'End Date'     , input : $("#input-leave-end")   },
-                'leaveType'   : { label: 'Leave Type'   , input : $("#input-leave-type")   ,type: 'droplist' },
-                'leaveStatus' : { label: 'Leave Status' , input : $("#input-leave-status") ,type: 'droplist' },
+                'idNo'        : { label: 'ID Number'    , input : inputIdNo },
+                'startDate'   : { label: 'Start Date'   , input : to_date_picker("#input-leave-start")  },
+                'endDate'     : { label: 'End Date'     , input : to_date_picker("#input-leave-end")    },
+                'leaveType'   : { label: 'Leave Type'   , input : to_droplist('#input-leave-type')      },
+                'leaveStatus' : { label: 'Leave Status' , input : to_droplist('#input-leave-status')    },
             }
         };
 
@@ -63,21 +72,6 @@ var leaveRequestPage = (function ()
             // alert('closed')
         });
 
-        // Load employee id numbers into autocomplete textbox
-        to_auto_suggest_ajax(jq_INPUT_EMP_NO, 
-            {
-                'action'    : $(jq_RECORDS_TABLE).data('src-emp-ids'),
-                'csrfToken' : getCsrfToken(),
-            },
-            (dataSource) => employeeMapping = dataSource
-        );
-
-        to_date_picker("#input-leave-start");
-        to_date_picker("#input-leave-end");
-
-        to_droplist('#input-leave-type');
-        to_droplist('#input-leave-status');
-
         bindTableDataSource();
     };
     
@@ -87,11 +81,15 @@ var leaveRequestPage = (function ()
 
     var handleEvents = function ()
     {
-        Object.keys(formElements.fields).forEach(field => {
+        Object.keys(formElements.fields).forEach( k => {
 
             // When all inputs inside the <form> are interacted,
             // flag the form as 'dirty'
-            formElements.fields[field].input.on('input', () => formElements.isDirty = true );
+            formElements.fields[ k ].input.getInput().on('input', function()
+            {
+                if ($(this).val())
+                    formElements.isDirty = true;
+            });
         });
 
         // Reflect the employee's name when an employee id was selected
@@ -113,39 +111,57 @@ var leaveRequestPage = (function ()
         formElements.btnSave.on('click', () => 
         {
             let validation = validateEntries();
-
-            //if (validation != null && 'status' in validation && validation.status === -1)
-            if (validation?.status ?? null === -1)
+            
+            if (!isObjectEmpty(validation.errorFields))
             {
-                let msg = `${validation.label} must be filled out`;
+                Object.keys(validation.errorFields).forEach( k => {
+                    
+                    let field  = validation.errorFields[k];
+                    let msg    = `${field.label} must be filled out`;
+                    let elem   = field.input.getInput();
 
-                //if ('type' in validation && validation.type === 'droplist')
-                (validation.type === 'droplist') ?
-                    showDroplistError(validation.input, msg) :
-                    showTextboxError(validation.input, msg);
-
-                validation.input.focus();
+                    (field.input.getType() === 'droplist') ?
+                        showDroplistError(elem, msg)  :
+                        showTextboxError(elem, msg);
+                });
                 return;
             }
-
-            submitForm(validation.validated);
+            
+            submitForm(validation.passedFields);
         });
 
         formElements.btnCancel.on('click', () => 
         {
+            leaveReqModal.hide();
+
             if (formElements.isDirty)
-                alert('confirmation');
+            {
+                let message = 'You have unsaved changes. Do you wish to cancel the operation?';
+
+                alertModal.showWarn(message, 'Warning', 
+                    // OK was clicked; clean-up the form inputs...    
+                    () => closeLeaveRequestModal(true),
+
+                    // CANCEL was clicked; bring back the modal...
+                    () => leaveReqModal.show()
+                );
+
+                return;
+            }
         });
 
-        $(document).on('click', '.row-actions .btn-delete',  function () 
+        // Record Row Actions
+        $(document).on('click', '.row-actions .btn-delete', function () 
         {
-            let row = $(this).closest('tr');
-            let employeeName = row.find('.td-employee-name').text();
-            let date = row.find('.td-date-from').text();
-
-            let message = sanitize(`Are you sure you want to delete the leave request of "<b><i>${employeeName}</i></b>" which was made on <b><i>${date}</i></b> ?`);
-
-            alertModal.showWarn(message, 'Warning', () => deleteRecord(row));
+            handleRowActions( $(this).closest('tr'), 'delete' );
+        })
+        .on('click', '.row-actions .btn-approve', function()
+        {
+            handleRowActions( $(this).closest('tr'), 'approve' );
+        })
+        .on('click', '.row-actions .btn-reject', function()
+        {
+            handleRowActions( $(this).closest('tr'), 'reject' );
         });
 
         $('.filter-options-dialog .btn-clear').on('click',   () => applyFilters(false));
@@ -200,7 +216,7 @@ var leaveRequestPage = (function ()
         },
         // Fifth Column -> Date End
         {
-            className: 'text-truncate',
+            className: 'td-date-to text-truncate',
             width: '120px',
             data: 'end',
             render: function (data, type, row) 
@@ -212,6 +228,7 @@ var leaveRequestPage = (function ()
         },
         // SIXTH Column -> Duration
         {
+            className: 'td-duration',
             width: '120px',
             data: 'duration',
             defaultContent: '',
@@ -235,31 +252,27 @@ var leaveRequestPage = (function ()
                                 {-actions-}
                             </div>`;
 
+                var actionButtons =
+                    `<button class="btn btn-sm btn-edit"> 
+                        <i class="fa-solid fa-pen"></i> 
+                    </button>
+                    <button class="btn btn-sm btn-delete"> 
+                        <i class="fa-solid fa-trash"></i> 
+                    </button>`;
+
                 if (data.status.toLowerCase() == STATUS_PENDING)
                 {
-                    var actionButtons =
+                    actionButtons =
                         `<button class="btn btn-sm btn-approve"> 
                             <i class="fa-solid fa-thumbs-up"></i> 
                         </button>
-                        <button class="btn btn-sm btn-disapprove"> 
+                        <button class="btn btn-sm btn-reject"> 
                             <i class="fa-solid fa-thumbs-down"></i> 
                         </button>`;
-
-                    html = html.replace(/{-actions-}/g, actionButtons);
                 }
-                else
-                {
-                    var actionButtons =
-                        `<button class="btn btn-sm btn-edit"> 
-                            <i class="fa-solid fa-pen"></i> 
-                        </button>
-                        <button class="btn btn-sm btn-delete"> 
-                            <i class="fa-solid fa-trash"></i> 
-                        </button>`;
 
-                    html = html.replace(/{-actions-}/g, actionButtons);
-                }
-                
+                html = html.replace(/{-actions-}/g, actionButtons);
+
                 return sanitize(html);
             }
         }
@@ -397,33 +410,40 @@ var leaveRequestPage = (function ()
 
     var validateEntries = function() 
     {
+        let errorFields  = {};
+        let passedFields = {};
+
         for (const key in formElements.fields)
         {
-            var field = formElements.fields[key];
+            let field = formElements.fields[key];
 
-            if (field.input.val().trim() === '')
+            if (field.input.getValue().trim() === '')
             {
-                field['status'] = -1;
-                return field;
+                errorFields[key] = field;
+                formElements.isDirty = true;
             }
         }
 
+        // Validated fields
+        if (isObjectEmpty(errorFields))
+            passedFields = formElements.fields;
+
         return {
-            status: 0,
-            validated: formElements.fields
+            errorFields  : errorFields,
+            passedFields : passedFields
         };
     };
 
     function submitForm(formData)
     {
-        formElements.btnSave.prop('disabled', true);
+        enableFormModalButtons(false);
 
         let postData = {
             '_token': getCsrfToken()
         };
 
-        Object.keys(formData).forEach(key => postData[key] = formData[key].input.val() );
-
+        Object.keys(formData).forEach(key => postData[key] = formData[key].input.getValue() );
+        
         $.ajax({
             url: formElements.mainForm.data('post-create-target'),
             type: 'POST',
@@ -448,16 +468,17 @@ var leaveRequestPage = (function ()
                     },
 
                     // Validation Error
-                    '400': function () 
+                    '422' : function () 
                     {
                         for (var field in response.errors)
                         {
-                            var element = formElements.fields[field];
-
-                            if (element.type == 'droplist')
-                                showDroplistError(element.input, response.errors[field]);
+                            var target  = formElements.fields[field];
+                            var element = target.input.getInput();
+                            
+                            if (target.input.getType() == 'droplist')
+                                showDroplistError(element, response.errors[field]);
                             else
-                                showTextboxError(element.input, response.errors[field]);
+                                showTextboxError(element, response.errors[field]);
                         }
                     }
                 };
@@ -471,9 +492,37 @@ var leaveRequestPage = (function ()
             },
             complete: function() 
             {
-                formElements.btnSave.prop('disabled', false);
+                enableFormModalButtons(true);
             }
         });
+    }
+
+    function handleRowActions(row, action)
+    {
+        let employeeName = row.find('.td-employee-name').text();
+        let startDate    = row.find('.td-date-from').text();
+        let endDate      = row.find('.td-date-to').text();
+        let duration     = row.find('.td-duration').text();
+
+        let message;
+
+        switch(action) 
+        {
+            case 'delete':
+                message = sanitize(`Are you sure you want to delete the leave request of "<b><i>${employeeName}</i></b>" which was made on <b><i>${startDate}</i></b> ?`);
+                alertModal.showWarn(message, 'Delete', () => deleteRecord(row));
+                break;
+
+            case 'approve':
+                message = `Are you sure you want to approve the leave request of "<i>${employeeName}</i>" from <b><i>${startDate}</i></b>, to <b><i>${endDate}</i></b>, for a duration of <b><i>${duration}</i></b> ?`;
+                alertModal.showWarn(message, 'Approve', () => approveRequest(row));
+                break;
+
+            case 'reject':
+                message = `Are you sure you want to reject the leave request of "<i>${employeeName}</i>" from <b><i>${startDate}</i></b>, to <b><i>${endDate}</i></b>, for a duration of <b><i>${duration}</i></b> ?`;
+                alertModal.showWarn(message, 'Reject', () => rejectRequest(row));
+                break;
+        }
     }
 
     function deleteRecord(row) 
@@ -528,6 +577,14 @@ var leaveRequestPage = (function ()
         })
     }
 
+    function approveRequest(row) {
+
+    }
+
+    function rejectRequest(row) {
+
+    }
+
     function onServerNoResponse()
     {
         alertModal.showDanger('The server did not respond. Please try again later.');
@@ -535,12 +592,24 @@ var leaveRequestPage = (function ()
 
     function closeLeaveRequestModal(clear) 
     {
-        if (clear && typeof clear === 'boolean' && clear === true)
+        if (typeof clear === 'boolean' && clear === true)
         {
+            Object.keys(formElements.fields).forEach(field => {
+                formElements.fields[field].input.reset()
+            });
 
+            formElements.inputEmpName.val('');
+            formElements.isDirty = false;
         }
 
         leaveReqModal.hide();
+    }
+
+    function enableFormModalButtons(enable) 
+    {
+        var buttons = [ formElements.btnSave, formElements.btnCancel ];
+
+        buttons.forEach(b => b.prop('disabled', !enable));
     }
 
     function enableControlButtons()

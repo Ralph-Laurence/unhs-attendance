@@ -6,10 +6,13 @@ use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use Carbon\Carbon;
+use Exception;
+use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class LeaveRequest extends Model
 {
@@ -260,6 +263,40 @@ class LeaveRequest extends Model
         }
         catch (\Exception $ex) {
             return Extensions::encodeFailMessage(Messages::GENERIC_DELETE_FAIL);
+        }
+    }
+
+    /**
+     * Approves or Rejects a leave request.
+     * 
+     * @param integer $action - The type of action to perform [ Approve | Reject ]
+     * @param integer $employeeFK - The employee foreign key id
+     * @param integer $requestId - The record id
+     */
+    public static function completeRequest($action, Request $request)
+    {
+        try
+        {
+            $failure = Extensions::encodeFailMessage(Messages::UPDATE_FAIL_INCOMPLETE);
+
+            $validator = Validator::make($request->all(), [
+                'empKey' => 'required|string',
+                'rowKey' => 'required|string',
+            ]);
+        
+            if ($validator->fails())
+                return $failure;
+
+            $hashids = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+
+            $empId = $hashids->decode( $validator->validated['empKey'] )[0];
+            $rowId = $hashids->decode( $validator->validated['rowKey'] )[0];
+
+            
+        }
+        catch (Exception $ex)
+        {
+            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
         }
     }
 }

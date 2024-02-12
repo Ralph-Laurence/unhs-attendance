@@ -126,7 +126,7 @@
                         <i class="fas fa-plus"></i>
                         <span class="ms-1">Add</span>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="options-dropdown-button">
+                    <ul class="dropdown-menu shadow shadow-4-strong" aria-labelledby="options-dropdown-button">
                         <li>
                             <a class="dropdown-item" data-mdb-toggle="modal" 
                                data-mdb-target="#leaveRequestModal"
@@ -171,7 +171,7 @@
                     <img src="{{ asset('images/internal/icons/modal_icon_leave.png') }}" width="28" height="28" alt="icon" class="modal-icon" />
                     <h6 class="modal-title mb-0" id="leaveRequestModalLabel">Employee Leave</h6>
                 </div>
-                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-cancel" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-danger text-center py-2 text-14 error-box d-hidden"></div>

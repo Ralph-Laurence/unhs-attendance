@@ -14,7 +14,7 @@ class Constants
     public const TimestampFormat        = 'Y-m-d H:i:s';
     public const DateFormat             = 'Y-m-d';
 
-    public const ValidationStat_Failed  = 400;
+    public const ValidationStat_Failed  = 422;
     public const ValidationStat_Success = 200;
     public const RecordId_Empty         = 410;
     public const RecordNotFound         = 405;

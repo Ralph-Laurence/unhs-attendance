@@ -221,7 +221,7 @@ function handleFormSubmit()
                 var data = JSON.parse(response);
 
                 // Validation Failed
-                if (data.validation_stat == 400)
+                if (data.validation_stat == 422)
                 {
                     for (var field in data.errors)
                     {

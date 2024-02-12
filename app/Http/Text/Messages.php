@@ -34,8 +34,10 @@ class Messages
     public const EMAIL_SUBJECT_QRCODE    = 'QR Code for Attendance Monitoring System';
 
     public const READ_RECORD_FAIL        = 'Unable to read the record. Please try again.';
+    public const UPDATE_FAIL_INCOMPLETE  = 'Could not update the record because some information was missing.';
+    
     public const UPDATE_FAIL_CANT_IDENTIFY_RECORD = "Failed to update the record because it cannot be identified.";
-    public const UPDATE_FAIL_NON_EXISTENT_RECORD = "Failed to update a non-existent record.";
+    public const UPDATE_FAIL_NON_EXISTENT_RECORD  = "Failed to update a non-existent record.";
 
     public const LEAVE_REQUEST_OVERLAP   = 'Leave request overlaps with an existing one.';
 

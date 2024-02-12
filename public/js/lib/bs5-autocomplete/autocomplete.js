@@ -61,7 +61,7 @@ function set_autocomplete(id_formfield, auto_suggest_items, start_at_letters = 3
             // Hide the suggestions combobox
             autocomplete_div.classList.add("invisible");
 
-            // delete all childs from result list
+            // delete all children from result list
             while (autocomplete_div.firstChild)
             {
                 autocomplete_div.removeChild(autocomplete_div.firstChild);
@@ -105,7 +105,7 @@ function renderResults(results, search, container, form_id, max_results) {
     //set result list to same width less borders
     container.style.width = form_width.toString() + 'px';
     
-    if (results.length>0) {
+    if (results.length > 0) {
         // create ul and set classes
         let ul = document.createElement('UL');
         ul.classList.add('list-group', 'mt-1');
@@ -177,13 +177,14 @@ function colored_result(string, search) {
         }
         else if (index +1 == splitted.length) {
             sp.push("<span>" + string.slice(start, start + element.length) + "</span>");
-    }
+        }
         else {
             sp.push("<span>" + string.slice(start, start + element.length) + "</span>");
             start = start + element.length;
             sp.push(`<span class="${highlightStyle}">` + string.slice(start , start + search.length) + "</span>");
             start = start  + search.length;
         }
-        });
+    });
+    
     return sp.join('')
 }

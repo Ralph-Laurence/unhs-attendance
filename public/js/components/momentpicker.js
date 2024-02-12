@@ -142,7 +142,7 @@ function to_date_picker(selector)
     {
         // Update the input field with the selected date in the format 'Y-m-d'
         $input.val(year + '-' + (month + 1)
-            .toString().padStart(2, '0') + '-' + day.padStart(2, '0'))
+            .toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0'))
             .trigger('input');
     }
 
@@ -192,8 +192,8 @@ function to_date_picker(selector)
         monthPickerBtn.find('.btn-text').text(targetMonthItem.data('month-name'));
 
         // Change the marked selected year
-        var resetSelectedYear = unmarkSelectedYear();
-        var targetYearItem = resetSelectedYear.filter(`[data-year="${date.year()}"]`);
+        resetSelectedYear = unmarkSelectedYear();
+        targetYearItem = resetSelectedYear.filter(`[data-year="${date.year()}"]`);
 
         targetYearItem.addClass(className_currentYear);
         yearPickerBtn.find('.btn-text').text(targetYearItem.data('year'));
@@ -245,4 +245,17 @@ function to_date_picker(selector)
         unmarkSelectedYear();
         $(this).addClass(className_currentYear);
     });
+
+    var __reset = function() 
+    {
+        var now = moment();
+        applyValue(now.year(), now.month(), now.date());
+    };
+
+    return {
+        getInput    : () => $input,
+        getType     : () => 'datepicker',
+        reset       : __reset,
+        getValue    : () => $input.val() 
+    }
 }
