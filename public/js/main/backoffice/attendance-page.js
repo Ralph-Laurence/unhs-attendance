@@ -117,23 +117,16 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
                 dataTable_isFirstDraw = false;
                 return;
             }
+            
+            var api = this.api();
 
-            var isEmpty = this.api().rows().count() === 0;
-
-            if (isEmpty)
+            if (api.rows().count() === 0)
             {
                 snackbar.showInfo('No records to show');
                 return;
             }
 
-            //updateRowEntryNumbers(dataTable);
-            // var api = dataTable.api();
-            // var startIndex = api.context[0]._iDisplayStart; // get the start index
-
-            // api.column(0, { page: 'current' }).nodes().each(function (cell, i)
-            // {
-            //     cell.innerHTML = startIndex + i + 1; // update cell content
-            // });
+            updateRowEntryNumbers(api)
         },
 
         ajax: {

@@ -41,6 +41,7 @@ var leaveRequestPage = (function ()
             mainForm      : $('#frm-leave-request'),
             inputEmpName  : $('#input-employee-name'),
             btnSave       : $(jq_LEAVE_REQ_MODAL).find('.btn-save'),
+            btnCancel     : $(jq_LEAVE_REQ_MODAL).find('.btn-cancel'),
             isDirty       : false,
             fields        : {
                 'idNo'        : { label: 'ID Number'    , input : $(jq_INPUT_EMP_NO)      },
@@ -86,7 +87,14 @@ var leaveRequestPage = (function ()
 
     var handleEvents = function ()
     {
-        // An option was selected in the auto-suggest input
+        Object.keys(formElements.fields).forEach(field => {
+
+            // When all inputs inside the <form> are interacted,
+            // flag the form as 'dirty'
+            formElements.fields[field].input.on('input', () => formElements.isDirty = true );
+        });
+
+        // Reflect the employee's name when an employee id was selected
         $(jq_INPUT_EMP_NO).on('valueSelected', function ()
         {
             let needle = $(this).val();
@@ -121,6 +129,12 @@ var leaveRequestPage = (function ()
             }
 
             submitForm(validation.validated);
+        });
+
+        formElements.btnCancel.on('click', () => 
+        {
+            if (formElements.isDirty)
+                alert('confirmation');
         });
 
         $(document).on('click', '.row-actions .btn-delete',  function () 
@@ -274,19 +288,15 @@ var leaveRequestPage = (function ()
                     return;
                 }
 
-                if (this.api().rows().count() === 0)
+                var api = this.api();
+
+                if (api.rows().count() === 0)
                 {
                     snackbar.showInfo('No records to show');
                     return;
                 }
 
-                // Re assign the row numbers
-                var api = this.api();
-                var startIndex = api.context[0]._iDisplayStart;
-
-                api.column(0, {page: 'current'}).nodes().each( 
-                    (cell, i) => cell.innerHTML = startIndex + i + 1 
-                );
+                updateRowEntryNumbers(api)
             },
             ajax: {
 
@@ -493,7 +503,9 @@ var leaveRequestPage = (function ()
                     // Success
                     if (response.code === 0)
                     {
-                        dataTable.row(row).remove().draw();
+                        dataTable.row(row).remove();// .draw();
+                        redrawTable(dataTable, true);
+
                         snackbar.showSuccess(response.message);
                     }
 

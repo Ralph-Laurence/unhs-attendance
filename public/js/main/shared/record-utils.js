@@ -49,15 +49,42 @@ function showRowActionSpinner(show, spinner)
     $(spinner).toggleClass('d-none', !show);
 }
 
-function updateRowEntryNumbers(dataTable)
+// Re assign the row numbers. Default column is 0
+function updateRowEntryNumbers(apiInstance, columnIndex)
 {
-    // Update the row numbers
-    // dataTable.rows().every(function (index)
-    // {
-    //     var pageInfo = dataTable.page.info();
-    //     var newRowIndex = pageInfo.start + index + 1;
-    //     $('td:eq(0)', this.node()).html(newRowIndex);
-    // });
-
+    columnIndex = columnIndex || 0;
     
+    var startIndex = apiInstance.context[0]._iDisplayStart;
+
+    apiInstance.column(columnIndex, {page: 'current'}).nodes().each( 
+        (cell, i) => cell.innerHTML = startIndex + i + 1 
+    );
+}
+
+// Re draw the data table after modifications. By default,
+// it returns to the first page when redrawing.
+function redrawTable(dataTable, retainPage)
+{
+    retainPage = retainPage || false;
+
+    if (retainPage === false)
+    {
+        dataTable.draw();
+        return;
+    }
+
+    var info = dataTable.page.info();
+
+    var recordsInCurrentPage = info.recordsTotal;
+    var currentPageNumber    = info.page;
+    var currentPageLength    = info.length;
+ 
+    // if ( currentPageNumber > 0 && (recordsInCurrentPage - 1) > (currentPageNumber * currentPageLength) )
+    if ( currentPageNumber > 0 && (recordsInCurrentPage > (currentPageNumber * currentPageLength) ))
+        // Redraw current page
+        dataTable.draw(false);
+    else
+        // There are no more records in current page,
+        // so we go back up one page
+        dataTable.page('previous').draw('page');
 }

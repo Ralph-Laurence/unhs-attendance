@@ -28,7 +28,7 @@ class LateAttendance extends Model
         $currentDate = Carbon::now();
 
         // Instead of whereDate($today), we will use where between
-        $dataset = $this->buildAbsenceQuery()
+        $dataset = $this->buildQuery()
             ->whereBetween('a.created_at', 
             [
                 $currentDate->startOfDay()->format(Constants::TimestampFormat), 
@@ -47,10 +47,13 @@ class LateAttendance extends Model
     {
         $currentWeek = Extensions::getCurrentWeek();
 
-        $dataset = $this->buildAbsenceQuery()
+        $dataset = $this->buildQuery()
                    ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek);
 
         $this->applyRoleFilter($request, $dataset);
+        error_log('current week -> ' . $currentWeek);
+        error_log(print_r($dataset->toSql(), true));
+
         $dataset = $dataset->get();
 
         Extensions::hashRowIds($dataset);
@@ -65,7 +68,7 @@ class LateAttendance extends Model
 
         $monthIndex = $request->input('monthIndex');
 
-        $dataset = $this->buildAbsenceQuery()
+        $dataset = $this->buildQuery()
             ->whereMonth('a.created_at', '=', $monthIndex);
         
         $this->applyRoleFilter($request, $dataset);
@@ -101,7 +104,7 @@ class LateAttendance extends Model
     /**
     * Base query builder for retrieving attendances 
     */
-    private function buildAbsenceQuery()
+    private function buildQuery()
     {
         $role = 'e.' . Employee::f_Position;
         $roles = Employee::RoleToString;
@@ -139,8 +142,6 @@ class LateAttendance extends Model
                 ->whereNotNull('a.' . Attendance::f_Late)
                 ->where('a.' . Attendance::f_Late, '<>', '')
                 ->orderBy('a.created_at', 'desc');
-
-        error_log($query->toSql());
 
         return $query;
     }

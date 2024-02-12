@@ -34,8 +34,8 @@ class LateAttendanceController extends Controller
         $roleFilters = array_values(Employee::RoleToString);
 
         return view('backoffice.late.index')
-            ->with('routes'             , $routes)
-            ->with('roleFilters'        , $roleFilters);
+            ->with('routes'      , $routes)
+            ->with('roleFilters' , $roleFilters);
     }
 
     public function destroy(Request $request) 
