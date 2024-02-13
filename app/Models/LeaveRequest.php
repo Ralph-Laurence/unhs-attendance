@@ -275,8 +275,13 @@ class LeaveRequest extends Model
     public static function completeLeaveRequest($action, Request $request)
     {
         $leaveStatuses = [
-            '0'     => LeaveRequest::LEAVE_STATUS_APPROVED,
-            '-1'    => LeaveRequest::LEAVE_STATUS_REJECTED
+            '0'  => LeaveRequest::LEAVE_STATUS_APPROVED,
+            '-1' => LeaveRequest::LEAVE_STATUS_REJECTED
+        ];
+
+        $successMessages = [
+            '0'  => Messages::LEAVE_REQUEST_APPROVED,
+            '-1' => Messages::LEAVE_REQUEST_REJECTED
         ];
 
         $failure = Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
@@ -323,9 +328,9 @@ class LeaveRequest extends Model
             });
 
             if ($transact)
-                return Extensions::encodeSuccessMessage(Messages::LEAVE_REQUEST_APPROVED);
-            else
-                return $failure;
+                return Extensions::encodeSuccessMessage( $successMessages[$action] );
+            
+            return $failure;
         } 
         catch (ModelNotFoundException $ex) {
             // Handle the error when no employee or leave request record is found

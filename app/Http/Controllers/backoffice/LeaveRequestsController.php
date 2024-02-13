@@ -64,11 +64,17 @@ class LeaveRequestsController extends Controller
             'filterItems'  => [ $defaultFilterTextAll => $defaultFilterValueAll ] + LeaveRequest::getLeaveStatuses()
         ];
 
+        $defaultLeaveStatus = [
+            'value' => LeaveRequest::LEAVE_STATUS_PENDING,
+            'label' => LeaveRequest::LEAVE_PENDING
+        ];
+
         return view('backoffice.leave.index')
             ->with('routes'             , $routes)
             ->with('roleFilters'        , $roleFilters)
             ->with('leaveFilters'       , $leaveFilters)
             ->with('statusFilters'      , $statusFilters)
+            ->with('defaultLeaveStatus' , $defaultLeaveStatus)
             ->with('leaveTypes'         , LeaveRequest::getLeaveTypes())
             ->with('leaveStatuses'      , LeaveRequest::getLeaveStatuses())
             ->with('monthOptions'       , Extensions::getMonthsAssoc());

@@ -206,7 +206,9 @@
                             </div>
                             <div class="col-6">
                                 <h6 class="text-14">Leave Status</h6>
-                                <x-drop-list as="input-leave-status" :items="$leaveStatuses" button-classes="w-100" />
+                                <x-drop-list as="input-leave-status" :items="$leaveStatuses" button-classes="w-100"
+                                text="{{ $defaultLeaveStatus['label'] }}"
+                                default="{{ $defaultLeaveStatus['value'] }}" />
                             </div>
                         </div>
                     </div>

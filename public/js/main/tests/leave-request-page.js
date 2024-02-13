@@ -30,12 +30,7 @@ var leaveRequestPage = (function ()
     var initialize = function ()
     {
         filtersContainer = new mdb.Dropdown('.filter-options-dialog');
-        leaveReqModal = new mdb.Modal($(jq_LEAVE_REQ_MODAL));
-
-        // $(document).on('keypress', function(e) {
-        //     if (e.which == 117)
-        //         leaveReqModal.show();
-        // });
+        leaveReqModal    = new mdb.Modal($(jq_LEAVE_REQ_MODAL));
 
         // Load employee id numbers into autocomplete textbox
         var inputIdNo = to_auto_suggest_ajax(jq_INPUT_EMP_NO,
@@ -47,11 +42,11 @@ var leaveRequestPage = (function ()
         );
 
         formElements = {
-            mainForm    : $('#frm-leave-request'),
-            inputEmpName: $('#input-employee-name'),
-            btnSave     : $(jq_LEAVE_REQ_MODAL).find('.btn-save'),
-            btnCancel   : $(jq_LEAVE_REQ_MODAL).find('.btn-cancel'),
-            isDirty: false,
+            mainForm     : $('#frm-leave-request'),
+            inputEmpName : $('#input-employee-name'),
+            btnSave      : $(jq_LEAVE_REQ_MODAL).find('.btn-save'),
+            btnCancel    : $(jq_LEAVE_REQ_MODAL).find('.btn-cancel'),
+            isDirty      : false,
             fields: {
                 'idNo'          : { label: 'ID Number', input: inputIdNo },
                 'startDate'     : { label: 'Start Date', input: to_date_picker("#input-leave-start") },
@@ -118,8 +113,8 @@ var leaveRequestPage = (function ()
                 Object.keys(validation.errorFields).forEach(k =>
                 {
                     let field = validation.errorFields[k];
-                    let msg = `${field.label} must be filled out`;
-                    let elem = field.input.getInput();
+                    let msg   = `${field.label} must be filled out`;
+                    let elem  = field.input.getInput();
 
                     (field.input.getType() === 'droplist') ?
                         showDroplistError(elem, msg) :
@@ -163,9 +158,9 @@ var leaveRequestPage = (function ()
         $(document).on('click', '.row-actions .btn', function () 
         {
             var actions = {
-                'btn-delete'    : 'delete',
-                'btn-approve'   : 'approve',
-                'btn-reject'    : 'reject'
+                'btn-delete'  : 'delete',
+                'btn-approve' : 'approve',
+                'btn-reject'  : 'reject'
             };
 
             var action = Object.keys(actions).find( k => this.classList.contains(k));
@@ -517,7 +512,7 @@ var leaveRequestPage = (function ()
 
     var validateEntries = function () 
     {
-        let errorFields = {};
+        let errorFields  = {};
         let passedFields = {};
 
         for (const key in formElements.fields)
@@ -544,17 +539,15 @@ var leaveRequestPage = (function ()
     {
         enableFormModalButtons(false);
 
-        let postData = {
-            '_token': getCsrfToken()
-        };
+        let postData = { '_token': getCsrfToken() };
 
         Object.keys(formData).forEach(key => postData[key] = formData[key].input.getValue());
 
         $.ajax({
-            url: formElements.mainForm.data('post-create-target'),
-            type: 'POST',
-            data: postData,
-            success: function (response)
+            url     : formElements.mainForm.data('post-create-target'),
+            type    : 'POST',
+            data    : postData,
+            success : function (response)
             {
                 if (!response)
                 {
@@ -564,7 +557,7 @@ var leaveRequestPage = (function ()
 
                 response = JSON.parse(response);
 
-                var statusActions =
+                let statusActions =
                 {
                     // Success
                     '0': function () 
@@ -589,7 +582,8 @@ var leaveRequestPage = (function ()
                     }
                 };
 
-                statusActions[response.code]();
+                if (response.code in statusActions)
+                    statusActions[response.code]();
             },
             error: function (xhr, status, error) 
             {
