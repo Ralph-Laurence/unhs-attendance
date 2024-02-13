@@ -40,6 +40,8 @@ class Messages
     public const UPDATE_FAIL_NON_EXISTENT_RECORD  = "Failed to update a non-existent record.";
 
     public const LEAVE_REQUEST_OVERLAP   = 'Leave request overlaps with an existing one.';
+    public const LEAVE_REQUEST_APPROVED  = 'Leave request approved';
+    public const LEAVE_REQUEST_REJECTED  = 'Leave request rejected';
 
     public const PROCESS_REQUEST_FAILED  = "Unable to process your request because of an error.";
 

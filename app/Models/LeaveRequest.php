@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class LeaveRequest extends Model
 {
@@ -257,10 +258,10 @@ class LeaveRequest extends Model
 
             return $delete;
         } 
-        catch (\Illuminate\Database\Eloquent\ModelNotFoundException $ex) {
-            // Handle the error when no employee is found
-            return Extensions::encodeFailMessage('Employee not found');
-        }
+        // catch (\Illuminate\Database\Eloquent\ModelNotFoundException $ex) {
+        //     // Handle the error when no employee is found
+        //     return Extensions::encodeFailMessage('Employee not found');
+        // }
         catch (\Exception $ex) {
             return Extensions::encodeFailMessage(Messages::GENERIC_DELETE_FAIL);
         }
@@ -269,34 +270,70 @@ class LeaveRequest extends Model
     /**
      * Approves or Rejects a leave request.
      * 
-     * @param integer $action - The type of action to perform [ Approve | Reject ]
-     * @param integer $employeeFK - The employee foreign key id
-     * @param integer $requestId - The record id
+     * @param string $action - The type of action to perform [ Approve | Reject ]
      */
-    public static function completeRequest($action, Request $request)
+    public static function completeLeaveRequest($action, Request $request)
     {
-        try
-        {
-            $failure = Extensions::encodeFailMessage(Messages::UPDATE_FAIL_INCOMPLETE);
+        $leaveStatuses = [
+            '0'     => LeaveRequest::LEAVE_STATUS_APPROVED,
+            '-1'    => LeaveRequest::LEAVE_STATUS_REJECTED
+        ];
 
-            $validator = Validator::make($request->all(), [
-                'empKey' => 'required|string',
-                'rowKey' => 'required|string',
-            ]);
-        
-            if ($validator->fails())
+        $failure = Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
+
+        $validator   = Validator::make($request->all(), [
+            'rowKey' => 'required|string',
+        ]);
+
+        if ($validator->fails())
+            return Extensions::encodeFailMessage(Messages::UPDATE_FAIL_INCOMPLETE);
+
+        try 
+        {
+            $hashids  = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+            $rowId    = $hashids->decode($validator->validated()['rowKey'])[0];
+
+            $transact = DB::transaction(function () use ($rowId, $action, $leaveStatuses) {
+
+                // Find the Leave Request record
+                $leave = LeaveRequest::findOrFail($rowId);
+
+                // Find the employee associated with that leave request
+                $empId = $leave->toArray()[LeaveRequest::f_Emp_FK_ID];
+
+                // Update the leave request status
+                $updateLeave = $leave->update([LeaveRequest::f_LeaveStatus => $leaveStatuses[$action]]);
+
+                if (!$updateLeave)
+                    throw new Exception;
+
+                // Update the employee status to 'On Leave' only if 
+                // the leave request was approved
+                if ($leave->wasChanged() && $action == '0') 
+                {
+                    $emp_affectedRows = Employee::where('id', $empId)->update([
+                        Employee::f_Status => Employee::ON_STATUS_LEAVE
+                    ]);
+
+                    if (!$emp_affectedRows)
+                        throw new ModelNotFoundException;
+                }
+
+                return true;
+            });
+
+            if ($transact)
+                return Extensions::encodeSuccessMessage(Messages::LEAVE_REQUEST_APPROVED);
+            else
                 return $failure;
-
-            $hashids = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
-
-            $empId = $hashids->decode( $validator->validated['empKey'] )[0];
-            $rowId = $hashids->decode( $validator->validated['rowKey'] )[0];
-
-            
-        }
-        catch (Exception $ex)
-        {
-            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
+        } 
+        catch (ModelNotFoundException $ex) {
+            // Handle the error when no employee or leave request record is found
+            return Extensions::encodeFailMessage(Messages::UPDATE_FAIL_NON_EXISTENT_RECORD);
+        } 
+        catch (Exception $ex) {
+            error_log($ex->getMessage());
+            return $failure;
         }
     }
 }

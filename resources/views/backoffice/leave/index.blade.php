@@ -225,7 +225,9 @@
 
 @push('scripts')
 <script>
-    const route_deleteRecord = "{{ $routes['deleteRoute'] }}";
+    const route_deleteRecord    = "{{ $routes['deleteRoute'] }}";
+    const route_approveRequest  = "{{ $routes['approveRoute'] }}";
+    const route_rejectRequest   = "{{ $routes['rejectRoute'] }}";
 </script>
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>

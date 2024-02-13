@@ -40,7 +40,9 @@ class RouteNames
         'get'        => 'backoffice.leave.get',
         'index'      => 'backoffice.leave',
         'create'     => 'backoffice.leave.create',
-        'delete'     => 'backoffice.leave.delete'
+        'delete'     => 'backoffice.leave.delete',
+        'approve'    => 'backoffice.leave.approve',
+        'reject'     => 'backoffice.leave.reject'
     ];
 
     public const Teachers = [

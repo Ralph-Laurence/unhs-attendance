@@ -36,6 +36,8 @@ class LeaveRequestsController extends Controller
             'ajax_get_all'      => route(RouteNames::Leave['get']),
             'ajax_load_empids'  => route(RouteNames::AJAX['list-empno']),
             'deleteRoute'       => route(RouteNames::Leave['delete']),
+            'approveRoute'      => route(RouteNames::Leave['approve']),
+            'rejectRoute'       => route(RouteNames::Leave['reject']),
             'insertPostRoute'   => route(RouteNames::Leave['create']),
             'updatePostRoute'   => ''
         ];
@@ -197,15 +199,13 @@ class LeaveRequestsController extends Controller
         ));
     }
 
-    private function approveLeave(Request $request)
+    public function approveLeave(Request $request)
     {
-        // $employeeFK, $requestId
-        LeaveRequest::completeRequest(0, $request);
+        return LeaveRequest::completeLeaveRequest('0', $request);
     }
     
-    private function rejectLeave(Request $request)
+    public function rejectLeave(Request $request)
     {
-        // $employeeFK, $requestId
-        LeaveRequest::completeRequest(-1, $request);
+        return LeaveRequest::completeLeaveRequest('-1', $request);
     }
 }
