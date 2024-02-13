@@ -239,12 +239,14 @@ var leaveRequestPage = (function ()
         {
             width: '120px',
             data: 'status',
+            name: 'request-status',
             defaultContent: '',
         },
         // Seventh Column -> Actions
         {
             data: null,
             className: 'td-actions text-center position-sticky end-0 z-100 sticky-cell',
+            name: 'row-actions',
             width: '100px',
             render: function (data, type, row)
             {
@@ -491,8 +493,13 @@ var leaveRequestPage = (function ()
                 // Success
                 if (response.code === 0)
                 {
-                    // dataTable.row(row).remove();
-                    // redrawTable(dataTable, true);
+                    // Update the 'status' cell
+                    dataTable.cell(row.index(), 'request-status:name').data(response.newStatus).draw();
+
+                    // Update the 'row actions' cell with new action buttons
+                    let actionButtons = makeRowActionButtons(response.rowKey, [ROW_ACTION_EDIT, ROW_ACTION_DELETE]);
+
+                    dataTable.cell(row.index(), 'row-actions:name').data( sanitize(actionButtons) ).draw();
 
                     snackbar.showSuccess(response.message);
                 }

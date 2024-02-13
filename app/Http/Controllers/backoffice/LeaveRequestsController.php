@@ -192,12 +192,7 @@ class LeaveRequestsController extends Controller
         $validationMessages);
 
         if ($validator2->fails())
-        {
             return Extensions::validationFailResponse($validator2);
-            // , [
-            //     'startDate' => Messages::LEAVE_REQUEST_OVERLAP
-            // ]);
-        }
 
         // Assume successful validation
         return Extensions::validationSuccessResponse(array_merge(

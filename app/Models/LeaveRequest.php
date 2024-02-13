@@ -293,10 +293,12 @@ class LeaveRequest extends Model
         if ($validator->fails())
             return Extensions::encodeFailMessage(Messages::UPDATE_FAIL_INCOMPLETE);
 
+        $input_row_key = $validator->validated()['rowKey'];
+
         try 
         {
             $hashids  = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
-            $rowId    = $hashids->decode($validator->validated()['rowKey'])[0];
+            $rowId    = $hashids->decode($input_row_key)[0];
 
             $transact = DB::transaction(function () use ($rowId, $action, $leaveStatuses) {
 
@@ -306,7 +308,7 @@ class LeaveRequest extends Model
                 // Find the employee associated with that leave request
                 $empId = $leave->toArray()[LeaveRequest::f_Emp_FK_ID];
 
-                // Update the leave request status
+                // Update the leave request status. Select a status using $action
                 $updateLeave = $leave->update([LeaveRequest::f_LeaveStatus => $leaveStatuses[$action]]);
 
                 if (!$updateLeave)
@@ -328,7 +330,13 @@ class LeaveRequest extends Model
             });
 
             if ($transact)
-                return Extensions::encodeSuccessMessage( $successMessages[$action] );
+            {
+                $extraData = [
+                    'newStatus' => array_flip(self::getLeaveStatuses())[ $leaveStatuses[$action] ],
+                    'rowKey'    => $input_row_key
+                ];
+                return Extensions::encodeSuccessMessage( $successMessages[$action], $extraData);
+            }
             
             return $failure;
         } 
