@@ -120,6 +120,33 @@ class LeaveRequest extends Model
         return $this->encodeData($request, $dataset, "Month of $monthName");
     }
 
+    public static function getInsertedRow($rowId)
+    {
+        $leaveTypeMapping   = Extensions::mapCaseWhen(array_flip(self::getLeaveTypes()),    'l.' . self::f_LeaveType, 'type');
+        $leaveStatusMapping = Extensions::mapCaseWhen(array_flip(self::getLeaveStatuses()), 'l.' . self::f_LeaveStatus, 'status');
+
+        $leaveReqFields = Extensions::prefixArray('l.', [
+            'id',
+            LeaveRequest::f_StartDate   . ' as start',
+            LeaveRequest::f_EndDate     . ' as end',
+            LeaveRequest::f_Duration    . ' as duration',
+        ]);
+
+        $select = array_merge($leaveReqFields, [ 
+            Employee::getConcatNameDbRaw('e', 'empname', Constants::NAME_STYLE_EASTERN),
+            DB::raw($leaveTypeMapping),
+            DB::raw($leaveStatusMapping)
+        ]);
+        
+        $dataset = DB::table(self::getTableName() . ' as l')
+                ->select($select)
+                ->where('l.id', $rowId)
+                ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'l.'.self::f_Emp_FK_ID)
+                ->first();
+
+        return $dataset ? (array) $dataset : [];
+    }
+
     private function applyRoleFilter(Request &$request, &$dataset)
     {
         if (
@@ -174,17 +201,18 @@ class LeaveRequest extends Model
     */
     private function buildQuery()
     {
-        $roleMapping        = Extensions::mapCaseWhen(Employee::RoleToString,                'e.' . Employee::f_Position, 'role');
+        //$roleMapping        = Extensions::mapCaseWhen(Employee::RoleToString,                'e.' . Employee::f_Position, 'role');
         $leaveTypeMapping   = Extensions::mapCaseWhen(array_flip($this->getLeaveTypes()),    'a.' . self::f_LeaveType, 'type');
         $leaveStatusMapping = Extensions::mapCaseWhen(array_flip($this->getLeaveStatuses()), 'a.' . self::f_LeaveStatus, 'status');
 
-        $fname  = Employee::f_FirstName;
-        $mname  = Employee::f_MiddleName;
-        $lname  = Employee::f_LastName;
+        // $fname  = Employee::f_FirstName;
+        // $mname  = Employee::f_MiddleName;
+        // $lname  = Employee::f_LastName;
 
         $employeeFields = [
-            'e.' . Employee::f_EmpNo      . ' as idNo',
-            DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname")
+            'e.' . Employee::f_EmpNo . ' as idNo',
+            Employee::getConcatNameDbRaw('e', 'empname', Constants::NAME_STYLE_EASTERN)
+            //DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname")
         ];
 
         $leaveReqFields = Extensions::prefixArray('a.', [
@@ -195,7 +223,7 @@ class LeaveRequest extends Model
         ]);
 
         $fields = array_merge($leaveReqFields, $employeeFields, [ 
-            DB::raw($roleMapping), 
+            //DB::raw($roleMapping), 
             DB::raw($leaveTypeMapping),
             DB::raw($leaveStatusMapping)
         ]);
@@ -248,6 +276,13 @@ class LeaveRequest extends Model
                     // To do later:
                     // update employee status from leave to on-duty
 
+                    // but first, check if there are existing leave requests that had
+                    // not passed yet. If there are, but the current date is within the 
+                    // leave range, then do not update the employee status.
+                    // Otherwise, check again if there are leave requests.
+                    // If there are leave requests found, compare them to the
+                    // current date. If the current date is within the leave request,
+                    // do not update
                     return Extensions::encodeSuccessMessage(Messages::GENERIC_DELETE_OK);
                 } 
                 else 

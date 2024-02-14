@@ -31,4 +31,7 @@ class Constants
     public const RECORD_FILTER_ALL = 'All';
     public const FILTER_VALUE_ALL  = 0;
 
+    public const NAME_STYLE_EASTERN = 'eastern';    // Family name first
+    public const NAME_STYLE_WESTERN = 'western';    // Given name goes first
+
 }

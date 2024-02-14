@@ -563,15 +563,29 @@ var leaveRequestPage = (function ()
                 }
 
                 response = JSON.parse(response);
-
+                console.warn(response);
                 let statusActions =
                 {
                     // Success
-                    '0': function () 
+                    '0': function ()
                     {
-                        closeLeaveRequestModal();
+                        let rowNode = dataTable.row.add({
+                            'empname'   : response.rowData['empname'],
+                            'type'      : response.rowData['type'],
+                            'start'     : response.rowData['start'],
+                            'end'       : response.rowData['end'],
+                            'duration'  : response.rowData['duration'],
+                            'status'    : response.rowData['status'],
+                            'id'        : response.rowData['id']
+                            //'row-actions'     : response.rowData['']
+                        }).draw().node();
+
+                        console.warn( dataTable.row(rowNode).index());
                         snackbar.showSuccess(response.message);
                     },
+
+                    // Exceptions
+                    '-1': () => alertModal.showDanger(response.message),
 
                     // Validation Error
                     '422': function () 
@@ -590,12 +604,20 @@ var leaveRequestPage = (function ()
                 };
 
                 if (response.code in statusActions)
+                {
+                    // We should only close the modal when it does not
+                    // require the user to retry their entries.
+                    if (response.code != '422')
+                        closeLeaveRequestModal(true);
+
                     statusActions[response.code]();
+                }
             },
             error: function (xhr, status, error) 
             {
+                closeLeaveRequestModal(true);
                 alertModal.showDanger('An unexpected has occurred. Please try again later.');
-                console.warn(xhr.responseText);
+                //console.warn(xhr.responseText);
             },
             complete: function () 
             {

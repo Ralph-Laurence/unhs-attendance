@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Text\Messages;
+use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use Exception;
 use Hashids\Hashids;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 
 class Employee extends Model implements Auditable
@@ -204,5 +206,34 @@ class Employee extends Model implements Auditable
         catch (Exception $ex) {
             return Extensions::encodeFailMessage($messages['fail'][$role]);
         }
+    }
+
+    public static function getConcatNameDbRaw(string $prefix, $col_as = 'empname', $nameStyle = Constants::NAME_STYLE_WESTERN)
+    {
+        // If the prefix has no trailing dot, add one
+        if ($prefix && !Str::endsWith($prefix, '.'))
+            $prefix .= '.';
+    
+        $fname  = $prefix . self::f_FirstName;
+        $mname  = $prefix . self::f_MiddleName;
+        $lname  = $prefix . self::f_LastName;
+    
+        $styles = [
+            Constants::NAME_STYLE_WESTERN => "CONCAT_WS(' ', $fname, NULLIF($mname, ''), $lname)",
+            Constants::NAME_STYLE_EASTERN => "CONCAT_WS(' ', CONCAT($lname, ','), $fname, NULLIF($mname, ''))"
+        ];
+    
+        if (!in_array($nameStyle, array_keys($styles)))
+        {
+            error_log('Unknown name style given. Allowed values are eastern and western');
+            return '';
+        }
+    
+        $sql = $styles[$nameStyle];
+    
+        if ($col_as)
+            $sql .= " as $col_as";
+    
+        return DB::raw( $sql );
     }
 }

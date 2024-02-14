@@ -15,7 +15,9 @@ use App\Models\Shared\Filters;
 use App\Rules\DateRangeCompare;
 use App\Rules\LeaveRequestOverlapCheck;
 use Carbon\Carbon;
+use Exception;
 use Hashids\Hashids;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -100,6 +102,9 @@ class LeaveRequestsController extends Controller
         // Find the employee ID by the employee number
         $empId = Employee::where(Employee::f_EmpNo, '=', $inputs['idNo'])->value('id');
        
+        if (!$empId)
+            return Extensions::encodeFailMessage(Messages::EMPLOYEE_INEXISTENT);
+
         $leaveStart = $inputs['startDate'];
         $leaveEnd   = $inputs['endDate'];
 
@@ -110,7 +115,7 @@ class LeaveRequestsController extends Controller
                 $leaveDuration = $leaveStart == $leaveEnd ? 1 :
                                  Carbon::parse($leaveStart)->diffInDays( Carbon::parse($leaveEnd) );
 
-                return LeaveRequest::create([
+                $create = LeaveRequest::create([
                     LeaveRequest::f_Emp_FK_ID   => $empId,
                     LeaveRequest::f_StartDate   => $leaveStart,
                     LeaveRequest::f_EndDate     => $leaveEnd,
@@ -118,13 +123,29 @@ class LeaveRequestsController extends Controller
                     LeaveRequest::f_Duration    => $leaveDuration == 1 ? "$leaveDuration day" : "$leaveDuration days",
                     LeaveRequest::f_LeaveStatus => $inputs['leaveStatus']
                 ]);
+
+                // Build row data that will be shown into the datatable
+                $dataset = LeaveRequest::getInsertedRow($create->id);
+
+                if (empty($dataset))
+                    throw new ModelNotFoundException;
+
+                $dataset['id'] = $this->hashids->encode($create['id']);
+                
+                return $dataset;
             });
 
-            return Extensions::encodeSuccessMessage('Success', $insert->toArray());
+            return Extensions::encodeSuccessMessage('Success', ['rowData' => $insert]);
         } 
-        catch (\Throwable $th) 
+        catch (ModelNotFoundException $ex)
         {
-            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED . '\n\n' . $th->getMessage());
+            error_log($ex->getMessage());
+            return Extensions::encodeFailMessage(Messages::REVERT_TRANSACT_ON_FAIL . '\n\n' . $ex->getMessage());
+        }
+        catch (Exception $ex) 
+        {
+            error_log($ex->getMessage());
+            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED); // . '\n\n' . $ex->getMessage());
         }
     }
 

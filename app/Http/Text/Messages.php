@@ -16,6 +16,7 @@ class Messages
     public const GENERIC_DELETE_FAIL     = 'A problem has occurred while trying to delete the record.';
     public const GENERIC_DELETE_OK       = 'Record successfully deleted.';
 
+    public const EMPLOYEE_INEXISTENT     = 'Employee does not exist.';
     public const READ_FAIL_INEXISTENT    = 'It seems the record doesn\'t exist or has already been removed.';
     public const DELETE_FAIL_INEXISTENT  = 'It seems the record you\'re trying to modify doesn\'t exist or has already been removed.';
 
@@ -44,6 +45,7 @@ class Messages
     public const LEAVE_REQUEST_REJECTED  = 'Leave request rejected';
 
     public const PROCESS_REQUEST_FAILED  = "Unable to process your request because of an error.";
+    public const REVERT_TRANSACT_ON_FAIL = 'Apologies, we encountered an issue while processing your request and had to revert the changes. Please try again later or contact support if the issue persists.';
 
     public const END_DATE_LESS_THAN      = 'The end date must not be earlier than the start date.';
 }
