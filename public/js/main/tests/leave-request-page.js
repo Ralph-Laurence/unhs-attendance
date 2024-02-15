@@ -291,7 +291,31 @@ var leaveRequestPage = (function ()
                     return;
                 }
 
-                updateRowEntryNumbers(api)
+                updateRowEntryNumbers(api);
+
+                // Highlight the newly added row
+
+                // $('.simplebar-content-wrapper').scrollTop($('body').height());
+                if ('newRowInstance' in dataTable && dataTable.newRowInstance !== null)
+                {
+                    $('.simplebar-content-wrapper').animate({
+                        scrollTop: $('body').height()
+                    },
+                    function () 
+                    {
+                        console.warn(dataTable.newRowInstance);
+                        if (!dataTable.newRowInstance.node())
+                            return;
+
+                        setTimeout(function() 
+                        {
+                            let node = dataTable.newRowInstance.node();
+
+                            flashRow(node, () => dataTable.newRowInstance = null);
+
+                        }, 800);
+                    });
+                }
             },
             ajax: {
 
@@ -493,13 +517,13 @@ var leaveRequestPage = (function ()
                 // Success
                 if (response.code === 0)
                 {
-                    // Update the 'status' cell
-                    dataTable.cell(row.index(), 'request-status:name').data(response.newStatus).draw();
+                    let dtRow   = dataTable.row(row);
+                    let rowData = dtRow.data();
 
-                    // Update the 'row actions' cell with new action buttons
-                    let actionButtons = makeRowActionButtons(response.rowKey, [ROW_ACTION_EDIT, ROW_ACTION_DELETE]);
+                    dataTable.newRowInstance = dtRow;
 
-                    dataTable.cell(row.index(), 'row-actions:name').data( sanitize(actionButtons) ).draw();
+                    rowData.status = response.newStatus;
+                    dtRow.data(rowData).invalidate().draw(false);
 
                     snackbar.showSuccess(response.message);
                 }
@@ -563,13 +587,13 @@ var leaveRequestPage = (function ()
                 }
 
                 response = JSON.parse(response);
-                console.warn(response);
+                
                 let statusActions =
                 {
                     // Success
                     '0': function ()
                     {
-                        let rowNode = dataTable.row.add({
+                        var newRow = dataTable.row.add({
                             'empname'   : response.rowData['empname'],
                             'type'      : response.rowData['type'],
                             'start'     : response.rowData['start'],
@@ -577,10 +601,17 @@ var leaveRequestPage = (function ()
                             'duration'  : response.rowData['duration'],
                             'status'    : response.rowData['status'],
                             'id'        : response.rowData['id']
-                            //'row-actions'     : response.rowData['']
-                        }).draw().node();
+                        });
 
-                        console.warn( dataTable.row(rowNode).index());
+                        // store the new row instance
+                        dataTable.newRowInstance = newRow;
+                        
+                        var rowIndex   = newRow.index();
+                        var pageNumber = Math.ceil((rowIndex + 1) / dataTable.page.len());
+
+                        // Go to the page
+                        dataTable.page(pageNumber - 1).draw(false);
+
                         snackbar.showSuccess(response.message);
                     },
 
@@ -612,6 +643,10 @@ var leaveRequestPage = (function ()
 
                     statusActions[response.code]();
                 }
+                else
+                {
+                    closeLeaveRequestModal();
+                }
             },
             error: function (xhr, status, error) 
             {
@@ -619,10 +654,7 @@ var leaveRequestPage = (function ()
                 alertModal.showDanger('An unexpected has occurred. Please try again later.');
                 //console.warn(xhr.responseText);
             },
-            complete: function () 
-            {
-                enableFormModalButtons(true);
-            }
+            complete: () => enableFormModalButtons(true)
         });
     }
 

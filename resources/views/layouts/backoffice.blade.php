@@ -47,7 +47,7 @@
             @include('layouts.backoffice.sidenav')
         
             <div class="col content-wrapper overflow-hidden d-flex flex-column px-0 vh-100">
-                <div data-simplebar class="overflow-y-auto nav-items-container px-3 h-100">
+                <div data-simplebar class="overflow-y-auto nav-items-containerx work-area px-3 h-100">
                     
                     @include('layouts.backoffice.header-banner')
         

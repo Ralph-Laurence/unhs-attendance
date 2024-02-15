@@ -150,3 +150,18 @@ function redrawTable(dataTable, retainPage)
         // so we go back up one page
         dataTable.page('previous').draw('page');
 }
+
+function flashRow(rowNode, onAnimationEnd)
+{
+    let node = $(rowNode);
+
+    node.addClass('row-flash');
+    node.on('animationend', function ()
+    {
+        // Remove the class after the animation ends
+        node.removeClass('row-flash');
+
+        if (onAnimationEnd && typeof onAnimationEnd === 'function')
+            onAnimationEnd();
+    });
+}
