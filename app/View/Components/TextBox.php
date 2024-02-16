@@ -8,15 +8,17 @@ use Illuminate\Support\Str;
 class TextBox extends Component
 {
     public $as;
+    public $default;
 
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($as = null)
+    public function __construct($as = null, $default = null)
     {
         $this->as = !is_null($as) ? $as : 'input-' . Str::random(6);
+        $this->default = $default;
     }
 
     /**

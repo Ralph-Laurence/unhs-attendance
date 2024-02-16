@@ -34,6 +34,27 @@ $(document).ready(function ()
     });
 });
 
+function to_textbox(selector)
+{
+    let $input = $(selector);
+    
+    var __reset = function() 
+    {
+        let defaultValue = $input.data('default-value');
+        // Trigger the input event to hide the textbox error
+        $input.val( defaultValue ).trigger('input');
+    };
+
+    return {
+        getInput:  ()  => $input,
+        getType :  ()  => 'textbox',
+        getValue:  ()  => $input.val(),
+        setValue:  (v) => $input.val(v).trigger('input'),
+        setText :  (t) => $input.val(t),
+        reset   :  __reset
+    }
+}
+
 function showTextboxError(target, message)
 {
     var root = $(target).closest('.textbox');

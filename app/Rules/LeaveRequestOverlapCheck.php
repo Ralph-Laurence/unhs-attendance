@@ -11,17 +11,20 @@ class LeaveRequestOverlapCheck implements Rule
     protected $employeeFK;
     protected $startDate;
     protected $endDate;
+    protected $leaveRequestId ;    // Will be used only during update to ignore the checking on the same record (i.e itself)
 
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct($employeeFK, $startDate, $endDate)
+    public function __construct($employeeFK, $startDate, $endDate, $leaveRequestId = null)
     {
         $this->employeeFK = $employeeFK;
         $this->startDate  = $startDate;
         $this->endDate    = $endDate;
+
+        $this->leaveRequestId = $leaveRequestId; // this will be null during creation
     }
 
     /**
@@ -47,7 +50,7 @@ class LeaveRequestOverlapCheck implements Rule
             {
                 $f_start_date   = LeaveRequest::f_StartDate;
                 $f_end_date     = LeaveRequest::f_EndDate;
-    
+                
                 $query->whereBetween($f_start_date, [$start, $end])
                 ->orWhereBetween($f_end_date,       [$start, $end])
                 ->orWhere(function ($query) use ($start, $end, $f_start_date, $f_end_date) 
@@ -55,10 +58,13 @@ class LeaveRequestOverlapCheck implements Rule
                     $query->where($f_start_date, '<=', $start)
                           ->where($f_end_date,   '>=', $end);
                 });
-            })
-        ->exists();
+            });
+        
+        // Exclude the current leave request from the query only if leaveRequestId is not null
+        if (!is_null($this->leaveRequestId))
+            $overlappingLeave->where('id', '!=', $this->leaveRequestId);
     
-        return !$overlappingLeave;
+        return !$overlappingLeave->exists();
     }
 
     /**

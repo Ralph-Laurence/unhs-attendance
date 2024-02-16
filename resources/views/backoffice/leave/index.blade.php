@@ -80,9 +80,9 @@
                                     <small> 
                                         <i class="fas fa-user-tie me-1"></i> Employee
                                     </small>
-                                    <x-drop-list as="input-role-filter" :items="$roleFilters['filterItems']" 
-                                    text="{{ $roleFilters['defaultText'] }}" button-classes="w-100"
-                                    default="{{ $roleFilters['defaultValue'] }}"/>
+                                    <x-drop-list as="input-role-filter" :items="$datasetFilters['role']" 
+                                    text="{{ $datasetFilters['defaultText'] }}" button-classes="w-100"
+                                    default="{{ $datasetFilters['defaultValue'] }}"/>
                                 </div>
                             </div>
                             <div class="row">
@@ -91,18 +91,18 @@
                                     <small> 
                                         <i class="fas fa-chart-area me-1"></i> Leave Type
                                     </small>
-                                    <x-drop-list as="input-leave-filter" :items="$leaveFilters['filterItems']" 
-                                    text="{{ $leaveFilters['defaultText'] }}"  button-classes="w-100"
-                                    default="{{ $leaveFilters['defaultValue']  }}"/>
+                                    <x-drop-list as="input-leave-filter" :items="$datasetFilters['leaveType']" 
+                                    text="{{ $datasetFilters['defaultText'] }}"  button-classes="w-100"
+                                    default="{{ $datasetFilters['defaultValue']  }}"/>
                                 </div>
                                 <div class="col-6">
                                     {{-- LEAVE STATUS FILTERS --}}
                                     <small> 
                                         <i class="fas fa-chart-line me-1"></i> Leave Status
                                     </small>
-                                    <x-drop-list as="input-status-filter" :items="$statusFilters['filterItems']" 
-                                    text="{{ $statusFilters['defaultText'] }}"  button-classes="w-100"
-                                    default="{{ $statusFilters['defaultValue']  }}"/>
+                                    <x-drop-list as="input-status-filter" :items="$datasetFilters['leaveStatus']" 
+                                    text="{{ $datasetFilters['defaultText'] }}"  button-classes="w-100"
+                                    default="{{ $datasetFilters['defaultValue']  }}"/>
                                 </div>
                             </div>
                             <hr class="my-3 opacity-10">
@@ -128,9 +128,7 @@
                     </button>
                     <ul class="dropdown-menu shadow shadow-4-strong" aria-labelledby="options-dropdown-button">
                         <li>
-                            <a class="dropdown-item" data-mdb-toggle="modal" 
-                               data-mdb-target="#leaveRequestModal"
-                               role="button">Create Manually</a>
+                            <a class="dropdown-item" id="opt-add-leave-request" role="button">Create Manually</a>
                         </li>
                         <li><a class="dropdown-item" href="#">Import Sheet</a></li>
                     </ul>
@@ -141,7 +139,7 @@
         {{-- DATASET TABLE --}}
         <div class="w-100 position-relative overflow-hidden">
             <table class="table table-striped table-fixed w-100 table-sm table-hover dataset-table" id="records-table"
-                data-src-default="{{ $routes['ajax_get_all'] }}" data-src-emp-ids="{{ $routes['ajax_load_empids'] }}">
+                data-src-emp-ids="{{ $routes['ajax_load_empids'] }}">
                 <thead class="user-select-none">
                     <tr>
                         <th class="record-counter sticky-header">#</th>
@@ -175,9 +173,9 @@
             </div>
             <div class="modal-body">
                 <div class="alert alert-danger text-center py-2 text-14 error-box d-hidden"></div>
-                <form data-post-create-target="{{ $routes['insertPostRoute'] }}" data-post-update-target="{{ $routes['updatePostRoute'] }}" method="post"
+                <form data-post-target="{{ $routes['insertPostRoute'] }}" method="post"
                       id="frm-leave-request">
-
+                      <x-text-box as="input-update-key" readonly parent-classes="d-none"/>
                     <div class="container">
                         <div class="row mb-3">
                             <div class="col">
@@ -228,13 +226,15 @@
 @push('scripts')
 <script>
     const route_deleteRecord    = "{{ $routes['deleteRoute'] }}";
+    const route_editRecord      = "{{ $routes['editRoute'] }}";
     const route_approveRequest  = "{{ $routes['approveRoute'] }}";
     const route_rejectRequest   = "{{ $routes['rejectRoute'] }}";
+    const route_getDataSource   = "{{ $routes['ajax_get_all'] }}";
+    // security concerns : https://stackoverflow.com/questions/32584700/how-to-prevent-laravel-routes-from-being-accessed-directly-i-e-non-ajax-reques
 </script>
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
-{{-- <script src="{{ asset('js/main/backoffice/leave-request-page.js') }}"></script> --}}
 <script src="{{ asset('js/components/auto-suggest-field.js') }}"></script>
 <script src="{{ asset('js/main/tests/leave-request-page.js') }}"></script>
 @endpush

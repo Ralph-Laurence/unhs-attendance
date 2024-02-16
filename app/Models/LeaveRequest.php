@@ -120,7 +120,7 @@ class LeaveRequest extends Model
         return $this->encodeData($request, $dataset, "Month of $monthName");
     }
 
-    public static function getInsertedRow($rowId)
+    public static function findLeaveRequest($rowId)
     {
         $leaveTypeMapping   = Extensions::mapCaseWhen(array_flip(self::getLeaveTypes()),    'l.' . self::f_LeaveType, 'type');
         $leaveStatusMapping = Extensions::mapCaseWhen(array_flip(self::getLeaveStatuses()), 'l.' . self::f_LeaveStatus, 'status');
@@ -201,18 +201,12 @@ class LeaveRequest extends Model
     */
     private function buildQuery()
     {
-        //$roleMapping        = Extensions::mapCaseWhen(Employee::RoleToString,                'e.' . Employee::f_Position, 'role');
         $leaveTypeMapping   = Extensions::mapCaseWhen(array_flip($this->getLeaveTypes()),    'a.' . self::f_LeaveType, 'type');
         $leaveStatusMapping = Extensions::mapCaseWhen(array_flip($this->getLeaveStatuses()), 'a.' . self::f_LeaveStatus, 'status');
-
-        // $fname  = Employee::f_FirstName;
-        // $mname  = Employee::f_MiddleName;
-        // $lname  = Employee::f_LastName;
 
         $employeeFields = [
             'e.' . Employee::f_EmpNo . ' as idNo',
             Employee::getConcatNameDbRaw('e', 'empname', Constants::NAME_STYLE_EASTERN)
-            //DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname")
         ];
 
         $leaveReqFields = Extensions::prefixArray('a.', [
@@ -223,7 +217,6 @@ class LeaveRequest extends Model
         ]);
 
         $fields = array_merge($leaveReqFields, $employeeFields, [ 
-            //DB::raw($roleMapping), 
             DB::raw($leaveTypeMapping),
             DB::raw($leaveStatusMapping)
         ]);
@@ -287,7 +280,7 @@ class LeaveRequest extends Model
                 } 
                 else 
                 {
-                    return Extensions::encodeFailMessage(Messages::DELETE_FAIL_INEXISTENT);
+                    return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);
                 }
             });
 

@@ -25,7 +25,7 @@
         @endif
 
         <input type="{{ $inputType }}" name="{{ $as }}" id="{{ $as }}" {{ $attributes->merge(['class' => "main-control"]) }} 
-        value="{{ old($as) }}"/>
+        value="{{ old($as, $default) }}" data-default-value="{{ $default }}" />
 
         @if ($attributes->has('trailing-icon'))
         <i class="fas trailing-icon {{ $attributes->get('trailing-icon') }}"></i>

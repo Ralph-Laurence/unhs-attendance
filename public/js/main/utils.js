@@ -37,10 +37,30 @@ function extractDate(timestamp)
     month = monthNames[month - 1];
 
     let parts = {
-        'year': year,
-        'month': month,
-        'day': day,
-        'dayName': dayName
+        'year'      : year,
+        'month'     : month,
+        'day'       : day,
+        'dayName'   : dayName
+    };
+
+    return parts;
+}
+
+function extractDateInt(timestamp)
+{
+    // Create a new Date object with the UTC time
+    let date = new Date(timestamp + 'Z');
+
+    // Add leading '0' to day
+    let day = date.getUTCDate();
+    
+    if (day < 10)
+        day = '0' + day;
+
+    let parts = {
+        'year'  : date.getUTCFullYear(),
+        'month' : date.getUTCMonth() + 1, // JavaScript counts months from 0 to 11, so we add 1
+        'day'   : day,
     };
 
     return parts;

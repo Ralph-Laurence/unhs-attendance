@@ -50,8 +50,8 @@ function to_auto_suggest_ajax(selectorId, options, loadComplete)
         getInput : ()  => $(selectorId),
         getType  : ()  => 'autosuggest',
         getValue : ()  => $input.val(),
-        setValue : (v) => _setVal(v),
-
+        setValue : (v) => _setVal(v),       // Set value then trigger keyup
+        setText  : (t) => $input.val(t),    // Set value silently
         reset    : ()  => {
             _setVal('');
             hideTextboxError($input)

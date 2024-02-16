@@ -18,7 +18,7 @@ class Messages
 
     public const EMPLOYEE_INEXISTENT     = 'Employee does not exist.';
     public const READ_FAIL_INEXISTENT    = 'It seems the record doesn\'t exist or has already been removed.';
-    public const DELETE_FAIL_INEXISTENT  = 'It seems the record you\'re trying to modify doesn\'t exist or has already been removed.';
+    public const MODIFY_FAIL_INEXISTENT  = 'It seems the record you\'re trying to modify doesn\'t exist or has already been removed.';
 
     public const TEACHER_DELETE_OK       = 'Faculty member successfully removed from records.';
     public const TEACHER_DELETE_FAIL     = 'Failed to remove faculty member from the records.';
@@ -48,4 +48,6 @@ class Messages
     public const REVERT_TRANSACT_ON_FAIL = 'Apologies, we encountered an issue while processing your request and had to revert the changes. Please try again later or contact support if the issue persists.';
 
     public const END_DATE_LESS_THAN      = 'The end date must not be earlier than the start date.';
+
+    public const SEC_ERR_HASH_ID         = "Oops! It seems like the security key for the record you're trying to access doesn't match. Please try again later.\n\nIf the problem persists, consider reaching out to our support team for help.";
 }

@@ -256,6 +256,7 @@ function to_date_picker(selector)
         getInput    : () => $input,
         getType     : () => 'datepicker',
         reset       : __reset,
-        getValue    : () => $input.val() 
+        getValue    : () => $input.val(),
+        setValue    : (y, m, d) => applyValue(y, m, d),
     }
 }

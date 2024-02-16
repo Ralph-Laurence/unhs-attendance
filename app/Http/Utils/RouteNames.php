@@ -41,6 +41,7 @@ class RouteNames
         'index'      => 'backoffice.leave',
         'create'     => 'backoffice.leave.create',
         'delete'     => 'backoffice.leave.delete',
+        'edit'       => 'backoffice.leave.edit',
         'approve'    => 'backoffice.leave.approve',
         'reject'     => 'backoffice.leave.reject'
     ];

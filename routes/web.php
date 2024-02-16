@@ -87,6 +87,7 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
     Route::post('/backoffice/leave/get'     , 'getRecords')->name(RouteNames::Leave['get']);
     Route::post('/backoffice/leave/create'  , 'store')->name(RouteNames::Leave['create']);
     Route::post('/backoffice/leave/delete'  , 'destroy')->name(RouteNames::Leave['delete']);
+    Route::post('/backoffice/leave/edit'    , 'edit')->name(RouteNames::Leave['edit']);
     Route::post('/backoffice/leave/approve' , 'approveLeave')->name(RouteNames::Leave['approve']);
     Route::post('/backoffice/leave/reject'  , 'rejectLeave')->name(RouteNames::Leave['reject']);
 });
