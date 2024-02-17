@@ -1,20 +1,26 @@
 @extends('layouts.base')
 
 @section('content')
-@php
-    $leaveTypes = [];
+
+{{-- @php
+    use \Carbon\Carbon;
+    $employees_toUpdate_onLeave = [];
+    $employees_toUpdate_onDuty = [];
+    $today = now()->startOfDay();
 @endphp
-<x-moment-picker as="input-date-start" />
-<x-moment-picker as="input-date-end" />
-<x-drop-list :items="$leaveTypes" button-classes="w-100"/>
-@push('scripts')
-<script src="{{ asset('js/lib/momentjs/moment-with-locales.js') }}"></script>
-<script>
-$(document).ready(function () {
-    to_date_picker("#input-date-start");
-    to_date_picker("#input-date-end");
-});
-</script>
-@endpush
+<h6>today is: {{ $today }}</h6>
+@foreach ($employees as $emp)
+    @foreach ($emp->leave_requests as $req)
+    @php
+        if ($today >= Carbon::parse($req['start_date']) && $today <= Carbon::parse($req['end_date']) )
+            $employees_toUpdate_onLeave[] = $req['id'];
+    @endphp
+        <p>
+            {{  }}
+        </p>
+    @endforeach
+@endforeach --}}
+
+@dd($employees)
 
 @endsection

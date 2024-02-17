@@ -34,4 +34,7 @@ class Constants
     public const NAME_STYLE_EASTERN = 'eastern';    // Family name first
     public const NAME_STYLE_WESTERN = 'western';    // Given name goes first
 
+    public const TABLE_LEAVE_REQUESTS = 'leave_requests';
+    public const TABLE_EMPLOYEES = 'employees';
+
 }

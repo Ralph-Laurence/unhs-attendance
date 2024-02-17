@@ -55,8 +55,12 @@ class LeaveRequest extends Model
     public const HASH_SALT = 'FCD61F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
     
+    // Need to place this here for Object relational mapping
+    protected $table = Constants::TABLE_LEAVE_REQUESTS;
+
+    // For other uses
     public static function getTableName() : string {
-        return (new self)->getTable();
+        return Constants::TABLE_LEAVE_REQUESTS;
     }
     
     protected $guarded = [
@@ -302,79 +306,103 @@ class LeaveRequest extends Model
      */
     public static function completeLeaveRequest($action, Request $request)
     {
-        $leaveStatuses = [
-            '0'  => LeaveRequest::LEAVE_STATUS_APPROVED,
-            '-1' => LeaveRequest::LEAVE_STATUS_REJECTED
+        $actionMap = 
+        [
+            'approve' => [
+                'success' => Messages::LEAVE_REQUEST_APPROVED,
+                'value'   => self::LEAVE_STATUS_APPROVED
+            ],
+
+            'reject'  => [
+                'success' => Messages::LEAVE_REQUEST_REJECTED,
+                'value'   => self::LEAVE_STATUS_REJECTED
+            ],
         ];
 
-        $successMessages = [
-            '0'  => Messages::LEAVE_REQUEST_APPROVED,
-            '-1' => Messages::LEAVE_REQUEST_REJECTED
-        ];
-
-        $failure = Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
-
-        $validator   = Validator::make($request->all(), [
-            'rowKey' => 'required|string',
-        ]);
+        $failMessage = Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
+        $validator   = Validator::make($request->all(), [ 'rowKey' => 'required|string' ]);
 
         if ($validator->fails())
             return Extensions::encodeFailMessage(Messages::UPDATE_FAIL_INCOMPLETE);
 
-        $input_row_key = $validator->validated()['rowKey'];
+        $rowKey = $validator->validated()['rowKey'];
 
-        try 
+        try
         {
             $hashids  = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
-            $rowId    = $hashids->decode($input_row_key)[0];
+            $leaveId  = $hashids->decode($rowKey)[0];
 
-            $transact = DB::transaction(function () use ($rowId, $action, $leaveStatuses) {
+            $transact = DB::transaction(function () use ($leaveId, $action, $actionMap, $rowKey) 
+            {
+                //========= TASK 1 :: UPDATE LEAVE REQUEST =========//
+                
+                // Find the Leave Request record to make sure it exists
+                $leave = LeaveRequest::findOrFail($leaveId);
 
-                // Find the Leave Request record
-                $leave = LeaveRequest::findOrFail($rowId);
+                // Update the leave request status. Select a status by $action
+                $newLeaveStatus = $actionMap[$action]['value'];
 
-                // Find the employee associated with that leave request
-                $empId = $leave->toArray()[LeaveRequest::f_Emp_FK_ID];
+                $leave->setAttribute(self::f_LeaveStatus, $newLeaveStatus);
 
-                // Update the leave request status. Select a status using $action
-                $updateLeave = $leave->update([LeaveRequest::f_LeaveStatus => $leaveStatuses[$action]]);
-
-                if (!$updateLeave)
+                if (!($leave->save()))
                     throw new Exception;
 
-                // Update the employee status to 'On Leave' only if 
-                // the leave request was approved
-                if ($leave->wasChanged() && $action == '0') 
-                {
-                    $emp_affectedRows = Employee::where('id', $empId)->update([
-                        Employee::f_Status => Employee::ON_STATUS_LEAVE
-                    ]);
+                // We assume the operation succeeds and 
+                // we can now use the updated information
+                $leave = $leave->toArray();
 
-                    if (!$emp_affectedRows)
+                $startDate = Carbon::parse($leave[self::f_StartDate]);
+                $endDate   = Carbon::parse($leave[self::f_EndDate]);
+
+                //========= TASK 2 :: UPDATE EMPLOYEE STATUS =========//
+
+                // Find the employee's status associated with that leave request
+                $empId = $leave[self::f_Emp_FK_ID];
+
+                $currentEmpStatus = Employee::where('id', $empId)->value(Employee::f_Status);
+                $newEmpStatus     = Employee::ON_STATUS_DUTY;
+
+                if ( $leave[self::f_LeaveStatus] == self::LEAVE_STATUS_APPROVED &&
+                     now()->startOfDay()->between($startDate, $endDate)) 
+                {
+                    $newEmpStatus = Employee::ON_STATUS_LEAVE;
+                }
+                
+                // Update the employee status to 'On Leave' only if the leave request was approved
+                // and only if the current date is within the range of the leave
+                // and if its current status is not the same as the new status.
+                if ($currentEmpStatus != $newEmpStatus)
+                {
+                    $empStatus = DB::table(Employee::getTableName())
+                        ->where('id', $empId)
+                        ->update([Employee::f_Status => $newEmpStatus]);
+                 
+                    // If the $updateStatus failed, we revert the changes
+                    if ($empStatus < 1)
                         throw new ModelNotFoundException;
                 }
 
-                return true;
+                return [
+                    'newStatus' => array_flip(self::getLeaveStatuses())[ $newLeaveStatus ],
+                    'rowKey'    => $rowKey
+                ];
             });
 
-            if ($transact)
-            {
-                $extraData = [
-                    'newStatus' => array_flip(self::getLeaveStatuses())[ $leaveStatuses[$action] ],
-                    'rowKey'    => $input_row_key
-                ];
-                return Extensions::encodeSuccessMessage( $successMessages[$action], $extraData);
-            }
-            
-            return $failure;
-        } 
+            return Extensions::encodeSuccessMessage($actionMap[$action]['success'], $transact);
+        }
         catch (ModelNotFoundException $ex) {
             // Handle the error when no employee or leave request record is found
-            return Extensions::encodeFailMessage(Messages::UPDATE_FAIL_NON_EXISTENT_RECORD);
+            return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);
         } 
         catch (Exception $ex) {
-            error_log($ex->getMessage());
-            return $failure;
+            error_log($ex->getMessage() . ' at ' . $ex->getLine());
+            return $failMessage;
         }
+    }
+
+    // Object Relational Mapping; Each leave requests belongs to an employee
+    public function employee() 
+    {
+        return $this->belongsTo(\App\Models\Employee::class, self::f_Emp_FK_ID);
     }
 }

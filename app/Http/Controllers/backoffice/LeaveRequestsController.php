@@ -87,32 +87,96 @@ class LeaveRequestsController extends Controller
             if (!$empId)
                 return Extensions::encodeFailMessage(Messages::EMPLOYEE_INEXISTENT);
 
-            $updateId = $request->has('updateKey') && $request->filled('updateKey')
-                      ? $this->hashids->decode($request->input('updateKey'))[0]
-                      : null;
+            $leaveId = $request->has('updateKey') && $request->filled('updateKey')
+                     ? $this->hashids->decode($request->input('updateKey'))[0]
+                     : null;
 
-            $result = ($updateId) 
-                    ? $this->update($inputs, $updateId)
-                    : $this->insert($inputs, $empId);
+            $dataset = DB::transaction(function() use($leaveId, $inputs, $empId)
+            {
+                $result = [];
 
-            // Build row data that will be shown into the datatable
-            $dataset = LeaveRequest::findLeaveRequest($result->id);
+                // 0 -> create; 1 - update
+                // This will be used in the frontend to determine which operation was done
+                // such as Create or Update, which is necessary for displaying table rows
+                $transaction = null;
 
-            if (empty($dataset))
-                throw new ModelNotFoundException;
+                if ($leaveId)
+                {
+                    $result = $this->update($inputs, $leaveId);
+                    $result = $result->toArray();
 
-            $dataset['id'] = $this->hashids->encode($result['id']);
+                    $startDate = Carbon::parse($result[LeaveRequest::f_StartDate]);
+                    $endDate   = Carbon::parse($result[LeaveRequest::f_EndDate]);
+                    $newStatus = Employee::ON_STATUS_DUTY;
+
+                    $currentEmpStatus = Employee::where('id', $empId)->value(Employee::f_Status);
+                    
+                    // Update employee status to on leave upon updating the record.
+                    // Only if the current date is within the range of the leave
+                    // and if its current status is not the same as the new status.
+                    if ( $result[LeaveRequest::f_LeaveStatus] == LeaveRequest::LEAVE_STATUS_APPROVED &&
+                         now()->startOfDay()->between($startDate, $endDate)) 
+                    {
+                        $newStatus = Employee::ON_STATUS_LEAVE;
+                    }
+
+                    if ($currentEmpStatus != $newStatus)
+                    {
+                        $empStatus = DB::table(Employee::getTableName())
+                            ->where('id', $empId)
+                            ->update([Employee::f_Status => $newStatus]);
+                     
+                        // If the $updateStatus failed, we revert the changes
+                        if ($empStatus < 1)
+                            throw new ModelNotFoundException;
+                    }
+
+                    $transaction = 1; 
+                }
+                else 
+                {
+                    $result = $this->insert($inputs, $empId);
+                    $result = $result->toArray();
+
+                    $startDate = Carbon::parse($result[LeaveRequest::f_StartDate]);
+                    $endDate   = Carbon::parse($result[LeaveRequest::f_EndDate]);
+
+                    // Update employee status to on leave upon creating the record.
+                    // Only if the current date is within the range of the leave.
+                    // And only if the leave request was approved.
+                    if ( $result[LeaveRequest::f_LeaveStatus] == LeaveRequest::LEAVE_STATUS_APPROVED && 
+                         now()->startOfDay()->between($startDate, $endDate)) 
+                    {
+                        $empStatus = DB::table(Employee::getTableName())
+                            ->where('id', $empId)
+                            ->update([Employee::f_Status => Employee::ON_STATUS_LEAVE]);
+
+                        // If the $updateStatus failed, we revert the changes
+                        if ($empStatus < 1)
+                            throw new ModelNotFoundException;
+                    }
+
+                    $transaction = 0;
+                }
+
+                // Build row data that will be shown into the datatable
+                $rowData = LeaveRequest::findLeaveRequest($result['id']);
+
+                if (empty($rowData))
+                    throw new ModelNotFoundException;
+
+                $rowData['id'] = $this->hashids->encode($result['id']);
+                $rowData['transaction'] = $transaction;
+
+                return $rowData;
+            });
 
             return Extensions::encodeSuccessMessage('Success', ['rowData' => $dataset]);
         } 
-        catch (ModelNotFoundException $ex)
-        {
-            error_log($ex->getMessage());
+        catch (ModelNotFoundException $ex){
             return Extensions::encodeFailMessage(Messages::REVERT_TRANSACT_ON_FAIL);
         }
-        catch (Exception $ex) 
-        {
-            error_log($ex->getMessage() . ' at ' . $ex->getLine());
+        catch (Exception $ex) {
             return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
         }
     }
@@ -151,23 +215,12 @@ class LeaveRequestsController extends Controller
                 'data' => $leaveRequest
             ]);
         } 
-        catch (ItemNotFoundException $ex) 
-        {
-            error_log($ex->getMessage());
+        catch (ItemNotFoundException $ex) {
             return Extensions::encodeFailMessage(Messages::READ_FAIL_INEXISTENT);
         }
-        catch (Exception $ex) 
-        {
-            error_log($ex->getMessage());
-            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED); // . '\n\n' . $ex->getMessage());
+        catch (Exception $ex) {
+            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
         }
-    }
-
-    private function calculateLeaveDuration($leaveStart, $leaveEnd)
-    {
-        return $leaveStart == $leaveEnd 
-            ? 1 
-            : Carbon::parse($leaveStart)->diffInDays( Carbon::parse($leaveEnd) );
     }
     
     public function update($inputs, $updateId)
@@ -179,7 +232,7 @@ class LeaveRequestsController extends Controller
             LeaveRequest::f_StartDate   => $inputs['startDate'],
             LeaveRequest::f_EndDate     => $inputs['endDate'],
             LeaveRequest::f_LeaveType   => $inputs['leaveType'],
-            LeaveRequest::f_Duration    => $leaveDuration == 1 ? "$leaveDuration day" : "$leaveDuration days",
+            LeaveRequest::f_Duration    => $leaveDuration, // == 1 ? "$leaveDuration day" : "$leaveDuration days",
             LeaveRequest::f_LeaveStatus => $inputs['leaveStatus']
         ]);
     
@@ -195,7 +248,7 @@ class LeaveRequestsController extends Controller
             LeaveRequest::f_StartDate   => $inputs['startDate'],
             LeaveRequest::f_EndDate     => $inputs['endDate'],
             LeaveRequest::f_LeaveType   => $inputs['leaveType'],
-            LeaveRequest::f_Duration    => $leaveDuration == 1 ? "$leaveDuration day" : "$leaveDuration days",
+            LeaveRequest::f_Duration    => $leaveDuration, // == 1 ? "$leaveDuration day" : "$leaveDuration days",
             LeaveRequest::f_LeaveStatus => $inputs['leaveStatus']
         ]);
     }
@@ -209,11 +262,96 @@ class LeaveRequestsController extends Controller
 
     public function approveLeave(Request $request)
     {
-        return LeaveRequest::completeLeaveRequest('0', $request);
+        return LeaveRequest::completeLeaveRequest('approve', $request);
     }
     
     public function rejectLeave(Request $request)
     {
-        return LeaveRequest::completeLeaveRequest('-1', $request);
+        return LeaveRequest::completeLeaveRequest('reject', $request);
+    }
+
+    /**
+    * When you use with('relation') without has('relation'), it behaves like a SQL LEFT JOIN. 
+    * It retrieves all records from the first (or “left”) table, and the matched records from 
+    * the second (or “right”) table. If there is no match, the result is NULL on the right side.
+    * 
+    * When you chain "::has('relation')" into "::with('relation')", it behaves more like a 
+    * SQL INNER JOIN. It only retrieves records where there is a match in both tables.
+    * 
+    * The foreign key must also be included for this to work. In this case, we limit only the
+    * selection of necessary fields to reduce server stress.
+    */
+    public function autoUpdateEmployeeLeaveStatus()
+    {
+        $today = now()->startOfDay();
+
+        $employees = Employee::where(Employee::f_Status, '=', Employee::ON_STATUS_LEAVE)
+        ->whereHas('leave_requests', function ($query) use ($today) {
+            $query->where(LeaveRequest::f_LeaveStatus, '=', LeaveRequest::LEAVE_STATUS_APPROVED)
+            ->where(LeaveRequest::f_StartDate, '<=', $today)
+            ->where(LeaveRequest::f_EndDate, '>=', $today);
+        })
+        ->with(['leave_requests' => function ($query) use ($today) {
+            $query->select([
+                'id',
+                LeaveRequest::f_Emp_FK_ID,
+                LeaveRequest::f_StartDate,
+                LeaveRequest::f_EndDate,
+                LeaveRequest::f_LeaveStatus
+            ])
+            ->where(LeaveRequest::f_LeaveStatus, '=', LeaveRequest::LEAVE_STATUS_APPROVED);
+        }])
+        ->get();
+
+        $employeesToUpdateOnDuty = [];
+        $employeesToUpdateOnLeave = [];
+
+        foreach ($employees as $employee) 
+        {
+            $onLeave = false; // Assume the employee is not on leave
+
+            foreach ($employee->leave_requests as $leave_request) 
+            {
+                $start = Carbon::parse($leave_request[LeaveRequest::f_StartDate]);
+                $end   = Carbon::parse($leave_request[LeaveRequest::f_EndDate]);
+
+                // Check if today's date is within the leave request's date range
+                if ($today->between($start, $end)) {
+                    $onLeave = true; // The employee is on leave
+                    break;
+                }
+            }
+
+            // If the employee is on leave, add them to the on duty array
+            // Otherwise, add them to the on leave array
+            if ($onLeave) 
+                $employeesToUpdateOnDuty[] = $employee->id;
+            else
+                $employeesToUpdateOnLeave[] = $employee->id; 
+        }
+
+        // Now, perform the update operations
+        Employee::whereIn('id', $employeesToUpdateOnDuty)->update([Employee::f_Status => Employee::ON_STATUS_DUTY]);
+        Employee::whereIn('id', $employeesToUpdateOnLeave)->update([Employee::f_Status => Employee::ON_STATUS_LEAVE]);
+
+        // error_log('flag as ON DUTY');
+        // error_log(print_r($employeesToUpdateOnDuty, true));
+        
+        // error_log('flag as ON LEAVE');
+        // error_log(print_r($employeesToUpdateOnLeave, true));
+        
+        // Full LEFT JOIN:
+        // $employees = Employee::with('leave_requests')->get();
+    }
+
+    private function calculateLeaveDuration($leaveStart, $leaveEnd) : string
+    {
+        $duration = $leaveStart == $leaveEnd 
+                  ? 1 
+                  : Carbon::parse($leaveStart)->diffInDays( Carbon::parse($leaveEnd) );
+
+        $duration = ($duration == 1) ? "$duration day" : "$duration days";
+
+        return $duration;
     }
 }

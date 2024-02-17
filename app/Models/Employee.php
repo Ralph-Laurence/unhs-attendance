@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
+use Carbon\Carbon;
 use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -52,8 +53,12 @@ class Employee extends Model implements Auditable
     public const f_PINCode      = 'pin_code';
     public const f_PINFlags     = 'pin_flag';       // -> Enabled | Disabled
 
+    // Need to place this in here, for object relational mapping
+    protected $table = Constants::TABLE_EMPLOYEES;
+
+    // For other uses
     public static function getTableName() : string {
-        return (new self)->getTable();
+        return Constants::TABLE_EMPLOYEES;
     }
 
     protected $guarded = [
@@ -236,4 +241,29 @@ class Employee extends Model implements Auditable
     
         return DB::raw( $sql );
     }
+
+    /**
+     * Set the status of the employee as "On Leave"
+     * depending on the scope of the leave range
+     */
+    // public static function setOnLeave($empId, $startDate, $endDate) : bool
+    // {
+    //     $startDate = Carbon::parse($startDate);
+    //     $endDate   = Carbon::parse($endDate);
+    //     $status    = self::ON_STATUS_DUTY;
+
+    //     if (now()->between($startDate, $endDate))
+    //         $status = self::ON_STATUS_LEAVE;
+
+    //     return DB::table(self::getTableName())
+    //                 ->where('id', $empId)
+    //                 ->update([self::f_Status => $status]);
+    // }
+
+    // Object Relational Mapping; Each employee can have many leave requests
+    public function leave_requests() 
+    {
+        return $this->hasMany(\App\Models\LeaveRequest::class, LeaveRequest::f_Emp_FK_ID);
+    }
+    
 }

@@ -16,7 +16,7 @@ class CreateLeaveRequestsTable extends Migration
      */
     public function up()
     {
-        Schema::create('leave_requests', function (Blueprint $table) {
+        Schema::create(LeaveRequest::getTableName(), function (Blueprint $table) {
             $table->id();
 
             $table->foreignId(LeaveRequest::f_Emp_FK_ID)

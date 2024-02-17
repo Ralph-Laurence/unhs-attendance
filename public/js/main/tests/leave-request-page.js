@@ -112,30 +112,6 @@ var leaveRequestPage = (function ()
         };
 
         bindTableDataSource();
-
-        $(function () {  
-            $(document).on('keypress', function(e){
-                if (e.which == 117)
-                {
-                    // var row = $(dataTable.row(2).node()); 
-                    // var top = row.offset().top;
-                    // var vh  = $(window).height() / 2;
-
-                    // // $(row).get(0).scrollIntoView()
-                    // window.scrollTo(0, top - vh);
-                    var row = dataTable.row(2).node();
-                    var topPos = $(row).offset().top;
-                    var divHeight = $('[data-simplebar]').height();
-
-                    // Scroll the row to the middle of the div
-                    //$('[data-simplebar]').animate({ scrollTop: topPos - (divHeight / 2) }, 500);
-                    $('.simplebar-content-wrapper').animate({ scrollTop: topPos - (divHeight / 2) }, 500);
-                }
-
-                // if (e.which == 116)
-                //     dataTable.row(4).scrollTo();
-            });
-        });
     };
 
     //============================
@@ -253,7 +229,7 @@ var leaveRequestPage = (function ()
 
         // First Column -> Record Counter
         {
-            width: '50px',
+            width: '80px',
             className: 'record-counter text-truncate position-sticky start-0 sticky-cell',
             name: 'record-number',
             data: null,
@@ -371,21 +347,19 @@ var leaveRequestPage = (function ()
                 // $('.simplebar-content-wrapper').scrollTop($('body').height());
                 if ('newRowInstance' in dataTable && dataTable.newRowInstance !== null)
                 {
-                    $('.simplebar-content-wrapper').animate({
-                        scrollTop: $('body').height()
-                    },
-                    function () 
-                    {
-                        if (!dataTable.newRowInstance.node())
-                            return;
+                    if (!dataTable.newRowInstance.node())
+                        return;
 
-                        setTimeout(function() 
+                    let rowNode = dataTable.newRowInstance.node();
+                    
+                    scrollRowToView(rowNode, {
+                        'afterScroll': function () 
                         {
-                            let node = dataTable.newRowInstance.node();
-
-                            flashRow(node, () => dataTable.newRowInstance = null);
-
-                        }, 800);
+                            setTimeout(function() 
+                            {
+                                flashRow(rowNode, () => dataTable.newRowInstance = null);
+                            }, 800);
+                        }
                     });
                 }
             },

@@ -165,3 +165,26 @@ function flashRow(rowNode, onAnimationEnd)
             onAnimationEnd();
     });
 }
+
+// Requires the table to be placed inside the div simplebar
+function scrollRowToView(rowNode, options)
+{
+    let scrollDuration = 500; // ms
+
+    if ( scrollDuration in options )
+        scrollDuration = options.scrollTime;
+
+    var topPos    = $(rowNode).offset().top;
+    var divHeight = $('[data-simplebar]').height();
+
+    // Scroll the row to the middle of the div
+    $('.simplebar-content-wrapper').animate({ 
+        scrollTop: topPos - (divHeight / 2) 
+    },
+    scrollDuration,
+    function() 
+    {
+        if ('afterScroll' in options && typeof options.afterScroll === 'function')
+            options.afterScroll();
+    });
+}
