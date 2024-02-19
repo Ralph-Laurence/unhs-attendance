@@ -259,41 +259,47 @@ class LeaveRequest extends Model
     {
         try 
         {
-            // Make sure that the employee exists
-            // $employee = Employee::where(Employee::f_EmpNo, '=', $employeeId)->firstOrFail();
-            // $empId = $employee->id;
+            // Get the associated employee id from the leave record
+            $leave = LeaveRequest::where('id', '=', $recordId)->firstOrFail();
+            $empId = $leave->getAttribute( self::f_Emp_FK_ID );
 
-            $delete = DB::transaction(function () use ($recordId) 
+            // Load employee details such as the leave status. We must
+            // update the leave status after deleting the leave record.
+            $employee = Employee::where('id', '=', $empId)->firstOrFail();
+
+            $delete = DB::transaction(function () use ($leave, $employee, $empId) 
             {
-                // Delete the leave request
-                $rowsDeleted = LeaveRequest::where('id', '=', $recordId)->delete();
-
-                if ($rowsDeleted > 0) 
+                // Check employee details if status needs updating. We only do this if
+                // the leave requests was approved.
+                if ($employee->getAttribute(Employee::f_Status) == Employee::ON_STATUS_LEAVE && 
+                    $leave->getAttribute(self::f_LeaveStatus) == self::LEAVE_STATUS_APPROVED )
                 {
-                    // To do later:
-                    // update employee status from leave to on-duty
+                    $leaveStart = $leave->getAttribute( LeaveRequest::f_StartDate );
+                    $leaveEnd   = $leave->getAttribute( LeaveRequest::f_EndDate );
 
-                    // but first, check if there are existing leave requests that had
-                    // not passed yet. If there are, but the current date is within the 
-                    // leave range, then do not update the employee status.
-                    // Otherwise, check again if there are leave requests.
-                    // If there are leave requests found, compare them to the
-                    // current date. If the current date is within the leave request,
-                    // do not update
-                    return Extensions::encodeSuccessMessage(Messages::GENERIC_DELETE_OK);
-                } 
-                else 
-                {
-                    return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);
+                    if ( now()->startOfDay()->between($leaveStart, $leaveEnd) )
+                    {
+                        $updateStatus = Employee::where('id', '=', $empId)
+                                      ->update([Employee::f_Status => Employee::ON_STATUS_DUTY]);
+                        
+                        if ($updateStatus < 1)
+                            throw new ModelNotFoundException;
+                    }
                 }
+
+                // Deleting the leave request must be atomic with updating employee status
+                if ($leave->delete() < 1)
+                    return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);
+                
+                return Extensions::encodeSuccessMessage(Messages::GENERIC_DELETE_OK);
             });
 
             return $delete;
         } 
-        // catch (\Illuminate\Database\Eloquent\ModelNotFoundException $ex) {
-        //     // Handle the error when no employee is found
-        //     return Extensions::encodeFailMessage('Employee not found');
-        // }
+        catch (\Illuminate\Database\Eloquent\ModelNotFoundException $ex) {
+            // Handle the error when no employee is found
+            return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);
+        }
         catch (\Exception $ex) {
             return Extensions::encodeFailMessage(Messages::GENERIC_DELETE_FAIL);
         }

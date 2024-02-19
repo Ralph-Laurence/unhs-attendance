@@ -4,9 +4,7 @@
 var leaveRequestPage = (function ()
 {
     // JQuery selectors prefixed with 'jq'
-    const jq_RECORDS_TABLE      = "#records-table";
-    const jq_INPUT_EMP_NO       = '#input-id-no';
-    const jq_OPT_CREATE_LEAVE   = '#opt-add-leave-request';
+    const jq_RECORDS_TABLE = "#records-table";
 
     const STATUS_PENDING = 'pending';
 
@@ -22,6 +20,9 @@ var leaveRequestPage = (function ()
 
     // State Flags
     let dataTable_isFirstDraw = true;
+
+    // This will be used to track last actions (i.e. last clicked row)    
+    let stateStackFrame = {};
 
     //============================
     // Initialization
@@ -82,7 +83,7 @@ var leaveRequestPage = (function ()
         };
 
         // Load employee id numbers into autocomplete textbox
-        var inputIdNo = to_auto_suggest_ajax(jq_INPUT_EMP_NO,
+        var inputIdNo = to_auto_suggest_ajax('#input-id-no',
             {
                 'action'   : $(jq_RECORDS_TABLE).data('src-emp-ids'),
                 'csrfToken': getCsrfToken(),
@@ -132,7 +133,7 @@ var leaveRequestPage = (function ()
         });
 
         // Reflect the employee's name when an employee id was selected
-        $(jq_INPUT_EMP_NO).on('valueSelected', function ()
+        formElements.fields.idNo.input.getInput().on('valueSelected', function ()
         {
             let needle = $(this).val();
 
@@ -179,7 +180,7 @@ var leaveRequestPage = (function ()
 
                 alertModal.showWarn(message, 'Warning',
                      
-                    () => leaveReqModal.finish(),   // OK was clicked; clean-up the form inputs...   
+                    () => finishLeaveReqModal(),    // OK was clicked; clean-up the form inputs...   
                     () => leaveReqModal.show()      // CANCEL was clicked; bring back the modal...
                 );
 
@@ -188,10 +189,11 @@ var leaveRequestPage = (function ()
         });
 
         // Dropdown option "Create Leave Request"
-        $(jq_OPT_CREATE_LEAVE).on('click', () => {
+        $('#opt-add-leave-request').on('click', () => {
 
             leaveReqModal.setMode( leaveReqModal.MODE_CREATE );
             leaveReqModal.show();
+            formElements.fields.idNo.input.enable();
         });
 
         $('.filter-options-dialog .btn-clear').on('click',   () => applyFilters(false));
@@ -215,7 +217,18 @@ var leaveRequestPage = (function ()
             var action = Object.keys(actions).find( k => this.classList.contains(k));
 
             if (action)
-                executeRowActions( $(this).closest('tr'), actions[action] );
+            {
+                let row = $(this).closest('tr');
+                
+                if (!row)
+                {
+                    alertModal.showWarn("Unable to process the requested action because the current row can't be read. Please try again later.");
+                    return;
+                }
+
+                stateStackFrame['lastClickedRow'] = row;
+                executeRowActions( row, actions[action] );
+            }
         });
     };
 
@@ -539,9 +552,9 @@ var leaveRequestPage = (function ()
     function editRecord(row) 
     {
         leaveReqModal.setMode( leaveReqModal.MODE_UPDATE );
+        formElements.fields.idNo.input.disable();
 
         let process = processRowActions(row);
-
         process.begin();
 
         $.ajax({
@@ -694,7 +707,12 @@ var leaveRequestPage = (function ()
 
                 response = JSON.parse(response);
                 
-                leaveReqModal.finish();
+                let lastSelectedRow;
+
+                if (response.rowData.transaction == 1)
+                    lastSelectedRow = stateStackFrame.lastClickedRow;
+                
+                finishLeaveReqModal();
 
                 if (response.code != 0) 
                 {
@@ -702,24 +720,55 @@ var leaveRequestPage = (function ()
                     return;
                 }
 
-                var newRow = dataTable.row.add({
-                    'empname': response.rowData['empname'],
-                    'type': response.rowData['type'],
-                    'start': response.rowData['start'],
-                    'end': response.rowData['end'],
-                    'duration': response.rowData['duration'],
-                    'status': response.rowData['status'],
-                    'id': response.rowData['id']
-                });
+                let newRow = {};
 
-                // store the new row instance
-                dataTable.newRowInstance = newRow;
+                switch (response.rowData.transaction) 
+                {
+                    // Insert
+                    case 0:
+                        newRow = dataTable.row.add({
+                            'empname'   : response.rowData['empname'],
+                            'type'      : response.rowData['type'],
+                            'start'     : response.rowData['start'],
+                            'end'       : response.rowData['end'],
+                            'duration'  : response.rowData['duration'],
+                            'status'    : response.rowData['status'],
+                            'id'        : response.rowData['id']
+                        });
+                        // store the new row instance
+                        dataTable.newRowInstance = newRow;  
+                        break;
 
-                var rowIndex = newRow.index();
+                    // Update
+                    case 1:
+
+                        if (lastSelectedRow)
+                        {
+                            console.warn(lastSelectedRow);
+                            let temp_row = dataTable.row(lastSelectedRow);
+                            let temp_rowData = temp_row.data();
+
+                            temp_rowData.empname  = response.rowData['empname'];
+                            temp_rowData.type     = response.rowData['type'];
+                            temp_rowData.start    = response.rowData['start'];
+                            temp_rowData.end      = response.rowData['end'];
+                            temp_rowData.duration = response.rowData['duration'];
+                            temp_rowData.status   = response.rowData['status'];
+
+                            newRow = dataTable.row(temp_row).data(temp_rowData).invalidate().draw(false);
+                            // store the new row instance
+                            dataTable.newRowInstance = newRow;  
+                        }
+                        
+                        break;
+                }
+
+                var rowIndex   = newRow.index();
                 var pageNumber = Math.ceil((rowIndex + 1) / dataTable.page.len());
 
                 // Go to the page
                 dataTable.page(pageNumber - 1).draw(false);
+                
 
                 snackbar.showSuccess(response.message);
             },
@@ -746,7 +795,7 @@ var leaveRequestPage = (function ()
                 }
 
                 // General Error
-                leaveReqModal.finish();
+                finishLeaveReqModal();
                 alertModal.showDanger('An unexpected has occurred. Please try again later.');
             },
             complete: () => enableFormModalButtons(true)
@@ -756,6 +805,19 @@ var leaveRequestPage = (function ()
     function onServerNoResponse()
     {
         alertModal.showDanger('The server did not respond. Please try again later.');
+    }
+
+    function finishLeaveReqModal()
+    {
+        leaveReqModal.finish();
+
+        var inputIdNo = formElements.fields.idNo.input;
+        
+        if (!inputIdNo.isEnabled())
+            inputIdNo.enable();
+
+        // Clear the reference to the last clicked table row
+        stateStackFrame.lastClickedRow = null;
     }
 
     function enableFormModalButtons(enable) 
@@ -779,7 +841,8 @@ var leaveRequestPage = (function ()
     // End of Revealing Module Pattern
     return {
         init: initialize,
-        handle: handleEvents
+        handle: handleEvents,
+        stackFrame: stateStackFrame
     };
 
 })();

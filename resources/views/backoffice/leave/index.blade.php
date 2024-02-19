@@ -161,7 +161,8 @@
 @endsection
 
 @push('dialogs')
-<div class="modal fade" data-mdb-backdrop="static" id="leaveRequestModal" tabindex="-1" aria-labelledby="leaveRequestModalLabel" aria-hidden="true">
+<div class="modal fade" data-mdb-backdrop="static" data-mdb-keyboard="false"
+    id="leaveRequestModal" tabindex="-1" aria-labelledby="leaveRequestModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header py-2">

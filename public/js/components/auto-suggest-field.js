@@ -47,12 +47,15 @@ function to_auto_suggest_ajax(selectorId, options, loadComplete)
     };
 
     return {
-        getInput : ()  => $(selectorId),
-        getType  : ()  => 'autosuggest',
-        getValue : ()  => $input.val(),
-        setValue : (v) => _setVal(v),       // Set value then trigger keyup
-        setText  : (t) => $input.val(t),    // Set value silently
-        reset    : ()  => {
+        getInput  : ()  => $(selectorId),
+        getType   : ()  => 'autosuggest',
+        getValue  : ()  => $input.val(),
+        setValue  : (v) => _setVal(v),       // Set value then trigger keyup
+        setText   : (t) => $input.val(t),    // Set value silently
+        disable   : ()  => $input.prop('disabled', true),
+        enable    : ()  => $input.prop('disabled', false),
+        isEnabled : ()  => $input.prop('disabled'),
+        reset     : ()  => {
             _setVal('');
             hideTextboxError($input)
         },
