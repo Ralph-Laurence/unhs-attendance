@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 
 class LeaveRequest extends Model
 {
@@ -259,48 +260,47 @@ class LeaveRequest extends Model
     {
         try 
         {
-            // Get the associated employee id from the leave record
-            $leave = LeaveRequest::where('id', '=', $recordId)->firstOrFail();
-            $empId = $leave->getAttribute( self::f_Emp_FK_ID );
+            // Find the target leave request record and make sure it exists then,
+            // Find the employee associated with that record. Make sure they exist too.
+            $leaveReq = LeaveRequest::where('id', $recordId)->firstOrFail();
+            $employee = Employee::findOrFail( $leaveReq->getAttribute( self::f_Emp_FK_ID ) );
 
-            // Load employee details such as the leave status. We must
-            // update the leave status after deleting the leave record.
-            $employee = Employee::where('id', '=', $empId)->firstOrFail();
+            // Delete the leave request as it is no longer needed
+            $leaveReq->deleteOrFail();
 
-            $delete = DB::transaction(function () use ($leave, $employee, $empId) 
+            // Find the other leave requests tied to that employee. We select only the Approved ones
+            $leaveExists = LeaveRequest
+                         ::where(self::f_Emp_FK_ID,   '=',  $employee->id)
+                         ->where(self::f_LeaveStatus, '=',  self::LEAVE_STATUS_APPROVED)
+                         ->where(self::f_StartDate,   '<=', now())
+                         ->where(self::f_EndDate,     '>=', now())
+                         ->exists();
+
+            $empStatus = $employee->getAttribute( Employee::f_Status );
+
+            if ($leaveExists && $empStatus != Employee::ON_STATUS_LEAVE)
             {
-                // Check employee details if status needs updating. We only do this if
-                // the leave requests was approved.
-                if ($employee->getAttribute(Employee::f_Status) == Employee::ON_STATUS_LEAVE && 
-                    $leave->getAttribute(self::f_LeaveStatus) == self::LEAVE_STATUS_APPROVED )
-                {
-                    $leaveStart = $leave->getAttribute( LeaveRequest::f_StartDate );
-                    $leaveEnd   = $leave->getAttribute( LeaveRequest::f_EndDate );
+                $employee->setAttribute(Employee::f_Status, Employee::ON_STATUS_LEAVE);
+                $employee->saveOrFail();
+            }
+            else if (!$leaveExists && $empStatus != Employee::ON_STATUS_DUTY)
+            {
+                $employee->setAttribute(Employee::f_Status, Employee::ON_STATUS_DUTY);
+                $employee->saveOrFail();
+            }
 
-                    if ( now()->startOfDay()->between($leaveStart, $leaveEnd) )
-                    {
-                        $updateStatus = Employee::where('id', '=', $empId)
-                                      ->update([Employee::f_Status => Employee::ON_STATUS_DUTY]);
-                        
-                        if ($updateStatus < 1)
-                            throw new ModelNotFoundException;
-                    }
-                }
-
-                // Deleting the leave request must be atomic with updating employee status
-                if ($leave->delete() < 1)
-                    return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);
-                
-                return Extensions::encodeSuccessMessage(Messages::GENERIC_DELETE_OK);
-            });
-
-            return $delete;
+            return Extensions::encodeSuccessMessage(Messages::GENERIC_DELETE_OK);
         } 
-        catch (\Illuminate\Database\Eloquent\ModelNotFoundException $ex) {
-            // Handle the error when no employee is found
+        catch (ModelNotFoundException $ex) {
+            // When no records of leave or employee were found
             return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);
         }
+        catch (QueryException $ex) {
+            // We assume saveOrFail to throw errors here
+            return Extensions::encodeFailMessage(Messages::REVERT_TRANSACT_ON_FAIL);
+        }
         catch (\Exception $ex) {
+            // Common errors
             return Extensions::encodeFailMessage(Messages::GENERIC_DELETE_FAIL);
         }
     }

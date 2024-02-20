@@ -242,24 +242,6 @@ class Employee extends Model implements Auditable
         return DB::raw( $sql );
     }
 
-    /**
-     * Set the status of the employee as "On Leave"
-     * depending on the scope of the leave range
-     */
-    // public static function setOnLeave($empId, $startDate, $endDate) : bool
-    // {
-    //     $startDate = Carbon::parse($startDate);
-    //     $endDate   = Carbon::parse($endDate);
-    //     $status    = self::ON_STATUS_DUTY;
-
-    //     if (now()->between($startDate, $endDate))
-    //         $status = self::ON_STATUS_LEAVE;
-
-    //     return DB::table(self::getTableName())
-    //                 ->where('id', $empId)
-    //                 ->update([self::f_Status => $status]);
-    // }
-
     // Object Relational Mapping; Each employee can have many leave requests
     public function leave_requests() 
     {
