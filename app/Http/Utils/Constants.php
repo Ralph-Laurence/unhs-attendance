@@ -13,6 +13,7 @@ class Constants
     public const BasicTimeFormat        = 'g:i A';
     public const TimestampFormat        = 'Y-m-d H:i:s';
     public const DateFormat             = 'Y-m-d';
+    public const ZERO_DURATION          = '00:00:00';
 
     public const ValidationStat_Failed  = 422;
     public const ValidationStat_Success = 200;
@@ -34,7 +35,10 @@ class Constants
     public const NAME_STYLE_EASTERN = 'eastern';    // Family name first
     public const NAME_STYLE_WESTERN = 'western';    // Given name goes first
 
-    public const TABLE_LEAVE_REQUESTS = 'leave_requests';
-    public const TABLE_EMPLOYEES = 'employees';
+    public const TABLE_ABSENCE          = 'absence';
+    public const TABLE_ATTENDANCES      = 'attendances';
+    public const TABLE_LEAVE_REQUESTS   = 'leave_requests';
+    public const TABLE_EMPLOYEES        = 'employees';
+    public const TABLE_AUDIT_TRAILS     = 'audits';
 
 }

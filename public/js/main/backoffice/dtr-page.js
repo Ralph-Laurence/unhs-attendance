@@ -1,4 +1,4 @@
-let dtr_datasetTable = '.dtr-dataset-table';
+let dtr_datasetTable = '.dataset-table';
 let dataTable;
 let csrfToken;
 let range;
@@ -49,6 +49,19 @@ function bindTableDataSource(newRange)
 
     let url = $(dtr_datasetTable).data('src-default');
 
+    let weekendDays = [];
+
+    var onRenderDefaultContent = function(data, type, row) 
+    {
+        if(row.day_number && weekendDays.includes(row.day_number))
+            return `<span class="text-sm opacity-65">Rest Day</span>`;
+ 
+        if (data)
+            return data;
+
+        return `<span class="text-danger">${'\u00d7'}</span>`;
+    };
+
     let options = {
         "processing"   : true,
         "deferRender"  : true,
@@ -60,77 +73,131 @@ function bindTableDataSource(newRange)
             url     : url,
             type    : 'POST',
             dataType: 'JSON',
-            // dataSrc : function(json) {
-
-            //     if (iconStyles == undefined)
-            //         iconStyles = json.icon;
-
-            //     return json.data;
-            // },
             data: function() {
                 return {
                     '_token': csrfToken,
                     'employee-key': employeeKey,
                     'range': range
                 };
-            }
+            },
+            dataSrc : function (json) 
+            {
+                if (!json)
+                    return;
+
+                if (json.weekendDays && weekendDays.length < 1)
+                    weekendDays = json.weekendDays;
+
+                if (json.statistics)
+                {
+                    let stats = json.statistics;
+
+                    $('.th-work-hrs').text(stats.totalWorkHrs);
+                }
+
+                return json.data;
+            },
         },
         columns: [
 
             // First Column -> Day number
             {
-                className: 'daynumber td-50 opacity-45',
+                className: 'daynumber td-50',
                 data: 'day_number',
+                defaultContent: '',
+                render: function (data, type, row) 
+                {
+                    let color = 'text-record-counter ';
+
+                    if(data && weekendDays.includes(data))
+                        color = 'text-danger';
+                    
+                    return `<span class="${color}">${data}</span>`;
+                }
             },
             // Second Column -> Date
             {
                 className: 'dayname td-60',
                 data: 'day_name',
-                defaultContent: ''
-            },
-            // Third Column -> Status
-            {
-                className: 'am_in text-center td-80',
-                data: 'am_in', 
+                name: 'day_name',
                 defaultContent: '',
+                render: function(data, type, row) 
+                {
+                    let color = 'text-primary-dark';
+                     
+                    let dayName = data.toString().toLowerCase();
+
+                    if (dayName == 'sat' || dayName == 'sun')
+                        color = 'text-danger';
+
+                    return `<span class="${color}">${data}</span>`;
+                }
+            },
+            {
+                className: 'am_in text-center td-80 v-stripe-accent-green border-start border-end',
+                data: 'am_in', 
+                render: function(data, type, row) 
+                {
+                    data = data || '\u00d7';
+                    
+                    if(row.day_number && weekendDays.includes(row.day_number))
+                        return '<span class="text-special-dark-green text-sm">Rest Day</span>';
+
+                    return `<span class="text-special-dark-green">${data}</span>`;
+                },
             },
             {
                 className: 'am_out text-center td-80',
                 data: 'am_out', 
                 defaultContent: '',
+                render: onRenderDefaultContent,
             },
             {
                 className: 'pm_in text-center td-80',
                 data: 'pm_in', 
-                defaultContent: '',
+                //defaultContent: '',
+                render: onRenderDefaultContent,
             },
             {
-                className: 'pm_out text-center td-80',
+                className: 'pm_out text-center td-80 v-stripe-accent-yellow border-start border-end',
                 data: 'pm_out', 
                 defaultContent: '',
+                render: function(data, type, row) 
+                {
+                    data = data || '\u00d7';
+                    
+                    if(row.day_number && weekendDays.includes(row.day_number))
+                        return '<span class="text-special-dark-warning text-sm">Rest Day</span>';
+
+                    return `<span class="text-special-dark-warning">${data}</span>`;
+                },
             },
             {
-                className: 'duration td-120',
+                className: 'duration td-120 text-center',
                 data: 'duration', 
                 defaultContent: '',
+                render: onRenderDefaultContent,
             },
             {
-                className: 'late td-120',
+                className: 'late td-120 v-stripe-accent border-start border-end text-center',
                 data: 'late', 
                 defaultContent: '',
+                render: onRenderDefaultContent,
             },
             {
-                className: 'undertime td-120',
+                className: 'undertime td-120 text-center',
                 data: 'undertime', 
                 defaultContent: '',
+                render: onRenderDefaultContent,
             },
             {
-                className: 'overtime td-120',
+                className: 'overtime td-120 v-stripe-accent border-start border-end text-center',
                 data: 'overtime', 
                 defaultContent: '',
+                render: onRenderDefaultContent,
             },
             {
-                className: 'status td-100',
+                className: 'status td-100 text-center',
                 data: 'status', 
                 defaultContent: '',
             },

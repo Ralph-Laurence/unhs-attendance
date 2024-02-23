@@ -48,9 +48,10 @@ class ScannerController extends Controller
         $attendanceFields = Extensions::prefixArray('a.', [
             Attendance::f_TimeIn   . ' as timein',
             Attendance::f_TimeOut  . ' as timeout',
-            Attendance::f_Duration . ' as duration',
             Attendance::f_Status   . ' as status',
         ]);
+
+        $attendanceFields[] = Attendance::timeStringToDurationRaw(Attendance::f_Duration, 'a');
 
         $employeeFields = Extensions::prefixArray('e.', [
             Employee::f_FirstName  . ' as fname',
@@ -280,9 +281,9 @@ class ScannerController extends Controller
         $attendance->update([
             Attendance::f_TimeOut   => $timeOut,
             Attendance::f_Status    => Attendance::STATUS_PRESENT, //$status,
-            Attendance::f_Duration  => Attendance::formatTimeDuration($duration),
-            Attendance::f_UnderTime => Attendance::formatTimeDuration($undertime),
-            Attendance::f_OverTime  => Attendance::formatTimeDuration($overtime),
+            Attendance::f_Duration  => Extensions::durationToTimeString($duration), 
+            Attendance::f_UnderTime => Extensions::durationToTimeString($undertime),
+            Attendance::f_OverTime  => Extensions::durationToTimeString($overtime), 
         ]);
 
         return Extensions::encodeSuccessMessage('Good Bye!');//, ['status' => $status]);

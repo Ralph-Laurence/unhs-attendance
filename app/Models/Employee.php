@@ -61,6 +61,12 @@ class Employee extends Model implements Auditable
         return Constants::TABLE_EMPLOYEES;
     }
 
+    // This is the friendly name that will be used when 
+    // presenting this model in the Audits table.
+    public static function getFriendlyName() : string {
+        return 'Employees';
+    }
+
     protected $guarded = [
         'id'
     ];

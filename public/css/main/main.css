@@ -15,6 +15,9 @@
     --accent-bright:    #22DDB3;
     --warning-color:    #FFAC34;
 
+    --special-dark-green: #38761D;
+    --special-dark-warning: #664D03;
+
     --primary-font: 'Poppins', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     --accent-font:  'Averta', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     --font-awesome: 'Font Awesome 6 Free';
@@ -126,7 +129,7 @@ a.link-primary:hover {
 
 /* Color Utilities */
 .bg-color-primary {
-    background-color: var(--primary-color);
+    background-color: var(--primary-color) !important;
 }
 
 /*
@@ -219,6 +222,18 @@ Dropdown Menu Overrides
     color: var(--primary-dark);
 }
 
+.text-special-dark-green {
+    color: var(--special-dark-green) !important;
+}
+
+.text-special-dark-warning {
+    color: var(--special-dark-warning) !important;
+}
+
+.text-record-counter {
+    color: #B0B0B0;
+}
+
 /* Text Size Utilities */
 .text-sm {
     font-size: 12px;
@@ -291,6 +306,26 @@ Dropdown Menu Overrides
     max-height: 38px;
 
 }
+
+/* Vertical Stripes */
+.dataset-table thead th.v-stripe-accent-yellow,
+.dataset-table td.v-stripe-accent-yellow {
+    background-color: rgba(255, 242, 204, 0.45) !important;
+}
+
+.dataset-table thead th.v-stripe-accent-green,
+.dataset-table td.v-stripe-accent-green {
+    background-color: rgba(182, 215, 168, 0.28) !important;
+}
+
+.dataset-table thead th.v-stripe-accent,
+.dataset-table td.v-stripe-accent {
+    background-color: rgba(225, 219, 255, 0.28) !important;
+}
+/* 
+,td:nth-child(even) {
+    
+  } */
 table td {
     min-height: 40px;
     height: 40px;

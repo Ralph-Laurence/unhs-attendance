@@ -1,7 +1,7 @@
 //
 // Uses revealing module pattern:
 //
-var leaveRequestPage = (function ()
+var auditsPage = (function ()
 {
     // JQuery selectors prefixed with 'jq'
     const jq_RECORDS_TABLE = "#records-table";
@@ -849,6 +849,6 @@ var leaveRequestPage = (function ()
 
 $(document).ready(function ()
 {
-    leaveRequestPage.init();
-    leaveRequestPage.handle();
+    auditsPage.init();
+    auditsPage.handle();
 });

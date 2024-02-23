@@ -63,6 +63,12 @@ class LeaveRequest extends Model
     public static function getTableName() : string {
         return Constants::TABLE_LEAVE_REQUESTS;
     }
+
+    // This is the friendly name that will be used when 
+    // presenting this model in the Audits table.
+    public static function getFriendlyName() : string {
+        return 'Leave Requests';
+    }
     
     protected $guarded = [
         'id'

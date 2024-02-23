@@ -48,6 +48,23 @@ class Attendance extends Model
     public const HASH_SALT = 'FA610E'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
 
+    
+    protected $appends = ['hashid'];
+
+    protected $guarded = [
+        'id'
+    ];
+    
+    public static function getTableName() : string {
+        return Constants::TABLE_ATTENDANCES;
+    }
+
+     // This is the friendly name that will be used when 
+    // presenting this model in the Audits table.
+    public static function getFriendlyName() : string {
+        return 'Attendances';
+    }
+
     public static function createTimeIn(int $empId) : Attendance
     {
         $timeIn = Carbon::now();
@@ -64,16 +81,12 @@ class Attendance extends Model
         if ($timeIn->gt(Attendance::$workStartTime))
         {
             $late = $timeIn->diffInSeconds($workStart) / 3600;
-            $data[Attendance::f_Late] = self::formatTimeDuration($late);
+            $data[Attendance::f_Late] = Extensions::durationToTimeString($late);
         }
 
         $insert = Attendance::create($data);
 
         return $insert;
-    }
-
-    public static function getTableName() : string {
-        return (new self)->getTable();
     }
 
     public static function getIconClasses() : array {
@@ -85,12 +98,6 @@ class Attendance extends Model
             Attendance::STATUS_LATE        => 'late'
         ];
     }
-
-    protected $appends = ['hashid'];
-
-    protected $guarded = [
-        'id'
-    ];
 
     protected $casts = [
         self::f_TimeIn      => 'datetime',
@@ -110,27 +117,20 @@ class Attendance extends Model
 
         return $hashids->encode($this->attributes['id']); // Use the instance to call the encode 
     }
-    /** 
-     * Will output something like 1H 30mins 2secs
-    */
-    public static function formatTimeDuration($duration)
+
+    public static function timeStringToDurationRaw($field = 'duration', $joinAlias = null, $caseAlias = 'duration')
     {
-        $hours   = floor($duration);
-        $minutes = floor(($duration - $hours) * 60);
-        $seconds = floor((($duration - $hours) * 60 - $minutes) * 60);
-    
-        $result = '';
-        if ($hours > 0)
-            $result .= $hours . 'Hr' . ($hours > 1 ? 's' : '') . ' ';
+        $field = $joinAlias ? "$joinAlias.$field" : $field;
+
+        $sql = DB::raw("CASE
+                   WHEN HOUR($field)   != 0 THEN CONCAT(HOUR($field),   'h ', MINUTE($field), 'm')
+                   WHEN MINUTE($field) != 0 THEN CONCAT(MINUTE($field), 'm ', SECOND($field), 's')
+                   ELSE CONCAT(SECOND($field), 'secs')
+               END as $caseAlias");
         
-        if ($minutes > 0)
-            $result .= $minutes . 'min' . ($minutes > 1 ? 's' : '') . ' ';
-        
-        if ($seconds > 0)
-            $result .= $seconds . 'sec' . ($seconds > 1 ? 's' : '');
-    
-        return trim($result);
+        return $sql;
     }
+    
 
     /**
      * Select all employees who do not have an attendance record for the current day, 
@@ -253,31 +253,25 @@ class Attendance extends Model
     */
     private function buildAttendanceQuery()
     {
-        $fname = Employee::f_FirstName;
-        $mname = Employee::f_MiddleName;
-        $lname = Employee::f_LastName;
+        $fields = array_merge([
+            Employee::getConcatNameDbRaw('e'), 
+            $this->timeStringToDurationRaw(self::f_Duration, 'a')
+        ],
+        Extensions::prefixArray('a.', [
+            'id', 
+            'created_at',
+            self::f_TimeIn  . ' as timein',
+            self::f_TimeOut . ' as timeout',
+            self::f_Status  . ' as status',
+        ]));
 
-        $employeeFields = [
-            DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname")
-        ];
-        
-        $attendanceFields = Extensions::prefixArray('a.', [
-            Attendance::f_TimeIn   . ' as timein',
-            Attendance::f_TimeOut  . ' as timeout',
-            Attendance::f_Duration . ' as duration',
-            Attendance::f_Status   . ' as status',
-            'id',
-            'created_at' ,
-        ]);
+        $sql = DB::table(self::getTableName(), 'a')
+               ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.self::f_Emp_FK_ID)
+               ->where('a.'.self::f_Status, '!=', self::STATUS_ABSENT)
+               ->orderBy('a.created_at', 'desc')
+               ->select($fields);
 
-        $fields = array_merge($attendanceFields, $employeeFields);
-        $query = DB::table(self::getTableName() . ' as a')
-                ->select($fields)
-                ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
-                ->where('a.' . Attendance::f_Status, '!=', Attendance::STATUS_ABSENT)
-                ->orderBy('a.created_at', 'desc');
-
-        return $query;
+        return $sql;
     }
 
      /**

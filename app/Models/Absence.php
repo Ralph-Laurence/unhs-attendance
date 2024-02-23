@@ -20,7 +20,13 @@ class Absence extends Model
     public const f_WeekNo       = 'week_no';
 
     public static function getTableName() : string {
-        return (new self)->getTable();
+        return Constants::TABLE_ABSENCE;
+    }
+
+     // This is the friendly name that will be used when 
+    // presenting this model in the Audits table.
+    public static function getFriendlyName() : string {
+        return 'Absence';
     }
     
      /**

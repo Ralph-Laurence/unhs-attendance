@@ -13,6 +13,8 @@ class Messages
     public const ATTENDANCE_DELETE_OK    = 'Attendance record successfully deleted.';
     public const ATTENDANCE_DELETE_FAIL  = 'Failed to delete attendance record.';
 
+    public const DTR_PERIOD_UNRECOGNIZED = 'The date period was not recognized as a valid date range.';
+
     public const GENERIC_DELETE_FAIL     = 'A problem has occurred while trying to delete the record.';
     public const GENERIC_DELETE_OK       = 'Record successfully deleted.';
 
@@ -35,6 +37,7 @@ class Messages
     public const EMAIL_SUBJECT_QRCODE    = 'QR Code for Attendance Monitoring System';
 
     public const READ_RECORD_FAIL        = 'Unable to read the record. Please try again.';
+    public const READ_FAIL_INCOMPLETE    = 'Could not read the record because some information was missing.';
     public const UPDATE_FAIL_INCOMPLETE  = 'Could not update the record because some information was missing.';
     
     public const UPDATE_FAIL_CANT_IDENTIFY_RECORD = "Failed to update the record because it cannot be identified.";

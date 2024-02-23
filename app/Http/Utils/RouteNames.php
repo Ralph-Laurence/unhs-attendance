@@ -70,6 +70,11 @@ class RouteNames
         'destroy'   => 'backoffice.staff.destroy',
     ];
 
+    public const AuditTrails = [
+        'index'     => 'backoffice.audits',
+        'all'       => 'backoffice.audits.all',
+    ];
+
     public const AJAX = [
         'list-empno' => 'backoffice.staff.list.empno',
     ];

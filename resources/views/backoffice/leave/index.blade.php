@@ -237,5 +237,5 @@
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
 <script src="{{ asset('js/components/auto-suggest-field.js') }}"></script>
-<script src="{{ asset('js/main/tests/leave-request-page.js') }}"></script>
+<script src="{{ asset('js/main/backoffice/leave-request-page.js') }}"></script>
 @endpush

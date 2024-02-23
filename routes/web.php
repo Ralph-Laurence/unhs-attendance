@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\backoffice\AbsenceController;
 use App\Http\Controllers\backoffice\AttendanceController;
+use App\Http\Controllers\backoffice\AuditTrailsController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\backoffice\EmployeeController;
@@ -33,9 +34,9 @@ Route::get('/', function () {
 Route::controller(DailyTimeRecordController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::post('/backoffice/dtr', 'index')->name(RouteNames::DailyTimeRecord['index']);
-    Route::post('/backoffice/dtr/timerecords', 'getTimeRecords')->name(RouteNames::DailyTimeRecord['get']);
-    Route::post('/backoffice/dtr/export/pdf',  'exportPdf')->name(RouteNames::DailyTimeRecord['exportPdf']);
+    Route::post('/backoffice/dtr',             'index')          ->name(RouteNames::DailyTimeRecord['index']);
+    Route::post('/backoffice/dtr/timerecords', 'getTimeRecords') ->name(RouteNames::DailyTimeRecord['get']);
+    Route::post('/backoffice/dtr/export/pdf',  'exportPdf')      ->name(RouteNames::DailyTimeRecord['exportPdf']);
 });
 
 Route::controller(ScannerController::class)->group(function()
@@ -43,10 +44,9 @@ Route::controller(ScannerController::class)->group(function()
     Route::get('/dtr-scanner', 'index')->name(RouteNames::Scanner['index']);
 
     // AJAX requests
-    Route::get('/dtr-scanner/history',   'history')->name(RouteNames::Scanner['history']);
-    Route::post('/dtr-scanner/decode/',  'decode')->name(RouteNames::Scanner['decode']);
-
-    Route::post('/dtr-scanner/pin/auth', 'authenticatePin')->name(RouteNames::Scanner['authpin']);
+    Route::get('/dtr-scanner/history',   'history')         ->name(RouteNames::Scanner['history']);
+    Route::post('/dtr-scanner/decode/',  'decode')          ->name(RouteNames::Scanner['decode']);
+    Route::post('/dtr-scanner/pin/auth', 'authenticatePin') ->name(RouteNames::Scanner['authpin']);
 });
 
 Route::controller(AttendanceController::class)->middleware(['auth'])
@@ -57,26 +57,26 @@ Route::controller(AttendanceController::class)->middleware(['auth'])
     // This will be exectued by CRON JOB
     Route::get('/backoffice/attendance/auto-absent', 'autoAbsentEmployees')->name(RouteNames::Attendance['autoAbsent']);
 
-    Route::post('/backoffice/attendance/get',    'getAttendances')->name(RouteNames::Attendance['get']);
-    Route::post('/backoffice/attendance/delete', 'destroy')->name(RouteNames::Attendance['delete']);
+    Route::post('/backoffice/attendance/get',        'getAttendances')->name(RouteNames::Attendance['get']);
+    Route::post('/backoffice/attendance/delete',     'destroy')       ->name(RouteNames::Attendance['delete']);
 });
 
 Route::controller(AbsenceController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::get('/backoffice/attendance/absence', 'index')->name(RouteNames::Absence['index']);
+    Route::get('/backoffice/attendance/absence',         'index')       ->name(RouteNames::Absence['index']);
 
-    Route::post('/backoffice/attendance/absence/get',    'getAbsences')->name(RouteNames::Absence['get']);
-    Route::post('/backoffice/attendance/absence/delete', 'destroy')->name(RouteNames::Absence['delete']);
+    Route::post('/backoffice/attendance/absence/get',    'getAbsences') ->name(RouteNames::Absence['get']);
+    Route::post('/backoffice/attendance/absence/delete', 'destroy')     ->name(RouteNames::Absence['delete']);
 });
 
 Route::controller(LateAttendanceController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::get('/backoffice/attendance/late', 'index')->name(RouteNames::Late['index']);
+    Route::get('/backoffice/attendance/late',         'index')      ->name(RouteNames::Late['index']);
 
-    Route::post('/backoffice/attendance/late/get',    'getRecords')->name(RouteNames::Late['get']);
-    Route::post('/backoffice/attendance/late/delete', 'destroy')->name(RouteNames::Late['delete']);
+    Route::post('/backoffice/attendance/late/get',    'getRecords') ->name(RouteNames::Late['get']);
+    Route::post('/backoffice/attendance/late/delete', 'destroy')    ->name(RouteNames::Late['delete']);
 });
 
 Route::controller(LeaveRequestsController::class)->middleware(['auth'])
@@ -84,12 +84,12 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
 {
     Route::get('/backoffice/leave', 'index')->name(RouteNames::Leave['index']);
 
-    Route::post('/backoffice/leave/get'     , 'getRecords')->name(RouteNames::Leave['get']);
-    Route::post('/backoffice/leave/create'  , 'store')->name(RouteNames::Leave['create']);
-    Route::post('/backoffice/leave/delete'  , 'destroy')->name(RouteNames::Leave['delete']);
-    Route::post('/backoffice/leave/edit'    , 'edit')->name(RouteNames::Leave['edit']);
-    Route::post('/backoffice/leave/approve' , 'approveLeave')->name(RouteNames::Leave['approve']);
-    Route::post('/backoffice/leave/reject'  , 'rejectLeave')->name(RouteNames::Leave['reject']);
+    Route::post('/backoffice/leave/get'     , 'getRecords')   ->name(RouteNames::Leave['get']);
+    Route::post('/backoffice/leave/create'  , 'store')        ->name(RouteNames::Leave['create']);
+    Route::post('/backoffice/leave/delete'  , 'destroy')      ->name(RouteNames::Leave['delete']);
+    Route::post('/backoffice/leave/edit'    , 'edit')         ->name(RouteNames::Leave['edit']);
+    Route::post('/backoffice/leave/approve' , 'approveLeave') ->name(RouteNames::Leave['approve']);
+    Route::post('/backoffice/leave/reject'  , 'rejectLeave')  ->name(RouteNames::Leave['reject']);
 });
 
 // Route::get('/home', function() {
@@ -100,33 +100,38 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
 Route::controller(TeachersController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::get('/backoffice/employees/teachers',            'index')->name(RouteNames::Teachers['index']);
+    Route::get('/backoffice/employees/teachers',           'index')        ->name(RouteNames::Teachers['index']);
     
-    // AJAX
-    Route::post('/backoffice/employees/teachers/get',       'getTeachers')->name(RouteNames::Teachers['all']);
-    Route::post('/backoffice/employees/teachers/create',    'store')->name(RouteNames::Teachers['create']);
-    Route::post('/backoffice/employees/teachers/delete',    'destroy')->name(RouteNames::Teachers['destroy']);
-    Route::post('/backoffice/employees/teachers/details',   'details')->name(RouteNames::Teachers['details']);
-    Route::post('/backoffice/employees/teachers/update',    'update')->name(RouteNames::Teachers['update']);
+    Route::post('/backoffice/employees/teachers/get',      'getTeachers')  ->name(RouteNames::Teachers['all']);
+    Route::post('/backoffice/employees/teachers/create',   'store')        ->name(RouteNames::Teachers['create']);
+    Route::post('/backoffice/employees/teachers/delete',   'destroy')      ->name(RouteNames::Teachers['destroy']);
+    Route::post('/backoffice/employees/teachers/details',  'details')      ->name(RouteNames::Teachers['details']);
+    Route::post('/backoffice/employees/teachers/update',   'update')       ->name(RouteNames::Teachers['update']);
 });
 
 Route::controller(StaffController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::get('/backoffice/employees/staff',           'index')->name(RouteNames::Staff['index']);
+    Route::get('/backoffice/employees/staff',           'index')    ->name(RouteNames::Staff['index']);
 
-    // AJAX
-    Route::post('/backoffice/employees/staff/get',      'getStaff')->name(RouteNames::Staff['all']);
-    Route::post('/backoffice/employees/staff/create',   'store')->name(RouteNames::Staff['create']);
-    Route::post('/backoffice/employees/staff/delete',   'destroy')->name(RouteNames::Staff['destroy']);
-    Route::post('/backoffice/employees/staff/details',  'details')->name(RouteNames::Staff['details']);
-    Route::post('/backoffice/employees/staff/update',   'update')->name(RouteNames::Staff['update']);
+    Route::post('/backoffice/employees/staff/get',      'getStaff') ->name(RouteNames::Staff['all']);
+    Route::post('/backoffice/employees/staff/create',   'store')    ->name(RouteNames::Staff['create']);
+    Route::post('/backoffice/employees/staff/delete',   'destroy')  ->name(RouteNames::Staff['destroy']);
+    Route::post('/backoffice/employees/staff/details',  'details')  ->name(RouteNames::Staff['details']);
+    Route::post('/backoffice/employees/staff/update',   'update')   ->name(RouteNames::Staff['update']);
 });
 
 Route::controller(EmployeeController::class)->middleware(['auth'])
 ->group(function()
 {
     Route::post('/ajax/employees/list/empno', 'loadAutoSuggest_EmpNo')->name(RouteNames::AJAX['list-empno']);
+});
+
+Route::controller(AuditTrailsController::class)->middleware(['auth']) //['only_su']
+->group(function()
+{
+    Route::get('/backoffice/audit-trails',  'index')->name(RouteNames::AuditTrails['index']);
+    Route::post('/backoffice/audit-trails', 'getAll')->name(RouteNames::AuditTrails['all']);
 });
 
 Route::controller(TestController::class)->group(function(){

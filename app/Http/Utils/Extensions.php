@@ -4,10 +4,11 @@ namespace App\Http\Utils;
 
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use DateInterval;
+use DatePeriod;
 use DateTime;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class Extensions
 {
@@ -30,22 +31,40 @@ class Extensions
      * the last date having the array key "end". The dates 
      * are formatted as "f d Y".
      */
-    public static function getWeekDateRange($weekNumber, $year) 
-    {
-        $startDate = Carbon::now()->setISODate($year, $weekNumber, 1)->startOfDay();
-        $endDate = Carbon::now()->setISODate($year, $weekNumber, 7)->endOfDay();
-    
-        $dates = [];
+    // public static function getWeekDateRange($weekNumber, $year) 
+    // {
+    //     $startDate = Carbon::now()->setISODate($year, $weekNumber, 1)->startOfDay();
+    //     $endDate = Carbon::now()->setISODate($year, $weekNumber, 7)->endOfDay();
 
-        for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
-            $dates[] = $date->format('F d, Y');
+    //     $dates = [];
+
+    //     for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+    //         $dates[] = $date->format('F d, Y');
+    //     }
+
+    //     return [
+    //         'start' => $dates[0],
+    //         'end' => $dates[count($dates) - 1],
+    //         'dates' => $dates
+    //     ];
+    // }
+
+    /** 
+     * Takes a date range as input and returns an array of day numbers 
+     * that fall on a weekend within that range. 
+     * This assumes that the date range are in the format of 'Y-m-d'
+     * */
+    public static function getWeekendNumbersInRange($start, $end)
+    {
+        $weekendNumbers = [];
+
+        for ($date = $start; $date->lte($end); $date->addDay()) 
+        {
+            if ($date->isWeekend()) 
+                $weekendNumbers[] = $date->day;
         }
-    
-        return [
-            'start' => $dates[0],
-            'end' => $dates[count($dates) - 1],
-            'dates' => $dates
-        ];
+
+        return $weekendNumbers;
     }
 
     public static function getMonthDateRange($monthNumber, $year) 
@@ -65,7 +84,8 @@ class Extensions
            'dates' => $dates
        ];
     }
-
+    
+    /** Returns a string that represents the range of dates from $dateFrom to $dateTo. */
     public static function getPeriods($dateFrom, $dateTo, $format = 'F d, Y') : string
     {
         $period = new CarbonPeriod($dateFrom, $dateTo);
@@ -77,6 +97,41 @@ class Extensions
         }
 
         return $dates[0] .' - '. $dates[count($dates) -1 ];
+    }
+
+    /** Return list of formatted dates in given range  */
+    // public static function getDatesInRange(Carbon $dateFrom, Carbon $dateTo, $outFormat = Constants::BasicTimeFormat)
+    // {
+    //     $period = new DatePeriod(
+    //         $dateFrom, 
+    //         new DateInterval('P1D'), 
+    //         $dateTo->add( new DateInterval('P1D') )
+    //     );
+
+    //     $dates = [];
+
+    //     foreach ($period as $p)
+    //     {
+    //         $dates[] = 
+    //     }
+    // }
+
+    public static function getDateSeriesRaw(Carbon $from, Carbon $to, string $as = 'dates')
+    {
+        $sql = 
+        "(
+            WITH RECURSIVE dates AS 
+            (
+                SELECT DATE('$from') AS date
+                UNION ALL
+                SELECT DATE_ADD(date, INTERVAL 1 DAY)
+                FROM dates
+                WHERE DATE_ADD(date, INTERVAL 1 DAY) <= DATE('$to')
+            )
+            SELECT date FROM dates
+        ) as $as";
+
+        return DB::raw($sql);
     }
 
     //
@@ -117,11 +172,6 @@ class Extensions
         $result = ['code' => $statCode, 'message' => $message] + $extraRows;
     
         return json_encode($result);
-
-        // return json_encode([
-        //     'code'    => !is_null($code) ? $code : Constants::XHR_STAT_FAIL,
-        //     'message' => $message
-        // ]);
     }
 
     public static function validationFailResponse($validator, $extraRows = []) : array
@@ -191,5 +241,87 @@ class Extensions
         $mapping .= "END as $as";
 
         return $mapping;
+    }
+
+    /**
+     * Formats a sql date into "%b %d, %Y"
+     * which means Three letter month, two-digit day and full year.
+     * 
+     * By default, it formats the created_at field and gives it an alias 'date'
+     */
+    public static function date_format_bdY($field = 'created_at', $alias = 'date')
+    {
+        return DB::raw("DATE_FORMAT($field, '%b %d, %Y') as $alias");
+    }
+
+    /**
+     * Formats a sql date into "%h %i, %p"
+     * which means 12-hour time with AM/PM
+     * 
+     * By default, it formats the created_at field without the seconds 
+     * and gives it an alias 'time'
+     */
+    public static function time_format_hip($field = 'created_at', $alias = 'time', $includeSeconds = false)
+    {
+        $secs = ":%s";
+
+        if (!$includeSeconds)
+            $secs = '';
+
+        return DB::raw("DATE_FORMAT($field, '%h:%i$secs %p') as $alias");
+    }
+
+    /**
+     * Returns the time duration in HH:MM:SS format.
+     * Expects the duration parameter as a float.
+     */
+    public static function durationToTimeString(float $duration)
+    {
+        // tell if zero duration |> '00:00:00'
+        // if ($duration == 0)
+        //     return null;
+        
+        $hours   = floor($duration);
+        $minutes = floor(($duration - $hours) * 60);
+        $seconds = floor((($duration - $hours) * 60 - $minutes) * 60);
+    
+        // Pad the values with leading zeros if they are less than 10
+        $hours   = str_pad($hours,   2, '0', STR_PAD_LEFT);
+        $minutes = str_pad($minutes, 2, '0', STR_PAD_LEFT);
+        $seconds = str_pad($seconds, 2, '0', STR_PAD_LEFT);
+    
+        // Return the formatted time
+        return "{$hours}:{$minutes}:{$seconds}";
+    }
+
+    /**
+     * Convert the time string back to duration
+     */
+    public static function timeStringToDuration(string $timeString)
+    {
+        // Split the time string into hours, minutes, and seconds
+        $parts = explode(':', $timeString);
+
+        $hours   = intval($parts[0]);
+        $minutes = intval($parts[1]);
+        $seconds = intval($parts[2]);
+
+        // Format the duration
+        $result = '';
+        if ($hours > 0)
+            $result .= $hours . 'Hr' . ($hours > 1 ? 's' : '') . ' ';
+
+        if ($minutes > 0)
+            $result .= $minutes . 'min' . ($minutes > 1 ? 's' : '') . ' ';
+
+        if ($seconds > 0)
+            $result .= $seconds . 'sec' . ($seconds > 1 ? 's' : '');
+
+        // Check if the result is still empty
+        if (empty($result)) {
+            $result = '0Hrs 0mins 0secs';
+        }
+
+        return trim($result);
     }
 }

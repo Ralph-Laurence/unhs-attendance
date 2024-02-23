@@ -29,14 +29,15 @@
                 <ul class="dropdown-menu" aria-labelledby="period-dropdown-button">
                     @foreach ($dtrPeriods as $label => $value)
                     <li>
-                        <a class="dropdown-item period-filter" data-dtr-period="{{ $value }}" role="button">{{ $label }}</a>
+                        <a class="dropdown-item period-filter" data-dtr-period="{{ $value }}" role="button">{{ $label
+                            }}</a>
                     </li>
                     @endforeach
                 </ul>
             </div>
             <button class="btn btn-primary flat-button shadow-0" id="export-button">
-                    <i class="fas fa-download"></i>
-                    <span class="ms-1">Export</span>
+                <i class="fas fa-download"></i>
+                <span class="ms-1">Export</span>
             </button>
         </div>
 
@@ -46,29 +47,56 @@
         </div>
 
         {{-- DATASET TABLE --}}
-        <table class="table table-striped table-sm w-100 dtr-dataset-table" 
-            data-employee-key="{{ $empKey }}"
-            data-src-default="{{ $routes['ajax_dtr_get_all'] }}"
-            data-export-target="{{ $routes['ajax_export_pdf'] }}">
+        <table class="table table-striped table-sm w-100 dataset-table" data-employee-key="{{ $empKey }}"
+            data-src-default="{{ $routes['ajax_dtr_get_all'] }}" data-export-target="{{ $routes['ajax_export_pdf'] }}">
             <thead class="user-select-none">
                 <tr class="borderx border-top">
-                    <th class="align-middle" rowspan="2" colspan="2">Day</th>
+                    <th class="align-middle text-center" rowspan="2" colspan="2">Day</th>
                     <th class="py-0 th-h30 text-center border-start" colspan="2">AM</th>
                     <th class="py-0 th-h30 text-center border-start border-end" colspan="2">PM</th>
-                    <th class="align-middle" rowspan="2">Duration</th>
-                    <th class="align-middle" rowspan="2">Late</th>
-                    <th class="align-middle" rowspan="2">Undertime</th>
-                    <th class="align-middle" rowspan="2">Overtime</th>
-                    <th class="align-middle" rowspan="2">Status</th>
+                    <th class="align-middle text-center" rowspan="2">Duration</th>
+                    <th class="align-middle text-center v-stripe-accent border-start border-end" rowspan="2">Late</th>
+                    <th class="align-middle text-center" rowspan="2">Undertime</th>
+                    <th class="align-middle text-center v-stripe-accent border-start border-end" rowspan="2">Overtime
+                    </th>
+                    <th class="align-middle text-center" rowspan="2">Status</th>
                 </tr>
                 <tr>
-                    <th class="py-0 th-h30 text-center border-start">In</th>
+                    <th class="py-0 th-h30 text-center border-start v-stripe-accent-green">In</th>
                     <th class="py-0 th-h30 text-center">Out</th>
                     <th class="py-0 th-h30 text-center border-start">In</th>
-                    <th class="py-0 th-h30 text-center border-end">Out</th>
+                    <th class="py-0 th-h30 text-center border-end v-stripe-accent-yellow">Out</th>
                 </tr>
             </thead>
             <tbody></tbody>
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th class="text-sm fw-bold">Hours Worked</th>
+                    <th class="text-sm fw-bold">Total Days Late</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th class="text-sm fw-bold th-work-hrs text-center bg-color-primary text-white"></th>
+                    <th class="text-sm fw-bold">0</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
