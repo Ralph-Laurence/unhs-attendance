@@ -34,7 +34,7 @@ class DailyTimeRecord extends Model
             'range_days' => $daysRange,
             'dataset'    => $dataset,
             'weekends'   => Extensions::getWeekendNumbersInRange($from, $to),
-            'statistics' => $this->sumDtrTimes($dataset)
+            'statistics' => $this->getStatistics($dataset)
         ];
     }
 
@@ -52,7 +52,7 @@ class DailyTimeRecord extends Model
             'range_days' => $monthRange['start'] ." - ". $monthRange['end'],
             'dataset'    => $dataset,
             'weekends'   => Extensions::getWeekendNumbersInRange($from, $to),
-            'statistics' => $this->sumDtrTimes($dataset)
+            'statistics' => $this->getStatistics($dataset)
         ];
     }
 
@@ -69,31 +69,46 @@ class DailyTimeRecord extends Model
             'range_days' => $daysRange,
             'dataset'    => $dataset,
             'weekends'   => Extensions::getWeekendNumbersInRange($from, $to),
-            'statistics' => $this->sumDtrTimes($dataset)
+            'statistics' => $this->getStatistics($dataset)
         ]; 
     }
 
     private function buildSelectQuery(int $employeeId, Carbon $from, Carbon $to) // : Builder
     {
         $seriesAlias    = 'dateseries';
-
-        // Set the default status as Absent when null
         $col_status     = Attendance::f_Status;
-        $statusCoalesce = Attendance::STATUS_ABSENT;
+        $statusPresent  = Attendance::STATUS_PRESENT;
+        $statusBreak    = Attendance::STATUS_BREAK;
+
+        $tbl_attendance = Attendance::getTableName() . ' as a';
+        $tbl_leave_reqs = LeaveRequest::getTableName().' as l';
 
         $query = DB::table(Extensions::getDateSeriesRaw($from, $to, $seriesAlias))
-            ->leftJoin(Attendance::getTableName(), function($join) use($seriesAlias, $employeeId)
+            // The attendances
+            ->leftJoin($tbl_attendance, function($join) use($seriesAlias, $employeeId)
             {
                 $join->on(DB::raw("DATE($seriesAlias.date)"), '=', DB::raw('DATE(created_at)'));
-                $join->on(Attendance::f_Emp_FK_ID,            '=', DB::raw("$employeeId"));
+                $join->on('a.'.Attendance::f_Emp_FK_ID,       '=', DB::raw("$employeeId"));
             })
+            // Include his leave requests
+            ->leftJoin($tbl_leave_reqs, function($join) use($seriesAlias, $employeeId)
+            {
+                $join->on(DB::raw("DATE($seriesAlias.date)"),  '>=', LeaveRequest::f_StartDate);
+                $join->on(DB::raw("DATE($seriesAlias.date)"),  '<=', LeaveRequest::f_EndDate);
+                $join->on('l.'.LeaveRequest::f_Emp_FK_ID,      '=',  DB::raw("$employeeId"));
+                $join->where('l.'.LeaveRequest::f_LeaveStatus, '=',  LeaveRequest::LEAVE_STATUS_APPROVED);
+            })
+            // Set the default status as Absent ('x') when null
             ->select([
                 DB::raw("EXTRACT(DAY FROM $seriesAlias.date)      AS day_number"),
                 DB::raw("DATE_FORMAT($seriesAlias.date, '%a')     AS day_name"),
-                //DB::raw("COALESCE($col_status, '$statusCoalesce') AS status"),
                 DB::raw("CASE
-                    WHEN DATE_FORMAT($seriesAlias.date, '%w') IN (0, 6) THEN 'Rest'
-                    ELSE COALESCE($col_status, '$statusCoalesce')
+                    WHEN DATE_FORMAT($seriesAlias.date, '%w') IN (0, 6) THEN 'r'
+                    WHEN $seriesAlias.date > CURDATE() THEN NULL
+                    WHEN $col_status = '$statusPresent' THEN 'p'
+                    WHEN $col_status = '$statusBreak'   THEN 'b'
+                    WHEN l.id IS NOT NULL THEN 'l'
+                    ELSE COALESCE($col_status, 'x')
                 END AS status"),
 
                 $this->toShortTimeRaw(Attendance::f_TimeIn,     'am_in'),
@@ -101,15 +116,22 @@ class DailyTimeRecord extends Model
                 $this->toShortTimeRaw(Attendance::f_LunchEnd,   'pm_in'),
                 $this->toShortTimeRaw(Attendance::f_TimeOut,    'pm_out'),
 
-                Attendance::f_Duration . ' as duration_raw',    // unformatted duration string
+                // Unformatted duration strings
+                'a.' . Attendance::f_Duration  . ' as duration_raw',
+                'a.' . Attendance::f_OverTime  . ' as overtime_raw',
+                'a.' . Attendance::f_UnderTime . ' as undertime_raw',
+                'a.' . Attendance::f_Late      . ' as late_raw',
 
-                Attendance::timeStringToDurationRaw(Attendance::f_Duration , null),
-                Attendance::timeStringToDurationRaw(Attendance::f_Late     , null, 'late'),
-                Attendance::timeStringToDurationRaw(Attendance::f_UnderTime, null, 'undertime'),
-                Attendance::timeStringToDurationRaw(Attendance::f_OverTime , null, 'overtime'),
-                'created_at',
-            ]);
-        //error_log($query->toSql());
+                // Formatted duration strings
+                Attendance::timeStringToDurationRaw(Attendance::f_Duration , 'a'),
+                Attendance::timeStringToDurationRaw(Attendance::f_Late     , 'a', 'late'),
+                Attendance::timeStringToDurationRaw(Attendance::f_UnderTime, 'a', 'undertime'),
+                Attendance::timeStringToDurationRaw(Attendance::f_OverTime , 'a', 'overtime'),
+                'a.created_at',
+            ])
+            // Order the final result by date series in ascending
+            ->orderBy(DB::raw("DATE($seriesAlias.date)"), 'asc');
+        // error_log($query->toSql());
         return $query;
     }
 
@@ -121,47 +143,104 @@ class DailyTimeRecord extends Model
         return DB::raw($sql);
     }
 
-    private function sumDtrTimes(array $dataset) : array//, array $times) 
+    //private function includeLeaveRequests($empid)
+
+    private function getStatistics(array $dataset) : array
     {
-        $totalWorkHrs = Carbon::createFromTime(0, 0, 0);
+        $totalWorkHrs   = Carbon::createFromTime(0, 0, 0);
+        $totalOvertime  = Carbon::createFromTime(0, 0, 0);
+        $totalUndertime = Carbon::createFromTime(0, 0, 0);
+        $totalLateHrs   = Carbon::createFromTime(0, 0, 0);
+
+        $totalPresent   = 0;
+        $totalAbsent    = 0;
+        $leaveCount     = 0;
     
-        foreach($dataset as $data)
+        foreach($dataset as $data) 
         {
-            if (empty($data->duration_raw))
-                continue;
-            
-            // Create a Carbon instance from the time string
-            $workHrs = Carbon::createFromFormat('H:i:s', $data->duration_raw);
+            if (!empty($data->duration_raw)) 
+            {
+                $workHrs = Carbon::createFromFormat('H:i:s', $data->duration_raw);
 
-            $totalWorkHrs->addHours($workHrs->hour)
-                         ->addMinutes($workHrs->minute)
-                         ->addSeconds($workHrs->second);
-        }
+                $totalWorkHrs->addHours($workHrs->hour)
+                    ->addMinutes($workHrs->minute)
+                    ->addSeconds($workHrs->second);
+            }
 
-        $str_total_work_hrs = '';
+            if (!empty($data->overtime_raw))
+            {
+                $overtime = Carbon::createFromFormat('H:i:s', $data->overtime_raw);
 
-        if ($totalWorkHrs->hour > 0) {
-            $str_total_work_hrs = $totalWorkHrs->format('G\\h i\\m');  // Outputs like '4h 31m'
-        } else {
-            $str_total_work_hrs = $totalWorkHrs->format('i\\m s\\s');  // Outputs like '31m 24s'
+                $totalOvertime->addHours($overtime->hour)
+                        ->addMinutes($overtime->minute)
+                        ->addSeconds($overtime->second);
+            }
+
+            if (!empty($data->undertime_raw))
+            {
+                $undertime = Carbon::createFromFormat('H:i:s', $data->undertime_raw);
+
+                $totalUndertime->addHours($undertime->hour)
+                        ->addMinutes($undertime->minute)
+                        ->addSeconds($undertime->second);
+            }
+
+            if (!empty($data->late_raw))
+            {
+                $late = Carbon::createFromFormat('H:i:s', $data->late_raw);
+
+                $totalLateHrs->addHours($late->hour)
+                    ->addMinutes($late->minute)
+                    ->addSeconds($late->second);
+            }
+
+            if (!empty($data->status))
+            {
+                switch ($data->status)
+                {
+                    case 'p': // Attendance::STATUS_PRESENT:
+                        $totalPresent++;
+                        break;
+
+                    case 'x': // Attendance::STATUS_ABSENT:
+                        $totalAbsent++;
+                        break;
+
+                    case 'l': //Employee::ON_STATUS_LEAVE:
+                        $leaveCount++;
+                        break;
+                }
+            }
         }
 
         return [
-            'totalWorkHrs' => $str_total_work_hrs
-        ];
+            'totalWorkHrs'      => $this->formatTimeDuration($totalWorkHrs),
+            'totalLateHrs'      => $this->formatTimeDuration($totalLateHrs),
+            'totalOvertime'     => $this->formatTimeDuration($totalOvertime),
+            'totalUndertime'    => $this->formatTimeDuration($totalUndertime),
+            'totalPresent'      => $totalPresent,
+            'totalAbsent'       => $totalAbsent,
+            'leaveCount'        => $leaveCount,
 
-        // foreach ($times as $time) 
-        // {
-        //     // Create a Carbon instance from the time string
-        //     $timeInstance = Carbon::createFromFormat('H:i:s', $time);
-            
-        //     // Add the time to the total duration
-        //     $total->addHours($timeInstance->hour)
-        //                   ->addMinutes($timeInstance->minute)
-        //                   ->addSeconds($timeInstance->second);
-        // }
-    
-        // // Format the total duration as a time string and return it
-        // return $total->format('H:i:s');
+            // Will be used in frontend for additional styling 
+            // of the 'status' field
+            'statusMap' => [
+                'x' => ['style' => 'status-absent'  , 'label' => Attendance::STATUS_ABSENT  ],
+                'r' => ['style' => 'status-rest'    , 'label' => Attendance::STATUS_REST    ],
+                'p' => ['style' => 'status-present' , 'label' => Attendance::STATUS_PRESENT ],
+                'b' => ['style' => 'status-break'   , 'label' => Attendance::STATUS_BREAK   ],
+                'l' => ['style' => 'status-leave'   , 'label' => Employee::ON_STATUS_LEAVE  ]
+            ]
+        ];
+    }
+
+    private function formatTimeDuration(Carbon $time) 
+    {
+        // Outputs like '4h 31m'
+        if ($time->hour > 0)
+            return $time->format('G\\h i\\m');
+
+        // Outputs like '31m 24s'
+        return $time->format('i\\m s\\s');
     }
 }

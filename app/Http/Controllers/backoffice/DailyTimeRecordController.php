@@ -111,16 +111,19 @@ class DailyTimeRecordController extends Controller
             ]);
         }
         catch (ModelNotFoundException $ex) {
+            error_log($ex->getMessage());
             // When no records of dtr or employee were found
             return Extensions::encodeFailMessage(Messages::READ_FAIL_INEXISTENT);
         }
         catch (ItemNotFoundException $ex) {
+            error_log($ex->getMessage());
             // The filter supplied for the date periods is not present or not allowed
             return Extensions::encodeFailMessage(Messages::DTR_PERIOD_UNRECOGNIZED);
         }
         catch (Exception $ex) {
+            error_log($ex->getMessage());
             // Handle general error
-            return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);;
+            return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
         }
     }
 

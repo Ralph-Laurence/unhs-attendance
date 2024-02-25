@@ -6,6 +6,8 @@ let range;
 let exportPdfTarget = undefined;
 let employeeKey = undefined;
 
+let today;
+
 $(document).ready(function() 
 {
     initialize();
@@ -16,6 +18,8 @@ $(document).ready(function()
 //
 function initialize()
 {
+    today = getCurrentDateParts().day;
+
     csrfToken   = $('meta[name="csrf-token"]').attr('content');
     employeeKey = $(dtr_datasetTable).data('employee-key');
 
@@ -50,16 +54,21 @@ function bindTableDataSource(newRange)
     let url = $(dtr_datasetTable).data('src-default');
 
     let weekendDays = [];
+    let statusMap = {};
 
     var onRenderDefaultContent = function(data, type, row) 
     {
-        if(row.day_number && weekendDays.includes(row.day_number))
-            return `<span class="text-sm opacity-65">Rest Day</span>`;
- 
-        if (data)
-            return data;
+        if (row)
+        {
+            if (row.day_number && weekendDays.includes(row.day_number))
+                return `<span class="text-sm opacity-65">Rest Day</span>`;
+            
+            // Dont put 'x' mark on future days but only on past days wiht no 'am_in'
+            if (!row.am_in && row.day_number < today)
+                return `<span class="text-danger">${'\u00d7'}</span>`;
+        }
 
-        return `<span class="text-danger">${'\u00d7'}</span>`;
+        return data;
     };
 
     let options = {
@@ -91,8 +100,16 @@ function bindTableDataSource(newRange)
                 if (json.statistics)
                 {
                     let stats = json.statistics;
-
+                    
                     $('.th-work-hrs').text(stats.totalWorkHrs);
+                    $('.th-undertime-hrs').text(stats.totalUndertime);
+                    $('.th-overtime-hrs').text(stats.totalOvertime);
+                    $('.th-late-hrs').text(stats.totalLateHrs);
+                    $('.th-total-present').text(stats.totalPresent);
+                    $('.th-total-absent').text(stats.totalAbsent);
+                    $('.th-leave-count').text(stats.leaveCount);
+
+                    statusMap = stats.statusMap;
                 }
 
                 return json.data;
@@ -200,6 +217,15 @@ function bindTableDataSource(newRange)
                 className: 'status td-100 text-center',
                 data: 'status', 
                 defaultContent: '',
+                render: function(data, type, row)
+                {
+                    if (!statusMap || (statusMap && !statusMap[data]))
+                        return data;
+
+                    let status = statusMap[data];
+
+                    return `<span class="dtr-status ${status.style} px-2 py-1 rounded-2">${status.label}</span>`;
+                }
             },
         ]
     };

@@ -36,6 +36,7 @@ class Attendance extends Model
     public const STATUS_BREAK   = 'Lunch';
     public const STATUS_ABSENT  = 'Absent';
     public const STATUS_LATE    = 'Late';
+    public const STATUS_REST    = 'Rest';
     
     public const STATUS_UNDERTIME = 'Undertime';
     public const STATUS_OVERTIME  = 'Overtime';

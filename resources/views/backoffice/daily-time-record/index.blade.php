@@ -5,7 +5,7 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/main/backoffice/attendance-page.css') }}" />
+<link rel="stylesheet" href="{{ asset('css/main/backoffice/dtr-page.css') }}" />
 <link rel="stylesheet" href="{{ asset('css/main/shared/table-common-sizes.css') }}" />
 @endpush
 
@@ -72,29 +72,29 @@
             <tfoot>
                 <tr>
                     <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
+                    <th class="text-center">
+                        <span class="bg-success text-sm text-white rounded-2 px-2 py-1">Stats:</span>
+                    </th>
+                    <th class="text-sm text-center fw-bold" colspan="2">Days Present</th>
+                    <th class="text-sm text-center fw-bold" colspan="2">Days Absent</th>
                     <th class="text-sm fw-bold">Hours Worked</th>
-                    <th class="text-sm fw-bold">Total Days Late</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
+                    <th class="text-sm fw-bold">Total Hours</th>
+                    <th class="text-sm fw-bold">Total Hours</th>
+                    <th class="text-sm fw-bold">Total Hours</th>
+                    <th class="text-sm fw-bold">Leave Count</th>
                 </tr>
-                <tr>
+                <tr class="tr-statistics">
                     <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th class="text-sm fw-bold th-work-hrs text-center bg-color-primary text-white"></th>
-                    <th class="text-sm fw-bold">0</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
+                    <th class="text-center">
+                        <span class="bg-color-primary text-sm text-white rounded-2 px-2 py-1">Total:</span>
+                    </th>
+                    <th class="text-sm th-total-present text-center fw-bold" colspan="2">0</th>
+                    <th class="text-sm th-total-absent text-center fw-bold" colspan="2">0</th>
+                    <th class="text-sm th-work-hrs text-center bg-color-primary text-white"></th>
+                    <th class="text-sm th-late-hrs text-center fw-bold">0</th>
+                    <th class="text-sm th-undertime-hrs text-center fw-bold">0</th>
+                    <th class="text-sm th-overtime-hrs text-center fw-bold">0</th>
+                    <th class="text-sm th-leave-count text-center fw-bold">0</th>
                 </tr>
             </tfoot>
         </table>
