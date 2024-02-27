@@ -4,6 +4,10 @@ namespace App\Http\Utils;
 
 class RouteNames
 {
+    public const Dashboard = [
+        'index'     => 'backoffice.dashboard.index',
+    ];
+
     public const DailyTimeRecord = [
         'index'     => 'backoffice.attendance.dtr.index',
         'get'       => 'backoffice.attendance.dtr.get',

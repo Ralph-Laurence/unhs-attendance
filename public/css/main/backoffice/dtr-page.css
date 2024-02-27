@@ -4,7 +4,7 @@
 }
 
 .dtr-status.status-absent {
-    background-color: rgba(255, 38, 63, 0.2);
+    background-color: rgba(255, 38, 63, 0.14);
 }
 
 .dtr-status.status-absent::before {
@@ -15,7 +15,7 @@
 }
 
 .dtr-status.status-present {
-    background-color: rgb(31, 201, 164, 0.28);
+    background-color: rgb(31, 201, 164, 0.2);
 }
 
 .dtr-status.status-present::before {
@@ -26,7 +26,7 @@
 }
 
 .dtr-status.status-leave {
-    background-color: rgba(255, 170, 51, 0.28);
+    background-color: rgba(255, 170, 51, 0.2);
 }
 
 .dtr-status.status-leave::before {

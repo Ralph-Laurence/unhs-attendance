@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class LeaveRequest extends Model
+class LeaveRequest extends Model implements Auditable
 {
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
 
     public const f_Emp_FK_ID    = 'emp_fk_id';
     public const f_StartDate    = 'start_date';

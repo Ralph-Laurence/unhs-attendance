@@ -6,6 +6,7 @@ use App\Http\Utils\Extensions;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 class DailyTimeRecord extends Model
@@ -73,12 +74,13 @@ class DailyTimeRecord extends Model
         ]; 
     }
 
-    private function buildSelectQuery(int $employeeId, Carbon $from, Carbon $to) // : Builder
+    private function buildSelectQuery(int $employeeId, Carbon $from, Carbon $to) : Builder
     {
         $seriesAlias    = 'dateseries';
         $col_status     = Attendance::f_Status;
         $statusPresent  = Attendance::STATUS_PRESENT;
         $statusBreak    = Attendance::STATUS_BREAK;
+        $statusAbsent   = Attendance::STATUS_ABSENT;
 
         $tbl_attendance = Attendance::getTableName() . ' as a';
         $tbl_leave_reqs = LeaveRequest::getTableName().' as l';
@@ -107,6 +109,7 @@ class DailyTimeRecord extends Model
                     WHEN $seriesAlias.date > CURDATE() THEN NULL
                     WHEN $col_status = '$statusPresent' THEN 'p'
                     WHEN $col_status = '$statusBreak'   THEN 'b'
+                    WHEN $col_status = '$statusAbsent'  THEN 'x'
                     WHEN l.id IS NOT NULL THEN 'l'
                     ELSE COALESCE($col_status, 'x')
                 END AS status"),
@@ -131,13 +134,17 @@ class DailyTimeRecord extends Model
             ])
             // Order the final result by date series in ascending
             ->orderBy(DB::raw("DATE($seriesAlias.date)"), 'asc');
-        // error_log($query->toSql());
+        error_log($query->toSql());
         return $query;
     }
 
-    private function toShortTimeRaw($time, $as = 'time')
+    private function toShortTimeRaw($time, $as = 'time', $includeMeridiem = true)
     {
         $format = "%l:%i %p";
+
+        if ($includeMeridiem === false)
+            $format = "%l:%i";
+
         $sql = "DATE_FORMAT($time, '$format') as $as";
 
         return DB::raw($sql);
@@ -242,5 +249,88 @@ class DailyTimeRecord extends Model
 
         // Outputs like '31m 24s'
         return $time->format('i\\m s\\s');
+    }
+
+    public function printTest($id)
+    {
+        $from = Carbon::now()->startOfMonth();
+        $to   = Carbon::now()->endOfMonth();
+
+        $adapter = $this->queryDtrForPrint($id, $from, $to)->get();
+
+        $totalUndertime = Carbon::createFromTime(0, 0, 0);
+
+        foreach($adapter as $data) 
+        {
+            if (!empty($data->undertime_raw))
+            {
+                $undertime = Carbon::createFromFormat('H:i:s', $data->undertime_raw);
+
+                $totalUndertime->addHours($undertime->hour)
+                        ->addMinutes($undertime->minute)
+                        ->addSeconds($undertime->second);
+            }
+        }
+
+        $undertime = 0;
+
+        if ($totalUndertime->hour > 0)
+            $undertime = $totalUndertime->format('G\\h i\\m');
+        else
+        $undertime = $totalUndertime->format('i\\m');
+
+        return [
+            'dataset'   => $adapter,
+            'undertime' => $undertime
+        ];
+    }
+
+    private function queryDtrForPrint(int $employeeId, Carbon $from, Carbon $to) : Builder
+    {
+        $seriesAlias    = 'dateseries';
+        $tbl_attendance = Attendance::getTableName() . ' as a';
+        $tbl_leave_reqs = LeaveRequest::getTableName().' as l';
+
+        $col_undertime  = Attendance::f_UnderTime;
+        $statusLeave    = Employee::ON_STATUS_LEAVE;
+
+        $query = DB::table(Extensions::getDateSeriesRaw($from, $to, $seriesAlias))
+            // The attendances
+            ->leftJoin($tbl_attendance, function($join) use($seriesAlias, $employeeId)
+            {
+                $join->on(DB::raw("DATE($seriesAlias.date)"), '=', DB::raw('DATE(created_at)'));
+                $join->on('a.'.Attendance::f_Emp_FK_ID,       '=', DB::raw("$employeeId"));
+            })
+            // Include his leave requests
+            ->leftJoin($tbl_leave_reqs, function($join) use($seriesAlias, $employeeId)
+            {
+                $join->on(DB::raw("DATE($seriesAlias.date)"),  '>=', LeaveRequest::f_StartDate);
+                $join->on(DB::raw("DATE($seriesAlias.date)"),  '<=', LeaveRequest::f_EndDate);
+                $join->on('l.'.LeaveRequest::f_Emp_FK_ID,      '=',  DB::raw("$employeeId"));
+                $join->where('l.'.LeaveRequest::f_LeaveStatus, '=',  LeaveRequest::LEAVE_STATUS_APPROVED);
+            })
+        
+            ->select([
+                DB::raw("EXTRACT(DAY FROM $seriesAlias.date) AS day_number"),
+
+                DB::raw("CASE
+                    WHEN DAYOFWEEK($seriesAlias.date) IN (1, 7) THEN DATE_FORMAT($seriesAlias.date, '%a')
+                    WHEN l.id IS NOT NULL THEN '$statusLeave'
+                    ELSE DATE_FORMAT(" . Attendance::f_TimeIn . ", '%l:%i')
+                END as am_in"),
+
+                'a.' . Attendance::f_UnderTime . ' as undertime_raw',
+
+                $this->toShortTimeRaw(Attendance::f_LunchStart  , 'am_out'  ,  false),
+                $this->toShortTimeRaw(Attendance::f_LunchEnd    , 'pm_in'   ,  false),
+                $this->toShortTimeRaw(Attendance::f_TimeOut     , 'pm_out'  ,  false),
+
+                DB::raw("CONCAT(HOUR(a.$col_undertime), 'h')   AS undertime_hours"),
+                DB::raw("CONCAT(MINUTE(a.$col_undertime), 'm') AS undertime_minutes")
+            ])
+            // Order the final result by date series in ascending
+            ->orderBy(DB::raw("DATE($seriesAlias.date)"), 'asc');
+
+        return $query;
     }
 }

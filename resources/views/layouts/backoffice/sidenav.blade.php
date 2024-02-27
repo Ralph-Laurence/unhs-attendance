@@ -3,12 +3,12 @@ use \App\Http\Utils\RouteNames;
 
 $routeItems = 
 [
-    ['wildcard' => '',      'icon' => 'fa-chart-pie',   'text' => 'Dashboard',      'target' => ''], //route(RouteNames::DASHBOARD['index'])
+    ['wildcard' => 'backoffice.dashboard',              'icon' => 'fa-chart-pie',           'text' => 'Dashboard',      'target' => route(RouteNames::Dashboard['index'])],
     ['wildcard' => 'backoffice.attendance',             'icon' => 'fa-calendar-check',      'text' => 'Attendance',     'target' => route(RouteNames::Attendance['index'])],
     ['wildcard' => 'backoffice.absence',                'icon' => 'fa-calendar-xmark',      'text' => 'Absence',        'target' => route(RouteNames::Absence['index']),     'menu_type' => 'sub'],
     ['wildcard' => 'backoffice.late',                   'icon' => 'fa-calendar-minus',      'text' => 'Late',           'target' => route(RouteNames::Late['index']),        'menu_type' => 'sub'],
     ['wildcard' => 'backoffice.leave',                  'icon' => 'fa-calendar-week',       'text' => 'Leave',          'target' => route(RouteNames::Leave['index']),       'menu_type' => 'sub'],
-    ['wildcard' => 'backoffice.attendance.tardiness',   'icon' => 'fa-qrcode',              'text' => 'Scanner',        'target' => route(RouteNames::Scanner['index']),     'menu_type' => 'sub'],
+    ['wildcard' => '',                                  'icon' => 'fa-qrcode',              'text' => 'Scanner',        'target' => route(RouteNames::Scanner['index']),     'menu_type' => 'sub'],
     ['wildcard' => 'backoffice.teachers',               'icon' => 'fa-person-chalkboard',   'text' => 'Faculty',        'target' => route(RouteNames::Teachers['index'])],
     ['wildcard' => 'backoffice.staff',                  'icon' => 'fa-people-carry-box',    'text' => 'Staff',          'target' => route(RouteNames::Staff['index'])],
     ['separator' => true],

@@ -5,6 +5,7 @@ use App\Http\Controllers\backoffice\AttendanceController;
 use App\Http\Controllers\backoffice\AuditTrailsController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
+use App\Http\Controllers\backoffice\DashboardController;
 use App\Http\Controllers\backoffice\EmployeeController;
 use App\Http\Controllers\backoffice\TeachersController;
 use App\Http\Controllers\backoffice\StaffController;
@@ -31,12 +32,20 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::controller(DashboardController::class)->middleware(['auth'])
+->group(function()
+{
+    Route::get('/backoffice/dashboard', 'index')->name(RouteNames::Dashboard['index']);
+});
+
 Route::controller(DailyTimeRecordController::class)->middleware(['auth'])
 ->group(function()
 {
     Route::post('/backoffice/dtr',             'index')          ->name(RouteNames::DailyTimeRecord['index']);
     Route::post('/backoffice/dtr/timerecords', 'getTimeRecords') ->name(RouteNames::DailyTimeRecord['get']);
     Route::post('/backoffice/dtr/export/pdf',  'exportPdf')      ->name(RouteNames::DailyTimeRecord['exportPdf']);
+
+    Route::get('/printtest/{id}', 'printTest');
 });
 
 Route::controller(ScannerController::class)->group(function()

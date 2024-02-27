@@ -14,9 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
 use Hashids\Hashids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ItemNotFoundException;
@@ -24,15 +22,10 @@ use Illuminate\Support\ItemNotFoundException;
 class DailyTimeRecordController extends Controller
 {
     private $emp_hashids;
-    private $fullForm;
-    private $shortForm;
 
     public function __construct() 
     {
         $this->emp_hashids = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
-
-        $this->fullForm  = ['Hr', 'Mins', 'Secs'];
-        $this->shortForm = ['h', 'm', 's'];
     }
 
     // $filename = $request->input('filename');
@@ -111,17 +104,14 @@ class DailyTimeRecordController extends Controller
             ]);
         }
         catch (ModelNotFoundException $ex) {
-            error_log($ex->getMessage());
             // When no records of dtr or employee were found
             return Extensions::encodeFailMessage(Messages::READ_FAIL_INEXISTENT);
         }
         catch (ItemNotFoundException $ex) {
-            error_log($ex->getMessage());
             // The filter supplied for the date periods is not present or not allowed
             return Extensions::encodeFailMessage(Messages::DTR_PERIOD_UNRECOGNIZED);
         }
         catch (Exception $ex) {
-            error_log($ex->getMessage());
             // Handle general error
             return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
         }
@@ -129,74 +119,19 @@ class DailyTimeRecordController extends Controller
 
     public function exportPdf(Request $request)
     {
-        error_log(print_r($request->all(), true));
+       
+    }
 
-        $key = 0; 
-        $empId  = $this->decodeEmpKey($request, $key);
+    public function printTest($id)
+    {
+        $dtr = new DailyTimeRecord;
+        $adapter = $dtr->printTest($id);
 
-         if (empty($empId))
-            return null;
+        $statLeave = Employee::ON_STATUS_LEAVE;
 
-        $employee = $this->getEmployeeDetails($empId);
-
-        if (!$employee)
-            return null;
-
-        $trailsLayout = 'reports.employee-trail';
-
-        // Set a default value to select period if not provided
-        $selectRange = $request->input('range', DailyTimeRecord::PERIOD_CURRENT);
-
-        // Make sure that the select range is one of the allowed values.
-        // If not, set its default select period
-        if (!in_array($selectRange, DailyTimeRecord::PAYROLL_PERIODS, true))
-            $selectRange = DailyTimeRecord::PERIOD_CURRENT;
-
-        try
-        {
-            $raw = $this->findTimeRecords($empId, $selectRange);
-            $dataset = $raw['dataset'];
-
-            $this->beautifyTimePeriod($dataset);
-
-            $pdf = Pdf::loadView($trailsLayout, [
-                'dataSet'       => $dataset,
-                'stat_absent'   => Attendance::STATUS_ABSENT,
-                'unicode_x'     => json_decode('"\\u00d7"'),
-
-                'emp_name'      => implode(' ', [ $employee->fname, $employee->mname, $employee->lname ]),
-                'emp_id'        => $employee->idNo,
-                'dateRange'     => $raw['range_days'],
-
-                'pdf_banner_org_name'  => Constants::OrganizationName,
-                'pdf_banner_org_addr'  => Constants::OrganizationAddress,
-                'pdf_banner_logo_img'  => public_path('/images/internal/templates/pdf-banner-logo.jpg')
-            ]);
-            
-            // build a filename for the PDF
-            $range_as_fileName = array_flip(DailyTimeRecord::PAYROLL_PERIODS)[$selectRange];
-
-            $out_filename = "$range_as_fileName-" . date('Y-m-d_H-i-s') . '.pdf';
-            $temp_filename = "temp-$out_filename";
-            
-            $pdf->save(public_path('pdf') . "/$temp_filename");
-            $pdfPath = public_path("pdf/$temp_filename");
-            
-            $fileData = file_get_contents($pdfPath);
-            $base64FileData = base64_encode($fileData);
-            
-            // Delete the temporary file
-            unlink($pdfPath);
-
-            return json_encode([
-                'fileData' => $base64FileData,
-                'filename' => $out_filename
-            ]);
-        }
-        catch(Exception $ex)
-        {
-            return Extensions::encodeFailMessage('Failed to generate report.');
-        }
+        return view('reports.dtr-print')
+            ->with('adapter'   , $adapter)
+            ->with('statLeave' , $statLeave);
     }
 
     private function decodeEmpKey(Request $request, &$out_raw_key = null) 
@@ -235,37 +170,5 @@ class DailyTimeRecordController extends Controller
             ->first();
 
         return $data;
-    }
-
-    
-    private function beautifyTimePeriod($dataset)
-    {
-        // Convert the time duration format.
-        // Replace the full form into shorter form
-        foreach ($dataset as &$data) 
-        {
-            $data->duration  = $this->formatDuration($data->duration);
-            $data->late      = $this->formatDuration($data->late);
-            $data->undertime = $this->formatDuration($data->undertime);
-            $data->overtime  = $this->formatDuration($data->overtime);
-        }
-
-        unset($data); // unset reference to last element
-    }
-
-     /**
-     * Fix the time duration formatting. 
-     * If an hour exists, remove its seconds.
-     * This applies to the duration, late, over and undertime
-     */
-    private function formatDuration($duration)
-    {
-        $duration = str_replace($this->fullForm, $this->shortForm, $duration);
-
-        if (strpos($duration, 'h') !== false) {
-            $parts = explode(' ', $duration);
-            $duration = $parts[0] . ' ' . $parts[1];
-        }
-        return $duration;
     }
 }
