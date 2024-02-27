@@ -57,7 +57,7 @@
             </div>
 
             {{-- ADD BUTTON --}}
-            {{-- <div class="dropdown">
+            <div class="dropdown">
                 <button class="btn btn-primary flat-button dropdown-toggle shadow-0" id="add-record-dropdown-button"
                     data-mdb-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-plus"></i>
@@ -71,7 +71,7 @@
                     </li>
                     <li><a class="dropdown-item" href="#">Import Sheet</a></li>
                 </ul>
-            </div> --}}
+            </div>
         </div>
 
         {{-- DATASET TABLE --}}
