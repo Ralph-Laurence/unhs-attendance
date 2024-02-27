@@ -14,9 +14,9 @@ $routeItems =
     ['separator' => true],
     ['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-shield',              'text' => 'Administrator',  'target' => ''], // route(RouteNames::Staffs['index'])
     ['wildcard' => 'backoffice.audits',                 'icon' => 'fa-file-signature',      'text' => 'Audit Trails',   'target' => route(RouteNames::AuditTrails['index']), 'menu_type' => 'sub'],
-    ['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-bolt-lightning',      'text' => 'System Logs',    'target' => '', 'menu_type' => 'sub'],
+    //['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-bolt-lightning',      'text' => 'System Logs',    'target' => '', 'menu_type' => 'sub'],
     ['separator' => true],
-    ['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-gear',      'text' => 'Settings',       'target' => '',],
+    //['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-gear',      'text' => 'Settings',       'target' => '',],
 ];
 @endphp
 <div class="col sidenav shadow-4-strong user-select-none d-flex flex-column vh-100 px-0">

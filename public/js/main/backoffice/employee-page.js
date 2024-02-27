@@ -25,26 +25,18 @@ function initialize()
 //
 function handleEvents() 
 {
-    $(document).on('employeeFormUpdateSuccess', function (event, data, selectedRow) {
+    $(document).on('employeeFormUpdateSuccess', function (event, data, selectedRow) 
+    {
         
-        let row     = dataTable.row(selectedRow);
-        let rowData = row.data();
+        let dtRow   = dataTable.row(selectedRow);
+        let rowData = dtRow.data();
 
-        rowData.fname = data.fname;
-        rowData.mname = data.mname;
-        rowData.lname = data.lname;
+        dataTable.newRowInstance = dtRow;
 
-        // Update the row data
-        dataTable.row(row).data(rowData).invalidate().draw();
-
-        let rowNode = $(row.node());
-        rowNode.addClass('row-flash');
-
-        // Remove the class after the animation ends
-        rowNode.on('animationend', function ()
-        {
-            rowNode.removeClass('row-flash');
-        });
+        rowData.empname = [data.fname, data.mname, data.lname].join(' ');
+        
+        dtRow.data(rowData).invalidate().draw(false);
+        snackbar.showSuccess("Employee details successfully updated");
     });
 
     $(document).on('employeeFormInsertSuccess', function (event, data) 
@@ -153,6 +145,42 @@ function bindTableDataSource(url)
         'searching'    : false,
         'ordering'     : false,
         'bAutoWidth'   : false,
+        'drawCallback' : function (settings) 
+        {
+            if (dataTable && dataTable.newRowInstance)
+            {
+                if (!dataTable.newRowInstance.node())
+                    return;
+                console.warn('reached')
+                let rowNode = dataTable.newRowInstance.node();
+                scrollRowToView(rowNode, {
+                    'afterScroll': function () 
+                    {
+                        setTimeout(function () 
+                        {
+                            flashRow(rowNode, () => dataTable.newRowInstance = null);
+                        }, 800);
+                    }
+                });
+            }
+            // if (dataTable && 'newRowInstance' in dataTable && dataTable.newRowInstance !== null)
+            // {
+            //     
+            //     
+
+            //     
+                
+            //     
+            //     
+            //     
+            //     
+            //     
+            //     
+            //     
+            //     
+            //     
+            // }
+        },
         ajax: {
 
             url     : url,

@@ -22,7 +22,7 @@
                     <li>
                         <a class="dropdown-item btn-add-record"role="button">Create Manually</a>
                     </li>
-                    <li><a class="dropdown-item" href="#">Import Sheet</a></li>
+                    {{-- <li><a class="dropdown-item" href="#">Import Sheet</a></li> --}}
                 </ul>
             </div>
         </div>
