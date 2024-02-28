@@ -142,16 +142,16 @@
 
 <body>
     <div class="header-container">
-        @include('reports.dtr-header')
-        @include('reports.dtr-header')
+        @include('reports.dtr-header', ['monthOf' => $monthOf, 'empDetails' => $empDetails])
+        {{-- @include('reports.dtr-header', ['monthOf' => $monthOf, 'empDetails' => $empDetails]) --}}
     </div>
     <div class="table-container">
         @include('reports.dtr-table', ['adapter' => $adapter])
-        @include('reports.dtr-table', ['adapter' => $adapter])
+        {{-- @include('reports.dtr-table', ['adapter' => $adapter]) --}}
     </div>
     <div class="agreement-container">
         @include('reports.dtr-agreement')
-        @include('reports.dtr-agreement')
+        {{-- @include('reports.dtr-agreement') --}}
     </div>
 </body>
 

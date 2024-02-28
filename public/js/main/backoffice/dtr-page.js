@@ -6,8 +6,6 @@ let range;
 let exportPdfTarget = undefined;
 let employeeKey = undefined;
 
-let today;
-
 $(document).ready(function() 
 {
     initialize();
@@ -18,8 +16,6 @@ $(document).ready(function()
 //
 function initialize()
 {
-    today = getCurrentDateParts().day;
-
     csrfToken   = $('meta[name="csrf-token"]').attr('content');
     employeeKey = $(dtr_datasetTable).data('employee-key');
 
@@ -45,8 +41,6 @@ function handleEvents()
     });
 }
 
-var test = 'x';
-
 function bindTableDataSource(newRange)
 {
     range = newRange;
@@ -55,6 +49,8 @@ function bindTableDataSource(newRange)
 
     let weekendDays = [];
     let statusMap = {};
+
+    let today = getCurrentDateParts().day;
 
     var onRenderDefaultContent = function(data, type, row) 
     {
@@ -234,11 +230,7 @@ function bindTableDataSource(newRange)
     // reload its data source with given url instead
     if (dataTable != null)
     {
-        // dataTable.ajax.url(url);
-        // dataTable.ajax.data(postData);
-        // dataTable.ajax.load();
         dataTable.ajax.reload();
-
         return;
     }
     
@@ -258,10 +250,22 @@ function exportPdf(range)
         },
         success: function(response) 
         {
-            if (response)
+            if (!response)
             {
-                response = JSON.parse(response);
-            
+                alertModal.showDanger('The server was unable to generate the PDF report');
+                return;
+            }
+
+            response = JSON.parse(response);
+
+            if (response && response.code == -1)
+            {
+                alertModal.showDanger(response.message);
+                return;
+            }
+
+            if (response && response.code == 0)
+            {
                 var byteCharacters = atob(response.fileData);
                 var byteNumbers = new Array(byteCharacters.length);
                 for (var i = 0; i < byteCharacters.length; i++) {
@@ -274,10 +278,6 @@ function exportPdf(range)
                 link.href = window.URL.createObjectURL(blob);
                 link.download = response.filename;
                 link.click();
-            }
-            else
-            {
-                alertModal.showDanger('The server was unable to generate the PDF report');
             }
         },
         error: function(xhr, error, status) {

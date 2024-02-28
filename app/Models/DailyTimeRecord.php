@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Utils\Extensions;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -285,6 +286,40 @@ class DailyTimeRecord extends Model
         ];
     }
 
+    public function makePrintableData($employeeId) 
+    {
+        $from = Carbon::now()->startOfMonth();
+        $to   = Carbon::now()->endOfMonth();
+
+        $adapter = $this->queryDtrForPrint($employeeId, $from, $to)->get();
+
+        $totalUndertime = Carbon::createFromTime(0, 0, 0);
+
+        foreach($adapter as $data) 
+        {
+            if (!empty($data->undertime_raw))
+            {
+                $undertime = Carbon::createFromFormat('H:i:s', $data->undertime_raw);
+
+                $totalUndertime->addHours($undertime->hour)
+                        ->addMinutes($undertime->minute)
+                        ->addSeconds($undertime->second);
+            }
+        }
+
+        $undertime = 0;
+
+        if ($totalUndertime->hour > 0)
+            $undertime = $totalUndertime->format('G\\h i\\m');
+        else
+            $undertime = $totalUndertime->format('i\\m');
+
+        return [
+            'dataset'   => $adapter,
+            'undertime' => $undertime
+        ];
+    }
+
     private function queryDtrForPrint(int $employeeId, Carbon $from, Carbon $to) : Builder
     {
         $seriesAlias    = 'dateseries';
@@ -301,7 +336,7 @@ class DailyTimeRecord extends Model
                 $join->on(DB::raw("DATE($seriesAlias.date)"), '=', DB::raw('DATE(created_at)'));
                 $join->on('a.'.Attendance::f_Emp_FK_ID,       '=', DB::raw("$employeeId"));
             })
-            // Include his leave requests
+            // Include employee leave requests
             ->leftJoin($tbl_leave_reqs, function($join) use($seriesAlias, $employeeId)
             {
                 $join->on(DB::raw("DATE($seriesAlias.date)"),  '>=', LeaveRequest::f_StartDate);
@@ -309,7 +344,6 @@ class DailyTimeRecord extends Model
                 $join->on('l.'.LeaveRequest::f_Emp_FK_ID,      '=',  DB::raw("$employeeId"));
                 $join->where('l.'.LeaveRequest::f_LeaveStatus, '=',  LeaveRequest::LEAVE_STATUS_APPROVED);
             })
-        
             ->select([
                 DB::raw("EXTRACT(DAY FROM $seriesAlias.date) AS day_number"),
 

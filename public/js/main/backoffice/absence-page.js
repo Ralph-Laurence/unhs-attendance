@@ -44,14 +44,14 @@ function initialize()
 //
 function handleEvents() 
 {
-    dataTable.on('length.dt', function(e, settings, len)
-    {
-        alert('changed');
-    })
-    .on('dataSrc.dt', function(e, settings, len)
-    {
-        alert('data src changed');
-    });
+    // dataTable.on('length.dt', function(e, settings, len)
+    // {
+    //     alert('changed');
+    // })
+    // .on('dataSrc.dt', function(e, settings, len)
+    // {
+    //     alert('data src changed');
+    // });
 
     $(document).on('click', '.row-actions .btn-delete', function() 
     {

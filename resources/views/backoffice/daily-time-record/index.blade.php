@@ -29,8 +29,9 @@
                 <ul class="dropdown-menu" aria-labelledby="period-dropdown-button">
                     @foreach ($dtrPeriods as $label => $value)
                     <li>
-                        <a class="dropdown-item period-filter" data-dtr-period="{{ $value }}" role="button">{{ $label
-                            }}</a>
+                        <a class="dropdown-item period-filter" data-dtr-period="{{ $value }}" role="button">
+                            {{ $label}}
+                        </a>
                     </li>
                     @endforeach
                 </ul>

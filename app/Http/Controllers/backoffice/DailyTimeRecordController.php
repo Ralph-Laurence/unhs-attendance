@@ -119,7 +119,65 @@ class DailyTimeRecordController extends Controller
 
     public function exportPdf(Request $request)
     {
-       
+        $empId = $this->decodeEmpKey($request, $key);
+
+         if (empty($empId))
+            return null;
+
+        $empDetails = null;
+
+        // Get employee details first to make sure that he exists
+        try 
+        {
+            $empDetails = Employee::where('id', '=', $empId)
+            ->select([
+                Employee::getConcatNameDbRaw(''),
+                Employee::f_EmpNo . ' as empno'
+            ])
+            ->firstOrFail();
+        } 
+        catch (ModelNotFoundException $ex) {
+            error_log($ex->getMessage());
+            return Extensions::encodeFailMessage(Messages::READ_FAIL_INEXISTENT);
+        } catch (Exception $ex) {
+            error_log($ex->getMessage());
+            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
+        }
+
+        // Assume successful retrieving of data
+        $dtr = new DailyTimeRecord;
+        $adapter = $dtr->makePrintableData($empId);
+
+        $pdf = Pdf::loadView('reports.dtr-print', [
+            'adapter'    => $adapter,
+            'statLeave'  => Employee::ON_STATUS_LEAVE,
+            'empDetails' => $empDetails,
+            'monthOf'    => date('F Y')
+        ]);
+
+        // build a filename for the PDF
+        //$range_as_fileName = array_flip(DailyTimeRecord::PAYROLL_PERIODS)[$selectRange];
+
+        $out_filename = $empDetails->empname ."-". date('Y-m-d_H-i-s') . '.pdf';
+        $temp_filename = "temp-$out_filename";
+
+        $pdf->save(public_path('pdf') . "/$temp_filename");
+        $pdfPath = public_path("pdf/$temp_filename");
+
+        $fileData = file_get_contents($pdfPath);
+        $base64FileData = base64_encode($fileData);
+
+        // Delete the temporary file
+        unlink($pdfPath);
+
+        return Extensions::encodeSuccessMessage('success', [
+            'fileData' => $base64FileData,
+            'filename' => $out_filename
+        ]);
+        // return json_encode([
+        //     'fileData' => $base64FileData,
+        //     'filename' => $out_filename
+        // ]);
     }
 
     public function printTest($id)

@@ -34,6 +34,7 @@ function handleEvents()
         dataTable.newRowInstance = dtRow;
 
         rowData.empname = [data.fname, data.mname, data.lname].join(' ');
+        rowData.emp_num = data.emp_num;
         
         dtRow.data(rowData).invalidate().draw(false);
         snackbar.showSuccess("Employee details successfully updated");
@@ -163,23 +164,6 @@ function bindTableDataSource(url)
                     }
                 });
             }
-            // if (dataTable && 'newRowInstance' in dataTable && dataTable.newRowInstance !== null)
-            // {
-            //     
-            //     
-
-            //     
-                
-            //     
-            //     
-            //     
-            //     
-            //     
-            //     
-            //     
-            //     
-            //     
-            // }
         },
         ajax: {
 
