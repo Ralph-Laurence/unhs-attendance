@@ -86,7 +86,7 @@
                     <th>Time In</th>
                     <th>Time Out</th>
                     <th>Duration</th>
-                    <th>Actions</th>
+                    {{-- <th>Actions</th> --}}
                 </tr>
             </thead>
             <tbody>{{-- CONTENT WILL COME FROM AJAX SOURCE --}}</tbody>

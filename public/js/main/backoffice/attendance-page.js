@@ -272,15 +272,19 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
             },
 
             // Eighth Column -> Actions
-            {
-                data: null,
-                className: 'text-center',
-                width: '120px',
-                render: function(data, type, row) {
+            // {
+            //     data: null,
+            //     className: 'text-center',
+            //     width: '120px',
+            //     render: function(data, type, row) 
+            //     {
+            //         return createRowDeleteAction(data.id);
+            //     }
+            //     // render: function(data, type, row) {
                     
-                    return createRowActions(data.id);
-                }
-            }
+            //     //     return createRowActions(data.id);
+            //     // }
+            // }
         ]
     };
 
