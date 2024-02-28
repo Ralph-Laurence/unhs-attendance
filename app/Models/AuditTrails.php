@@ -42,12 +42,13 @@ class AuditTrails extends Model
         ]), [
             Extensions::date_format_bdY('a.created_at'),
             Extensions::time_format_hip('a.created_at'),
-            Employee::getConcatNameDbRaw('e')
+            DB::raw("CONCAT(e.firstname,' ',e.lastname) AS adminname")
+            // Employee::getConcatNameDbRaw('e')
         ]);
 
         $dataset = DB::table(self::getTableName() . ' as a')
                  ->select($fields)
-                 ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'. self::f_User_FK)
+                 ->leftJoin('users as e', 'e.id', '=', 'a.'. self::f_User_FK)
                  ->orderBy('a.created_at', 'DESC')
                  ->get();
                 

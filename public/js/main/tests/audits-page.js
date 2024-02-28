@@ -52,8 +52,8 @@ var auditsPage = (function ()
                     {
                         className: 'td-employee-name text-truncate',
                         width: '240px',
-                        data: 'empname',
-                        name: 'empname',
+                        data: 'adminname',
+                        name: 'adminname',
                         defaultContent: ''
                     },
                     {
