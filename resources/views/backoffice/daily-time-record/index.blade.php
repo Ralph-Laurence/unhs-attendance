@@ -36,10 +36,10 @@
                     @endforeach
                 </ul>
             </div>
-            <button class="btn btn-primary flat-button shadow-0" id="export-button">
+            {{-- <button class="btn btn-primary flat-button shadow-0" id="export-button">
                 <i class="fas fa-download"></i>
                 <span class="ms-1">Export</span>
-            </button>
+            </button> --}}
         </div>
 
         <div class="employee-trail-identity py-2">
