@@ -50,9 +50,7 @@ function handleEvents()
             var rowNode = dataTable.row.add({
 
                 emp_num       : data.emp_num,
-                fname         : data.fname,
-                mname         : data.mname,
-                lname         : data.lname,
+                empname       : data.empname,
                 emp_status    : data.emp_status,
                 total_lates   : data.total_lates,
                 total_leave   : data.total_leave,

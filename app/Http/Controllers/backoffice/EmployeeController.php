@@ -47,14 +47,16 @@ class EmployeeController extends Controller
 
             $rowData = [
                 'emp_num'       => $empNum,
-                'fname'         => $insertResults[Employee::f_FirstName],
-                'mname'         => $insertResults[Employee::f_MiddleName],
-                'lname'         => $insertResults[Employee::f_LastName],
                 'emp_status'    => $insertResults[Employee::f_Status],
                 'total_lates'   => 0,
                 'total_leave'   => 0,
                 'total_absents' => 0,
-                'id'            => $encodedId
+                'id'            => $encodedId,
+                'empname'       => implode(' ', [
+                    $insertResults[Employee::f_FirstName],
+                    $insertResults[Employee::f_MiddleName],
+                    $insertResults[Employee::f_LastName],
+                ])
             ];
 
             // To send the QR code into their email, we
@@ -76,7 +78,7 @@ class EmployeeController extends Controller
             if (!empty($email))
             {
                 $str_search  = ['#recipient#', '#pin#'];
-                $str_replace = [ $insertResults[Employee::f_FirstName], $insertResults[Employee::f_PINCode] ];
+                $str_replace = [ $insertResults[Employee::f_FirstName], $insertResults['rawPinCode'] ];
 
                 // Replace the #recipient# with firstname
                 $mailMessage = str_replace($str_search, $str_replace, Messages::EMAIL_REGISTER_EMPLOYEE);
@@ -127,6 +129,8 @@ class EmployeeController extends Controller
             $inputs['input-role']
         ];
 
+        $rawPinCode = random_int(1000, 9999);
+
         $data = [
             Employee::f_EmpNo       => $inputs['input-id-no'],
             Employee::f_FirstName   => $inputs['input-fname'],
@@ -136,7 +140,7 @@ class EmployeeController extends Controller
             Employee::f_Contact     => $inputs['input-contact'],
             Employee::f_Position    => $inputs['input-role'],
             Employee::f_Status      => Employee::ON_STATUS_DUTY,
-            Employee::f_PINCode     => encrypt(random_int(1000, 9999))       // 4-digit PIN
+            Employee::f_PINCode     => encrypt($rawPinCode)       // 4-digit PIN
         ];
 
         // Save the newly created employee into database
@@ -144,6 +148,8 @@ class EmployeeController extends Controller
         {
             return Employee::create($data);
         });
+
+        $insert->rawPinCode = $rawPinCode;
 
         return $insert;
     }
