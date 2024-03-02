@@ -14,6 +14,7 @@
     --accent-color:     #1FC9A4;
     --accent-bright:    #22DDB3;
     --warning-color:    #FFAC34;
+    --warning-light:    #F9D385;
 
     --special-dark-green: #38761D;
     --special-dark-warning: #664D03;
@@ -234,6 +235,10 @@ Dropdown Menu Overrides
     color: #B0B0B0;
 }
 
+.text-warning-light {
+    color: var(--warning-light);
+}
+
 /* Text Size Utilities */
 .text-sm {
     font-size: 12px;
@@ -326,7 +331,7 @@ Dropdown Menu Overrides
 ,td:nth-child(even) {
     
   } */
-table td {
+table:not(.table-unstyled) td {
     min-height: 40px;
     height: 40px;
 }
@@ -374,4 +379,9 @@ Sizing utils
 .h-190p {
     min-height: 190px;
     height: 190px;
+}
+
+.min-hw-20 {
+    min-width: 20px;
+    min-height: 20px;
 }

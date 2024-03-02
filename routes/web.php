@@ -44,8 +44,8 @@ Route::controller(DailyTimeRecordController::class)->middleware(['auth'])
     Route::post('/backoffice/dtr',             'index')          ->name(RouteNames::DailyTimeRecord['index']);
     Route::post('/backoffice/dtr/timerecords', 'getTimeRecords') ->name(RouteNames::DailyTimeRecord['get']);
     Route::post('/backoffice/dtr/export/pdf',  'exportPdf')      ->name(RouteNames::DailyTimeRecord['exportPdf']);
-
-    Route::get('/printtest/{id}', 'printTest');
+    
+    // Route::get('/printtest/{id}', 'printTest');
 });
 
 Route::controller(ScannerController::class)->group(function()

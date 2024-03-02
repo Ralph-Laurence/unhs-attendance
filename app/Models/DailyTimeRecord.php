@@ -14,26 +14,36 @@ class DailyTimeRecord extends Model
 {
     use HasFactory;
 
-    public const PERIOD_15TH_MONTH = 'fifteenth';
-    public const PERIOD_END_MONTH  = 'end_of_month';
-    public const PERIOD_CURRENT    = 'current_month';
+    public const PERIOD_15TH_MONTH   = 'f';
+    public const PERIOD_END_MONTH    = 'e';
+    public const PERIOD_CURRENT      = 'c';
+    public const PERIOD_OTHER_MONTH  = 'o';
 
-    public const PAYROLL_PERIODS   = [
-        '15th of Month' => self::PERIOD_15TH_MONTH,
-        'End of Month'  => self::PERIOD_END_MONTH,
-        'Current Month' => self::PERIOD_CURRENT   
+    private const STR_PERIOD_15TH_MONTH  = 'First Half';
+    private const STR_PERIOD_END_MONTH   = 'End Of Month';
+    public  const STR_PERIOD_CURRENT     = 'This Month';
+    private const STR_PERIOD_OTHER_MONTH = 'Other Months';
+
+    public const MONTH_PERIODS   = [
+        self::PERIOD_15TH_MONTH  => self::STR_PERIOD_15TH_MONTH,
+        self::PERIOD_END_MONTH   => self::STR_PERIOD_END_MONTH,
+        self::PERIOD_CURRENT     => self::STR_PERIOD_CURRENT,
+        self::PERIOD_OTHER_MONTH => self::STR_PERIOD_OTHER_MONTH,
     ];
 
     public function fromFirstHalfMonth($empId)
     {
         $from = Carbon::now()->startOfMonth();
-        $to   = Carbon::now()->startOfMonth()->addDays(14);
+        //$to   = Carbon::now()->startOfMonth()->addDays(15);
+        $to   = Carbon::now()->startOfMonth()->addDays(15)->subSecond();
+        // subSecond includes the last timestamp before the next day. 
+        // This ensures that the 15th day is always selected (i.e. 23:59:59)
 
         $dataset   = $this->buildSelectQuery($empId, $from, $to)->get()->toArray();
         $daysRange = Extensions::getPeriods($from, $to);
 
         return [
-            'range_days' => $daysRange,
+            'dtr_range'  => self::STR_PERIOD_15TH_MONTH." ($daysRange)",
             'dataset'    => $dataset,
             'weekends'   => Extensions::getWeekendNumbersInRange($from, $to),
             'statistics' => $this->getStatistics($dataset)
@@ -51,7 +61,7 @@ class DailyTimeRecord extends Model
         $monthRange = Extensions::getMonthDateRange($date->month, $date->year);
 
         return [
-            'range_days' => $monthRange['start'] ." - ". $monthRange['end'],
+            'dtr_range'  => self::STR_PERIOD_CURRENT.' ('. $monthRange['start'] ." - ". $monthRange['end'] .')',
             'dataset'    => $dataset,
             'weekends'   => Extensions::getWeekendNumbersInRange($from, $to),
             'statistics' => $this->getStatistics($dataset)
@@ -68,11 +78,27 @@ class DailyTimeRecord extends Model
         $daysRange = Extensions::getPeriods($from, $to);
 
         return [
-            'range_days' => $daysRange,
+            'dtr_range'  => self::STR_PERIOD_END_MONTH." ($daysRange)",
             'dataset'    => $dataset,
             'weekends'   => Extensions::getWeekendNumbersInRange($from, $to),
             'statistics' => $this->getStatistics($dataset)
         ]; 
+    }
+
+    public function fromOtherMonth($empId, $monthNumber)
+    {
+        $year = Carbon::now()->year; // Get the current year
+        $from = Carbon::create($year, $monthNumber, 1)->startOfMonth(); // Start of the specific month
+        $to   = Carbon::create($year, $monthNumber, 1)->endOfMonth();   // End of the specific month
+
+        $dataset = $this->buildSelectQuery($empId, $from, $to)->get()->toArray();
+
+        return [
+            'dtr_range'  => "Month of " . $from->format('F Y'),
+            'dataset'    => $dataset,
+            'weekends'   => Extensions::getWeekendNumbersInRange($from, $to),
+            'statistics' => $this->getStatistics($dataset)
+        ];
     }
 
     private function buildSelectQuery(int $employeeId, Carbon $from, Carbon $to) : Builder
@@ -135,7 +161,7 @@ class DailyTimeRecord extends Model
             ])
             // Order the final result by date series in ascending
             ->orderBy(DB::raw("DATE($seriesAlias.date)"), 'asc');
-        error_log($query->toSql());
+        
         return $query;
     }
 
@@ -252,45 +278,8 @@ class DailyTimeRecord extends Model
         return $time->format('i\\m s\\s');
     }
 
-    public function printTest($id)
+    public function makePrintableData($employeeId, $from, $to) 
     {
-        $from = Carbon::now()->startOfMonth();
-        $to   = Carbon::now()->endOfMonth();
-
-        $adapter = $this->queryDtrForPrint($id, $from, $to)->get();
-
-        $totalUndertime = Carbon::createFromTime(0, 0, 0);
-
-        foreach($adapter as $data) 
-        {
-            if (!empty($data->undertime_raw))
-            {
-                $undertime = Carbon::createFromFormat('H:i:s', $data->undertime_raw);
-
-                $totalUndertime->addHours($undertime->hour)
-                        ->addMinutes($undertime->minute)
-                        ->addSeconds($undertime->second);
-            }
-        }
-
-        $undertime = 0;
-
-        if ($totalUndertime->hour > 0)
-            $undertime = $totalUndertime->format('G\\h i\\m');
-        else
-        $undertime = $totalUndertime->format('i\\m');
-
-        return [
-            'dataset'   => $adapter,
-            'undertime' => $undertime
-        ];
-    }
-
-    public function makePrintableData($employeeId) 
-    {
-        $from = Carbon::now()->startOfMonth();
-        $to   = Carbon::now()->endOfMonth();
-
         $adapter = $this->queryDtrForPrint($employeeId, $from, $to)->get();
 
         $totalUndertime = Carbon::createFromTime(0, 0, 0);

@@ -99,34 +99,35 @@ class Extensions
         return $dates[0] .' - '. $dates[count($dates) -1 ];
     }
 
-    /** Return list of formatted dates in given range  */
-    // public static function getDatesInRange(Carbon $dateFrom, Carbon $dateTo, $outFormat = Constants::BasicTimeFormat)
+    // public static function getDateSeriesRaw(Carbon $from, Carbon $to, string $as = 'dates')
     // {
-    //     $period = new DatePeriod(
-    //         $dateFrom, 
-    //         new DateInterval('P1D'), 
-    //         $dateTo->add( new DateInterval('P1D') )
-    //     );
+    //     $sql = 
+    //     "(
+    //         WITH RECURSIVE dates AS 
+    //         (
+    //             SELECT DATE('$from') AS date
+    //             UNION ALL
+    //             SELECT DATE_ADD(date, INTERVAL 1 DAY)
+    //             FROM dates
+    //             WHERE DATE_ADD(date, INTERVAL 1 DAY) <= DATE('$to')
+    //         )
+    //         SELECT date FROM dates
+    //     ) as $as";
 
-    //     $dates = [];
-
-    //     foreach ($period as $p)
-    //     {
-    //         $dates[] = 
-    //     }
+    //     return DB::raw($sql);
     // }
 
     public static function getDateSeriesRaw(Carbon $from, Carbon $to, string $as = 'dates')
     {
-        $sql = 
+        $sql =
         "(
             WITH RECURSIVE dates AS 
             (
-                SELECT DATE('$from') AS date
+                SELECT '$from' AS date
                 UNION ALL
                 SELECT DATE_ADD(date, INTERVAL 1 DAY)
                 FROM dates
-                WHERE DATE_ADD(date, INTERVAL 1 DAY) <= DATE('$to')
+                WHERE DATE_ADD(date, INTERVAL 1 DAY) <= '$to'
             )
             SELECT date FROM dates
         ) as $as";

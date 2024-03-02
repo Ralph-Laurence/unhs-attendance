@@ -1,0 +1,41 @@
+.month-picker {
+    width: fit-content;
+}
+
+.month-picker .datepicker.datepicker-dropdown.dropdown-menu {
+    left: 0 !important;
+    min-width: 240px;
+    width: 240px;
+    top: initial !important;
+}
+
+.month-picker .btn-trigger {
+    text-align: left;
+    display: flex;
+    width: 100%;
+}
+
+.month-picker .btn-trigger::after {
+    font-family: var(--font-awesome);
+    content: '\f078';
+    margin-left: auto;
+    padding-left: 8px;
+}
+
+.month-picker .datepicker-months table.table-condensed {
+    width: 100%;
+}
+
+.month-picker .datepicker-months table.table-condensed thead {
+    display: none;
+}
+
+.month-picker .datepicker-months table.table-condensed tbody span.month.focused:not(.active) {
+    color: var(--primary-dark);
+    background-color: var(--primary-lighter);
+}
+
+.month-picker .datepicker-months table.table-condensed tbody span.month.focused.active {
+    color: white;
+    background-color: var(--primary-color);
+}

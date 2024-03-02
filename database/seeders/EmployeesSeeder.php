@@ -9,6 +9,15 @@ use Illuminate\Support\Facades\DB;
 
 class EmployeesSeeder extends Seeder
 {
+    private function generatePin($common = false) {
+
+        if ($common === true)
+        {
+            return encrypt('1234');
+        }
+
+        return encrypt(random_int(1000, 9999));
+    }
     /**
      * Run the database seeds.
      *

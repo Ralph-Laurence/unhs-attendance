@@ -44,15 +44,20 @@ class DailyTimeRecordController extends Controller
 
         $routes = [
             'ajax_dtr_get_all'  => route(RouteNames::DailyTimeRecord['get']),
-            'ajax_export_pdf'   => route(RouteNames::DailyTimeRecord['exportPdf'])
+            'ajax_export_pdf'   => route(RouteNames::DailyTimeRecord['exportPdf']),
         ];
 
         return view('backoffice.daily-time-record.index')
-            ->with('routes',     $routes)
-            ->with('empKey',     $key)
-            ->with('empName',    implode(' ', [ $empDetails->lname, ',', $empDetails->fname, $empDetails->mname, ]))
-            ->with('empIdNo',    $empDetails->idNo)
-            ->with('dtrPeriods', DailyTimeRecord::PAYROLL_PERIODS);
+            ->with('routes',        $routes)
+            ->with('empKey',        $key)
+            ->with('empName',       implode(' ', [ $empDetails->lname, ',', $empDetails->fname, $empDetails->mname, ]))
+            ->with('empIdNo',       $empDetails->idNo)
+            ->with('empRole',       Employee::RoleToString[$empDetails->role])
+            ->with('dtrPeriods',    DailyTimeRecord::MONTH_PERIODS)
+            ->with('rangeOther',    DailyTimeRecord::PERIOD_OTHER_MONTH)
+            
+            ->with('defaultRange_Label', DailyTimeRecord::STR_PERIOD_CURRENT)
+            ->with('defaultRange_Value', DailyTimeRecord::PERIOD_CURRENT);
     }
 
     public function getTimeRecords(Request $request)
@@ -67,8 +72,10 @@ class DailyTimeRecordController extends Controller
 
         // Make sure that the select range is one of the allowed values.
         // If not, set its default select period
-        if (!in_array($selectRange, DailyTimeRecord::PAYROLL_PERIODS, true))
+        if (!array_key_exists($selectRange, DailyTimeRecord::MONTH_PERIODS))
             return Extensions::encodeFailMessage(Messages::READ_FAIL_INCOMPLETE);
+        
+        $otherMonth = $request->input('month', null);
 
         try
         {
@@ -77,16 +84,24 @@ class DailyTimeRecordController extends Controller
 
             $filters = [
                 // Get attendances of Current month
-                DailyTimeRecord::PERIOD_CURRENT => function() use($empId, $dtr, &$raw) {
+                DailyTimeRecord::PERIOD_CURRENT     => function() use($empId, $dtr, &$raw) {
                     $raw = $dtr->fromCurrentMonth($empId);
                 },
                 // Get attendances in First-Half weeks of month
-                DailyTimeRecord::PERIOD_15TH_MONTH => function() use($empId, $dtr, &$raw) {
+                DailyTimeRecord::PERIOD_15TH_MONTH  => function() use($empId, $dtr, &$raw) {
                     $raw = $dtr->fromFirstHalfMonth($empId);
                 },
                 // Get attendances in Second-Half weeks of month
-                DailyTimeRecord::PERIOD_END_MONTH => function() use($empId, $dtr, &$raw) {
+                DailyTimeRecord::PERIOD_END_MONTH   => function() use($empId, $dtr, &$raw) {
                     $raw = $dtr->fromEndOfMonth($empId);
+                },
+                // Get attendances of Other Months
+                DailyTimeRecord::PERIOD_OTHER_MONTH => function() use($empId, $dtr, &$raw, $otherMonth) 
+                {
+                    if (is_null($otherMonth))
+                        throw new ItemNotFoundException('Filter is not found');
+
+                    $raw = $dtr->fromOtherMonth($empId, $otherMonth);
                 },
             ];
             
@@ -97,10 +112,10 @@ class DailyTimeRecordController extends Controller
                 throw new ItemNotFoundException('Filter is not found');
 
             return json_encode([
-                'data'          => $raw['dataset'],
-                'daysRange'     => $raw['range_days'],
-                'weekendDays'   => $raw['weekends'],
-                'statistics'    => $raw['statistics']
+                'data'        => $raw['dataset'],
+                'dtrRange'    => $raw['dtr_range'],
+                'weekendDays' => $raw['weekends'],
+                'statistics'  => $raw['statistics']
             ]);
         }
         catch (ModelNotFoundException $ex) {
@@ -112,6 +127,7 @@ class DailyTimeRecordController extends Controller
             return Extensions::encodeFailMessage(Messages::DTR_PERIOD_UNRECOGNIZED);
         }
         catch (Exception $ex) {
+            error_log($ex->getMessage());
             // Handle general error
             return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
         }
@@ -125,10 +141,31 @@ class DailyTimeRecordController extends Controller
             return null;
 
         $empDetails = null;
+        $from       = null;
+        $to         = null;
+        $monthOf    = null;
 
         // Get employee details first to make sure that he exists
         try 
         {
+            $monthNumber = $request->input('month', null);
+
+            if (!is_null($monthNumber))
+            {
+                $year = Carbon::now()->year; // Get the current year
+                $from = Carbon::create($year, $monthNumber, 1)->startOfMonth(); // Start of the specific month
+                $to   = Carbon::create($year, $monthNumber, 1)->endOfMonth();   // End of the specific month
+            }
+            else
+            {
+                $from = Carbon::now()->startOfMonth();
+                $to   = Carbon::now()->endOfMonth();
+            }
+
+            // Format the date to "F Y"
+            // We will use this to indicate the range of the printed DTR
+            $monthOf = $from->format('F Y');
+
             $empDetails = Employee::where('id', '=', $empId)
             ->select([
                 Employee::getConcatNameDbRaw(''),
@@ -146,50 +183,23 @@ class DailyTimeRecordController extends Controller
 
         // Assume successful retrieving of data
         $dtr = new DailyTimeRecord;
-        $adapter = $dtr->makePrintableData($empId);
+        $adapter = $dtr->makePrintableData($empId, $from, $to);
 
-        $pdf = Pdf::loadView('reports.dtr-print', [
-            'adapter'    => $adapter,
-            'statLeave'  => Employee::ON_STATUS_LEAVE,
-            'empDetails' => $empDetails,
-            'monthOf'    => date('F Y')
-        ]);
+        $thisMonth = Carbon::now()->format('m');
 
-        // build a filename for the PDF
-        //$range_as_fileName = array_flip(DailyTimeRecord::PAYROLL_PERIODS)[$selectRange];
-
-        $out_filename = $empDetails->empname ."-". date('Y-m-d_H-i-s') . '.pdf';
-        $temp_filename = "temp-$out_filename";
-
-        $pdf->save(public_path('pdf') . "/$temp_filename");
-        $pdfPath = public_path("pdf/$temp_filename");
-
-        $fileData = file_get_contents($pdfPath);
-        $base64FileData = base64_encode($fileData);
-
-        // Delete the temporary file
-        unlink($pdfPath);
+        // Will be used for indicators
+        $selectedDtrPeriod = ($thisMonth == $from->format('m')) 
+                           ? DailyTimeRecord::PERIOD_CURRENT 
+                           : $from->format('F Y');
 
         return Extensions::encodeSuccessMessage('success', [
-            'fileData' => $base64FileData,
-            'filename' => $out_filename
+            'dataset'    => $adapter['dataset'],
+            'undertime'  => $adapter['undertime'],
+            'statLeave'  => Employee::ON_STATUS_LEAVE,
+            'empDetails' => $empDetails,
+            'monthOf'    => $monthOf,
+            'dtrPeriod'  => $selectedDtrPeriod
         ]);
-        // return json_encode([
-        //     'fileData' => $base64FileData,
-        //     'filename' => $out_filename
-        // ]);
-    }
-
-    public function printTest($id)
-    {
-        $dtr = new DailyTimeRecord;
-        $adapter = $dtr->printTest($id);
-
-        $statLeave = Employee::ON_STATUS_LEAVE;
-
-        return view('reports.dtr-print')
-            ->with('adapter'   , $adapter)
-            ->with('statLeave' , $statLeave);
     }
 
     private function decodeEmpKey(Request $request, &$out_raw_key = null) 
@@ -223,6 +233,7 @@ class DailyTimeRecordController extends Controller
                 Employee::f_FirstName   . ' as fname',
                 Employee::f_MiddleName  . ' as mname',
                 Employee::f_LastName    . ' as lname',
+                Employee::f_Position    . ' as role',
                 Employee::f_EmpNo       . ' as idNo'
             ])
             ->first();

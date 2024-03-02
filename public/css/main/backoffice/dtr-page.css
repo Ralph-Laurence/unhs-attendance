@@ -1,10 +1,12 @@
 .dtr-status {
     font-size: 12px;
     font-weight: bold;
+    width: 100%;
+    display: inline-block;
 }
 
 .dtr-status.status-absent {
-    background-color: rgba(255, 38, 63, 0.14);
+    background-color: rgba(255, 38, 63, 0.1);
 }
 
 .dtr-status.status-absent::before {
@@ -37,7 +39,7 @@
 }
 
 .dtr-status.status-rest {
-    background-color: rgb(40, 30, 151, 0.12);
+    background-color: rgb(40, 30, 151, 0.1);
 }
 
 .dtr-status.status-rest::before {
@@ -57,4 +59,86 @@
     font-family: var(--font-awesome);
     content: '\f2e7';
     margin-right: 4px;
+}
+
+/* PRINTING */
+@page {
+    /* margin: 30px 20px 30px 20px !important; top right bottom left */
+    size: A4;
+    margin: 0 !important;
+}
+@media print {
+    html,
+    body {
+        width: 210mm;
+        height: 297mm;
+    }
+}
+.a4-page {
+    width: 210mm;
+    min-height: 297mm;
+    background-color: white;
+    font-family: Helvetica, Arial, sans-serif;
+}
+.table-wrapper table {
+    font-size: 13px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    text-align: center;
+    width: 100%;
+}
+.table-wrapper table,
+.table-wrapper th,
+.table-wrapper td {
+    border: 1px solid black;
+    text-align: center;
+}
+.table-wrapper table thead th,
+.table-wrapper table thead td {
+    min-height: 24px !important;
+    height: 24px !important;
+    max-height: 24px !important;
+}
+.table-wrapper table thead .th-day {
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+}
+.table-wrapper table thead .th-time {
+    width: 55px;
+    min-width: 55px;
+}
+.table-wrapper table thead .th-normal th {
+    font-weight: normal;
+}
+.agreement {
+    font-size: 12px;
+    line-height: 1.25;
+    font-weight: 600;
+    text-align: justify;
+    text-justify: inter-word;
+}
+.agreement-wrapper table {
+    width: 100%;
+    table-layout: fixed;
+}
+.doc-bullet-diams::before {
+    content: "\2756";
+    font-style: normal;
+}
+
+.dtr-periods.dropdown-menu {
+    min-width: 180px;
+}
+
+.dtr-periods .period-filter.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.dtr-periods .period-filter.active::after {
+    float: right;
+    content: '\f00c';
+    font-family: var(--font-awesome);
+    margin-left: 12px;
 }

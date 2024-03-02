@@ -21,38 +21,7 @@ class TestController extends Controller
 
     public function index()
     {
-        /**
-         * When you use with('relation') without has('relation'), it behaves like a SQL LEFT JOIN. 
-         * It retrieves all records from the first (or “left”) table, and the matched records from 
-         * the second (or “right”) table. If there is no match, the result is NULL on the right side.
-         * 
-         * When you chain "::has('relation')" into "::with('relation')", it behaves more like a 
-         * SQL INNER JOIN. It only retrieves records where there is a match in both tables.
-         * 
-         * The foreign key must also be included for this to work. In this case, we limit only the
-         * selection of necessary fields to reduce server stress.
-         */
-        $employees = Employee::whereHas('leave_requests', function($query)
-        {
-            $query->where(LeaveRequest::f_LeaveStatus, '=', LeaveRequest::LEAVE_STATUS_APPROVED);
-        })
-        ->with(['leave_requests' => function ($query) {
-            $query->select([
-                'id',
-                LeaveRequest::f_Emp_FK_ID,
-                LeaveRequest::f_StartDate,
-                LeaveRequest::f_EndDate,
-                LeaveRequest::f_LeaveStatus
-            ])
-            ->where(LeaveRequest::f_LeaveStatus, '=', LeaveRequest::LEAVE_STATUS_APPROVED);
-        }])
-        ->get();
-        
-
-        // Full LEFT JOIN:
-        // $employees = Employee::with('leave_requests')->get();
-
-        return view('tests.test')->with('employees', $employees);
+        return view('tests.test');
     }
 
     public function pinsamples()

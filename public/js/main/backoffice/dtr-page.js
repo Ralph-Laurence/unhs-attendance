@@ -1,10 +1,14 @@
 let dtr_datasetTable = '.dataset-table';
 let dataTable;
-let csrfToken;
+
 let range;
+let monthNumber;
 
 let exportPdfTarget = undefined;
-let employeeKey = undefined;
+let employeeKey     = undefined;
+let monthPicker;
+
+let periodDropdowns;
 
 $(document).ready(function() 
 {
@@ -16,10 +20,12 @@ $(document).ready(function()
 //
 function initialize()
 {
-    csrfToken   = $('meta[name="csrf-token"]').attr('content');
-    employeeKey = $(dtr_datasetTable).data('employee-key');
-
+    employeeKey     = $(dtr_datasetTable).data('employee-key');
     exportPdfTarget = $(dtr_datasetTable).data('export-target');
+
+    periodDropdowns = new mdb.Dropdown("#period-dropdown-button");
+
+    monthPicker     = to_monthpicker('#dtr-months');
 
     bindTableDataSource();
 }
@@ -32,23 +38,54 @@ function handleEvents()
     {
         range = $(this).data('dtr-period');
 
+        if (range == 'o')
+        {
+            $('#other-months-filter').show();
+            return;
+        }
+        else
+        {
+            periodDropdowns.hide();
+            monthPicker.reset();
+            
+            $('#other-months-filter').hide();
+        }
+        
         bindTableDataSource(range);
+
+        $('.dropdown-item.period-filter').removeClass('active');
+        $(this).addClass('active');
     });
 
-    $('#export-button').on('click', function()
-    {
-        exportPdf(range);
-    });
+    $('#export-button').on('click', () => exportPdf(monthNumber));
+
+    monthPicker.changed = (info) => {
+
+        periodDropdowns.hide();
+
+        if (range && info.monthNumber)
+        {
+            bindTableDataSource(range, info.monthNumber);
+
+            $('.dropdown-item.period-filter').removeClass('active');
+            $('.dropdown-item.period-filter[data-dtr-period="o"]').addClass('active');
+        }
+
+        monthNumber = info.monthNumber;
+    };
 }
 
-function bindTableDataSource(newRange)
+function bindTableDataSource(newRange, newMonthNumber)
 {
-    range = newRange;
+    disableControlButtons();
+
+    range       = newRange;
+    monthNumber = newMonthNumber;
 
     let url = $(dtr_datasetTable).data('src-default');
 
     let weekendDays = [];
-    let statusMap = {};
+    let statusMap   = {};
 
     let today = getCurrentDateParts().day;
 
@@ -73,22 +110,33 @@ function bindTableDataSource(newRange)
         'searching'    : false,
         'ordering'     : false,
         'bAutoWidth'   : false,
+        'drawCallback' : function(settings) 
+        {
+            enableControlButtons();
+        },
         ajax: {
 
-            url     : url,
-            type    : 'POST',
-            dataType: 'JSON',
-            data: function() {
+            url        : url,
+            type       : 'POST',
+            dataType   : 'JSON',
+            data : function() {
                 return {
-                    '_token': csrfToken,
-                    'employee-key': employeeKey,
-                    'range': range
+                    '_token'        : getCsrfToken(),
+                    'employee-key'  : employeeKey,
+                    'range'         : range,
+                    'month'         : monthNumber
                 };
             },
             dataSrc : function (json) 
             {
                 if (!json)
                     return;
+
+                if (json.code == -1)
+                {
+                    alertModal.showDanger(json.message);
+                    return
+                }
 
                 if (json.weekendDays && weekendDays.length < 1)
                     weekendDays = json.weekendDays;
@@ -107,6 +155,8 @@ function bindTableDataSource(newRange)
 
                     statusMap = stats.statusMap;
                 }
+
+                $('.lbl-dtr-period').text(json.dtrRange || 'Unknown (Reload Required)');
 
                 return json.data;
             },
@@ -238,17 +288,20 @@ function bindTableDataSource(newRange)
     dataTable = $(dtr_datasetTable).DataTable(options);
 }
 
-function exportPdf(range)
+function exportPdf(monthNumber)
 {
+    disableControlButtons();
+    updateExportStatus('Fetching data, please wait...');
+
     $.ajax({
-        type: 'POST',
-        url: exportPdfTarget,
-        data: {
-            'employee-key': employeeKey,
-            'range':        range,
-            '_token':       csrfToken
+        type : 'POST',
+        url  : exportPdfTarget,
+        data : {
+            '_token'        : getCsrfToken(),
+            'employee-key'  : employeeKey,
+            'month'         : monthNumber
         },
-        success: function(response) 
+        success: function (response) 
         {
             if (!response)
             {
@@ -258,30 +311,109 @@ function exportPdf(range)
 
             response = JSON.parse(response);
 
-            if (response && response.code == -1)
-            {
-                alertModal.showDanger(response.message);
-                return;
-            }
-
-            if (response && response.code == 0)
-            {
-                var byteCharacters = atob(response.fileData);
-                var byteNumbers = new Array(byteCharacters.length);
-                for (var i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-                var byteArray = new Uint8Array(byteNumbers);
-            
-                var blob = new Blob([byteArray], {type: "application/pdf"});
-                var link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = response.filename;
-                link.click();
-            }
+            if (response)
+                onPrintResponse(response);
         },
-        error: function(xhr, error, status) {
+        error: function (xhr, error, status)
+        {
+            enableControlButtons();
+            clearExportStatus();
             console.warn(xhr.responseText);
-        }
+        },
     });
+}
+
+function onPrintResponse(response)
+{
+    updateExportStatus('Preparing printable copy...');
+    let tbody = $('.print-dtr .printable-content table.dtr-summary tbody');
+
+    try
+    {
+        if (response.code == -1)
+        {
+            let error = new Error(response.message);
+            error.code = -1;
+
+            throw error;
+        }
+
+        if (response.code == 0)
+        {
+            tbody.empty();
+
+            for (let row of response.dataset)
+            {
+                let weekends = '';
+
+                if (row.am_in &&
+                    (typeof row.am_in === 'string' && row.am_in.toString().toLowerCase() == 'sat') ||
+                    (typeof row.am_in === 'string' && row.am_in.toString().toLowerCase() == 'sun'))
+                {
+                    weekends = 'text-danger';
+                }
+
+                let tr =
+                `<tr>
+                    <td class="${weekends}">${row.day_number || ''}</td>
+                    <td class="${weekends}">${row.am_in || ''}</td>
+                    <td>${row.am_out || ''}</td>
+                    <td>${row.pm_in || ''}</td>
+                    <td>${row.pm_out || ''}</td>
+                    <td>${row.undertime_hours || ''}</td>
+                    <td>${row.undertime_minutes || ''}</td>
+                </tr>`;
+
+                tbody.append(tr);
+            }
+            $('.dtr-empname').text(response.empDetails.empname || '');
+            $('.dtr-month-range .month-of').text(response.monthOf || '');
+            $('.print-dtr .printable-content table.dtr-summary .th-undertime').text(response.undertime || '');
+
+            $('.printable-content').show().printThis({
+
+                afterPrint: () =>
+                {
+                    clearExportStatus();
+                    $('.printable-content').hide();
+                    enableControlButtons();
+                }
+            });
+        }
+    }
+    catch (error) 
+    {
+        enableControlButtons();
+        clearExportStatus();
+ 
+        if (error.code)
+        {
+            alertModal.showDanger(error.message);
+            return;
+        }
+
+        alertModal.showDanger("The requested action can't be completed because an error has occurred. Please try again later.");
+    }
+}
+
+function enableControlButtons() 
+{
+    $('.control-button').prop('disabled', false);
+}
+
+function disableControlButtons()
+{
+    $('.control-button').prop('disabled', true);
+}
+
+function updateExportStatus(status) 
+{
+    $('.export-status').removeClass('d-none');
+    $('.export-status .status-text').text(status);
+}
+
+function clearExportStatus(status) 
+{
+    $('.export-status .status-text').text('');
+    $('.export-status').addClass('d-none');
 }
