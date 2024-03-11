@@ -388,7 +388,10 @@ var employeeDatatables = (function()
                     return;
                 }
 
-                globalEventBus.publish(GEV_LOAD_EDIT, response);
+                globalEventBus.publish(GEV_LOAD_EDIT, {
+                    'data' : response,
+                    'row'  : row
+                });
             },
             error: function(xhr, status, error) 
             {
@@ -437,9 +440,13 @@ var employeePage = (function()
 
         eventBus.subscribe(EV_UPDATED_EMP, (response) => {
 
+            //employeeDatatables.
+            snackbar.showSuccess(response.message);
         });
 
-        globalEventBus.subscribe(GEV_LOAD_EDIT, (response) => crudModal.fill(response.dataset));
+        globalEventBus.subscribe(GEV_LOAD_EDIT, (response) => {
+            crudModal.fill(response.data.dataset);
+        });
     }
 
     function __initModal() 
