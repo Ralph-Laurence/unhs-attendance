@@ -99,24 +99,6 @@ class Extensions
         return $dates[0] .' - '. $dates[count($dates) -1 ];
     }
 
-    // public static function getDateSeriesRaw(Carbon $from, Carbon $to, string $as = 'dates')
-    // {
-    //     $sql = 
-    //     "(
-    //         WITH RECURSIVE dates AS 
-    //         (
-    //             SELECT DATE('$from') AS date
-    //             UNION ALL
-    //             SELECT DATE_ADD(date, INTERVAL 1 DAY)
-    //             FROM dates
-    //             WHERE DATE_ADD(date, INTERVAL 1 DAY) <= DATE('$to')
-    //         )
-    //         SELECT date FROM dates
-    //     ) as $as";
-
-    //     return DB::raw($sql);
-    // }
-
     public static function getDateSeriesRaw(Carbon $from, Carbon $to, string $as = 'dates')
     {
         $sql =
@@ -149,8 +131,10 @@ class Extensions
         else
             $hashids = new Hashids();
         
-        foreach ($dataset as $data) {
-            $data->id = $hashids->encode($data->id);
+        foreach ($dataset as $data) 
+        {
+            if ($data->id)
+                $data->id = $hashids->encode($data->id);
         }
     }
     
@@ -324,5 +308,29 @@ class Extensions
         }
 
         return trim($result);
+    }
+
+    /**
+     * Checks if a word begins with a vowel or consonant.
+     * 1 - Vowel
+     * 2 - Consonant
+     * 0 - Not a letter
+     */
+    public static function getCTypeAlpha($word)
+    {
+        if (empty($word))
+            return 0;
+
+        $word   = strtolower($word);
+        $vowels = ['a', 'e', 'i', 'o', 'u'];
+        $first  = $word[0];
+
+        if (in_array($first, $vowels))
+            return Constants::CTYPE_VOWEL;
+
+        if (ctype_alpha($first))
+            return Constants::CTYPE_CONSONANT;
+
+        return 0;
     }
 }

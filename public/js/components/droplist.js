@@ -26,6 +26,9 @@ function to_droplist(selector)
         hideDroplistError($(this));
 
         $(this).trigger('valueChanged', $(this).val());
+        
+        if (typeof instance.changed === 'function')
+            instance.changed();
     });
 
     var __reset = function() 
@@ -77,7 +80,21 @@ function to_droplist(selector)
         target.addClass('selected');
     }
 
-    return {
+    function __hideError()
+    {
+        root.find('.error-label').text('');
+    }
+
+    function __showError(message)
+    {
+        // if (typeof message === 'object' && message.length > 1)
+        if ( Array.isArray(message) && message.length > 1 )
+            root.find('.error-label').html(sanitize(message.join('<br><br>')));
+        else
+            root.find('.error-label').text(message);
+    }
+
+    let instance = {
         getInput:  () => $input,
         getType :  () => 'droplist',
         reset   :   __reset,
@@ -89,22 +106,27 @@ function to_droplist(selector)
                 callback(value);
             });
         },
+        changed :     null,
         pushHistory:  (value) => lastValue = value,
         pullHistory:  () => __setValueSilent( lastValue ),
         getText:      () => btnText.text(),
         getValue:     () => $input.val(),
         enable:       () => root.find('.dropdown-toggle').prop('disabled' , false),
         disable:      () => root.find('.dropdown-toggle').prop('disabled' , true),
+
+        hideError :  __hideError,
+        showError :  __showError
     };
+
+    return instance;
 };
 
 function showDroplistError(target, message)
 {
     var root = $(target).closest('.dropdown');
 
-    //root.addClass('has-error');
-    //root.find('.error-label').text(message);
-    if (typeof message === 'object' && message.length > 1)
+    // if (typeof message === 'object' && message.length > 1)
+    if ( Array.isArray(message) && message.length > 1 )
         root.find('.error-label').html( sanitize(message.join('<br><br>')) );
     else
         root.find('.error-label').text(message);

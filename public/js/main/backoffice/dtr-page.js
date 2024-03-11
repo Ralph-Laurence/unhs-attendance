@@ -96,7 +96,7 @@ function bindTableDataSource(newRange, newMonthNumber)
             if (row.day_number && weekendDays.includes(row.day_number))
                 return `<span class="text-sm opacity-65">Rest Day</span>`;
             
-            // Dont put 'x' mark on future days but only on past days wiht no 'am_in'
+            // Dont put 'x' mark on future days but only on past days with no 'am_in'
             if (!row.am_in && row.day_number < today)
                 return `<span class="text-danger">${'\u00d7'}</span>`;
         }

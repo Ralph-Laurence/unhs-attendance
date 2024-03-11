@@ -97,3 +97,56 @@ function nl2br(str) {
 function isObjectEmpty(obj) {
     return Object.keys(obj).length === 0;
 }
+
+
+// For loosely-coupled event handling
+function addModuleEventBus() 
+{
+    var eventBus = (function ()
+    {
+        let events = {};
+
+        function _subscribe(eventName, listener) 
+        {
+            if (!events[eventName])
+                events[eventName] = [];
+
+            events[eventName].push(listener);
+        }
+
+        function _publish(eventName, data)
+        {
+            if (events[eventName])
+            {
+                events[eventName].forEach( (listener) => listener(data) );
+                // events[eventName].forEach(function (listener)
+                // {
+                //     listener(data);
+                // })
+            }
+        }
+
+        return {
+            'publish': _publish,
+            'subscribe': _subscribe
+        }
+    })();
+
+    return eventBus;
+}
+
+// Messages
+let GenericMessages = (function()
+{
+    return {
+
+        // AJAX Messages
+        XHR_SERVER_NO_REPLY : 'The server did not respond. Please try again later.',
+        XHR_FAIL_ON_DELETE  : 'Something went wrong while trying to delete the record. Please try again later.',
+        XHR_FAIL_ERROR      : 'A problem is preventing your request from being processed. Please try again later.',
+
+        // LOCAL Messages
+        ROW_ACTION_FAIL     : "Unable to process the requested action because the record can't be read or has missing information. Please try again later.",
+        ALERT_ABORT_CHANGES : 'You have unsaved changes. Do you wish to abort the operation?'
+    }
+})();

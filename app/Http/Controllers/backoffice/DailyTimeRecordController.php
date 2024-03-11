@@ -233,7 +233,7 @@ class DailyTimeRecordController extends Controller
                 Employee::f_FirstName   . ' as fname',
                 Employee::f_MiddleName  . ' as mname',
                 Employee::f_LastName    . ' as lname',
-                Employee::f_Position    . ' as role',
+                Employee::f_Role    . ' as role',
                 Employee::f_EmpNo       . ' as idNo'
             ])
             ->first();

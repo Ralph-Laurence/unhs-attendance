@@ -16,12 +16,14 @@ td.td-80 {
     max-width: 80px;
 }
 
+th.th-100,
 td.td-100 {
     width: 100px;
     min-width: 100px;
     max-width: 100px;
 }
 
+th.th-120,
 td.td-120 {
     width: 120px;
     min-width: 120px;

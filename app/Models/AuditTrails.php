@@ -39,11 +39,16 @@ class AuditTrails extends Model
             self::f_Model_Type   . ' as target',
             self::f_Old_Values   . ' as old_vals',
             self::f_New_Values   . ' as new_vals',
+
         ]), [
-            Extensions::date_format_bdY('a.created_at'),
+            DB::raw(
+                "CASE 
+                    WHEN DATE(a.created_at) = CURDATE() THEN 'Today'
+                    ELSE DATE_FORMAT(a.created_at, '%b %d, %Y')
+                END as `date`"
+            ),
             Extensions::time_format_hip('a.created_at'),
             DB::raw("CONCAT(e.firstname,' ',e.lastname) AS adminname")
-            // Employee::getConcatNameDbRaw('e')
         ]);
 
         $dataset = DB::table(self::getTableName() . ' as a')

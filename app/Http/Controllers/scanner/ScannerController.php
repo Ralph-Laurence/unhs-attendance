@@ -57,7 +57,7 @@ class ScannerController extends Controller
             Employee::f_FirstName  . ' as fname',
             Employee::f_MiddleName . ' as mname',
             Employee::f_LastName   . ' as lname',
-            Employee::f_Position   . ' as role',
+            Employee::f_Role   . ' as role',
         ]);
 
         $selectFields = array_merge($attendanceFields, $employeeFields);
@@ -210,7 +210,7 @@ class ScannerController extends Controller
         if ($insertAttendance)
         {
             $empDetails = DB::table(Employee::getTableName())
-                        ->select(Employee::f_FirstName . ' as fname', Employee::f_LastName . ' as lname', Employee::f_Position . ' as role')
+                        ->select(Employee::f_FirstName . ' as fname', Employee::f_LastName . ' as lname', Employee::f_Role . ' as role')
                         ->where('id', $empId)
                         ->first();
 

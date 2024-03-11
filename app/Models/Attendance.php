@@ -245,7 +245,7 @@ class Attendance extends Model
                 return;
             }
 
-            $dataset->where('e.'.Employee::f_Position, '=', array_flip($roles)[ $role ]);
+            $dataset->where('e.'.Employee::f_Role, '=', array_flip($roles)[ $role ]);
         }
     }
 

@@ -81,12 +81,23 @@ class ValidationMessages
         return "Must be 11 or 12 digits without special charactes like '#' and '+'.";
     }
 
-    // public static function option($fieldName) : string
-    // {
-    //     $article = Utils::toIndefiniteArticle($fieldName);
+    public static function option($option = null) : string
+    {
+        $default = 'Please select an option.';
 
-    //     return "Please select $article $fieldName";
-    // }
+        if (empty($option))
+            return $default;
+
+        $ctype = Extensions::getCTypeAlpha($option);
+
+        if ($ctype == Constants::CTYPE_VOWEL)
+            return "Please select an $option";
+
+        if ($ctype == Constants::CTYPE_CONSONANT)
+            return "Please select a $option";
+        
+        return $default;
+    }
 
     public static function between($fieldName, $min, $max)
     {

@@ -173,7 +173,7 @@ class LeaveRequest extends Model implements Auditable
             if (!in_array($role, Employee::getRoles()))
                 $role = Constants::RECORD_FILTER_ALL;
 
-            $dataset->where('e.'.Employee::f_Position, '=', $role);
+            $dataset->where('e.'.Employee::f_Role, '=', $role);
         }
     }
     

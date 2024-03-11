@@ -37,6 +37,10 @@
     -webkit-box-shadow: 0 0 0 1000px #F1F2F3 inset !important;
 }
 
+.textbox.has-error  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #FBD3D4 inset !important;
+}
+
 .textbox.has-error input::placeholder {
     /* color: #FF3651; */
     color: #AF233A;
@@ -47,7 +51,7 @@
     box-shadow: 0 0 0 1px #FA8E96;
 }
 
-.textbox.has-error .input-wrapper input {
+.textbox.has-error .input-wrapper .main-control {
     background-color: #FBD3D4 !important;
 }
 

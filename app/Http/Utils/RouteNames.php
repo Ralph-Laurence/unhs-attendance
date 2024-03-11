@@ -53,6 +53,7 @@ class RouteNames
     public const Teachers = [
         'index'     => 'backoffice.teachers',
         'all'       => 'backoffice.teachers.all',
+        'edit'      => 'backoffice.teachers.edit',
         'create'    => 'backoffice.teachers.create',
         'update'    => 'backoffice.teachers.update',
         'details'   => 'backoffice.teachers.details',

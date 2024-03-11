@@ -29,3 +29,17 @@
 .droplist .dropdown-toggle {
     font-weight: 600;
 }
+
+.droplist .dropdown-toggle.required .fas::after {
+    font-family: var(--font-awesome);
+    content: '\2a';
+    font-size: 9px;
+    color: var(--primary-dark);
+    position: relative;
+    right: -4px;
+    margin-left: 6px;
+}
+
+/* .droplist .dropdown-toggle .droplist-arrow {
+    opacity: 0.65;
+} */

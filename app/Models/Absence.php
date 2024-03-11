@@ -104,7 +104,7 @@ class Absence extends Model
                 return;
             }
 
-            $dataset->where('e.'.Employee::f_Position, '=', array_flip($roles)[ $role ]);
+            $dataset->where('e.'.Employee::f_Role, '=', array_flip($roles)[ $role ]);
         }
     }
 
@@ -113,7 +113,7 @@ class Absence extends Model
     */
     private function buildAbsenceQuery()
     {
-        $role = 'e.' . Employee::f_Position;
+        $role = 'e.' . Employee::f_Role;
         $roles = Employee::RoleToString;
 
         $roleMapping = "CASE ";

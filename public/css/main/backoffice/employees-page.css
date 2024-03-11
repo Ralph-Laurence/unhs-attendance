@@ -1,0 +1,26 @@
+td.v-stripe-accent-yellow {
+    color: var(--special-dark-warning) !important;
+}
+
+.status-badge {
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 10px;
+}
+
+.status-badge.active {
+    background-color: rgb(31, 201, 164, 0.04);
+    border: 1px solid rgb(31, 201, 164, 0.2);
+    color: var(--accent-color);
+}
+
+.status-badge::before {
+    content: '\25cf';
+    margin-right: 4px;
+}
+
+.status-badge.inactive {
+    background-color: rgb(246, 190, 72, 0.14);
+    border: 1px solid rgb(246, 190, 72, 0.2);
+    color: var(--special-dark-warning);
+}

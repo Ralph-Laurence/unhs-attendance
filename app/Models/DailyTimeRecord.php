@@ -117,14 +117,14 @@ class DailyTimeRecord extends Model
             ->leftJoin($tbl_attendance, function($join) use($seriesAlias, $employeeId)
             {
                 $join->on(DB::raw("DATE($seriesAlias.date)"), '=', DB::raw('DATE(created_at)'));
-                $join->on('a.'.Attendance::f_Emp_FK_ID,       '=', DB::raw("$employeeId"));
+                $join->on('a.'.Attendance::f_Emp_FK_ID,       '=', DB::raw("?"))->addBinding($employeeId);
             })
             // Include his leave requests
             ->leftJoin($tbl_leave_reqs, function($join) use($seriesAlias, $employeeId)
             {
                 $join->on(DB::raw("DATE($seriesAlias.date)"),  '>=', LeaveRequest::f_StartDate);
                 $join->on(DB::raw("DATE($seriesAlias.date)"),  '<=', LeaveRequest::f_EndDate);
-                $join->on('l.'.LeaveRequest::f_Emp_FK_ID,      '=',  DB::raw("$employeeId"));
+                $join->on('l.'.LeaveRequest::f_Emp_FK_ID,      '=',  DB::raw("?"))->addBinding($employeeId);
                 $join->where('l.'.LeaveRequest::f_LeaveStatus, '=',  LeaveRequest::LEAVE_STATUS_APPROVED);
             })
             // Set the default status as Absent ('x') when null

@@ -116,6 +116,7 @@ Route::controller(TeachersController::class)->middleware(['auth'])
     Route::post('/backoffice/employees/teachers/delete',   'destroy')      ->name(RouteNames::Teachers['destroy']);
     Route::post('/backoffice/employees/teachers/details',  'details')      ->name(RouteNames::Teachers['details']);
     Route::post('/backoffice/employees/teachers/update',   'update')       ->name(RouteNames::Teachers['update']);
+    Route::post('/backoffice/employees/teachers/edit',     'edit')         ->name(RouteNames::Teachers['edit']);
 });
 
 Route::controller(StaffController::class)->middleware(['auth'])
@@ -149,16 +150,31 @@ Route::controller(TestController::class)->group(function(){
     Route::get('/pintest',  'pinsamples');
 });
 
-Route::get('/download/qr-code/{filename}/{outputname?}', function($filename)
+// Route::get('/download/qr-code/{filename}/{outputname?}', function($filename)
+// {
+//     // Define the file path
+//     $path = Extensions::getQRCode_storagePath($filename);
+
+//     // Download the file
+//     $file = response()->download($path, 'qr-code.png');
+
+//     // Delete the file after download
+//     $file->deleteFileAfterSend(true);
+
+//     return $file;
+
+// })->name('qr-download')->middleware(['auth']);
+
+Route::get('/download/qr-code/{filename}', function($filename)
 {
     // Define the file path
     $path = Extensions::getQRCode_storagePath($filename);
 
     // Download the file
-    $file = response()->download($path, 'qr-code.png');
+    $file = response()->download($path, $filename);
 
     // Delete the file after download
-    //$file->deleteFileAfterSend(true);
+    $file->deleteFileAfterSend(true);
 
     return $file;
 

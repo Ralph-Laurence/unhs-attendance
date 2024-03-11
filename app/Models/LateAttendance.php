@@ -97,7 +97,7 @@ class LateAttendance extends Model
                 return;
             }
 
-            $dataset->where('e.'.Employee::f_Position, '=', array_flip($roles)[ $role ]);
+            $dataset->where('e.'.Employee::f_Role, '=', array_flip($roles)[ $role ]);
         }
     }
 
@@ -106,7 +106,7 @@ class LateAttendance extends Model
     */
     private function buildQuery()
     {
-        $role = 'e.' . Employee::f_Position;
+        $role = 'e.' . Employee::f_Role;
         $roles = Employee::RoleToString;
 
         $roleMapping = "CASE ";

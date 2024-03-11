@@ -297,7 +297,7 @@ Dropdown Menu Overrides
     text-transform: uppercase;
     font-weight: 600;
     letter-spacing: 1px;
-    color: var(-dark-color);
+    color: var(--dark-color);
 }
 
 .dataset-table tbody td {
@@ -307,8 +307,8 @@ Dropdown Menu Overrides
 }
 
 .dataTables_scrollHead, .dataTables_scrollHeadInner {
-    height: 38px;
-    max-height: 38px;
+    height: 36px;
+    max-height: 36px;
 
 }
 
@@ -321,6 +321,11 @@ Dropdown Menu Overrides
 .dataset-table thead th.v-stripe-accent-green,
 .dataset-table td.v-stripe-accent-green {
     background-color: rgba(182, 215, 168, 0.28) !important;
+}
+
+.dataset-table thead th.v-stripe-accent-red,
+.dataset-table td.v-stripe-accent-red {
+    background-color: rgba(234, 67, 53, 0.14) !important;
 }
 
 .dataset-table thead th.v-stripe-accent,
@@ -384,4 +389,8 @@ Sizing utils
 .min-hw-20 {
     min-width: 20px;
     min-height: 20px;
+}
+
+.w-fit-content {
+    width: fit-content !important;
 }

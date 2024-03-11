@@ -796,7 +796,7 @@ var auditsPage = (function ()
 
                 // General Error
                 finishLeaveReqModal();
-                alertModal.showDanger('An unexpected has occurred. Please try again later.');
+                alertModal.showDanger('A problem is preventing your request from being processed. Please try again later.');
             },
             complete: () => enableFormModalButtons(true)
         });

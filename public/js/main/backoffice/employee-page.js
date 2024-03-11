@@ -116,21 +116,19 @@ function handleEvents()
         openEditForm(row);
     });
 
-    $(document).on('click', '.row-actions .btn-details', function () 
-    {  
-        let row = $(this).closest('tr');
-
-        showEmployeeDetails(row);
-    });
-
     $('.btn-add-record').on('click', () => openCreateForm());
 }
 
 function bindTableDataSource(url)
 {
+    return;
+    
     url = url || $(datasetTable).data('src-default');
 
-    let emphasizeCounts =  function(data, type, row) {
+    let emphasizeCounts =  function(data, type, row) 
+    {
+        data = data || 0;
+        
         let style = `opacity-40`;
 
         if (data && data > 0)
@@ -202,14 +200,24 @@ function bindTableDataSource(url)
                 width: '120px',
                 data: 'emp_status', 
                 defaultContent: '',
-                render: function(data, type, row) {
-                    return data; //`<div class="attendance-status ${iconStyles[data]}">${data}</div>`;
+                render: function(data, type, row) 
+                {
+                    console.warn(row)
+                    let style = row.status_style || '';
+
+                    return `<span class="status-badge text-sm ${style}">${data}</span>`;
                 }
             },
             // Fifth Column -> Late
-            { width: '80px', data: 'total_lates', defaultContent: '', render: emphasizeCounts},
-            { width: '80px', data: 'total_leave', defaultContent: '', render: emphasizeCounts},
-            { width: '80px', data: 'total_absents', defaultContent: '', render: emphasizeCounts},
+            { 
+                className: 'v-stripe-accent-yellow border-start border-end', 
+                width: '80px', data: 'total_lates', defaultContent: '0', render: emphasizeCounts
+            },
+            { width: '80px', data: 'total_leave', defaultContent: '0', render: emphasizeCounts},
+            { 
+                className: 'v-stripe-accent-red border-start border-end', 
+                width: '80px', data: 'total_absents', defaultContent: '0', render: emphasizeCounts
+            },
 
             // Eighth Column -> Actions
             {

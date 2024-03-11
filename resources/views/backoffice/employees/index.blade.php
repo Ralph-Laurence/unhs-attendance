@@ -81,21 +81,4 @@
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
 <script src="{{ asset('js/main/backoffice/employee-page.js') }}"></script>
-{{-- 
-<script>
-    $.ajax({
-    url: 'http://localhost:8000/backoffice/teachers/trail/get',
-    data: {
-        '_token': $('meta[name="csrf-token"]').attr('content'),
-        'employee-key': 'Xx529wLeGm'
-    },
-    type: 'POST',
-    success: function(response) {
-        console.warn(response);
-    },
-    error: function(xhr, status, error) {
-        console.warn(xhr.responseText);
-    }
-});
-</script> --}}
 @endpush

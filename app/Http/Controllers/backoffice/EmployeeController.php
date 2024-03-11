@@ -3,21 +3,18 @@
 namespace App\Http\Controllers\backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EmployeePostRequest;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\QRMaker;
-use App\Http\Utils\RegexPatterns;
-use App\Http\Utils\ValidationMessages;
 use App\Models\Employee;
-use Exception;
 use Hashids\Hashids;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
@@ -28,130 +25,228 @@ class EmployeeController extends Controller
         $this->hashids = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
     }
 
-    public function store(Request $request)
+    public function store(EmployeePostRequest $request)
     {
-        $inputs = $this->validateFields($request);
-
-        if ($inputs['validation_stat'] == Constants::ValidationStat_Failed)
-            return json_encode($inputs);
-
-        try 
+        try
         {
-            $insertResults = $this->addEmployee($inputs)->toArray();
+            $inputs        = $request->validated();
+            $insertResults = $this->addEmployee( $inputs );
+            $saveLocalCopy = $inputs['option-save-qr'] == Constants::CHECKBOX_ON;
+            $frontendData  = $insertResults['frontEndData'];
 
-            // Convert the collection to array so that we can use
-            // these into the frontend such as adding a new row to
-            // the datatable
-            $encodedId    = $this->hashids->encode($insertResults['id']);
-            $empNum       = $insertResults[Employee::f_EmpNo];
+            $qrcode = $this->sendEmployeeQR(
+                $insertResults['modelInstance'], 
+                $saveLocalCopy
+            );
 
-            $rowData = [
-                'emp_num'       => $empNum,
-                'emp_status'    => $insertResults[Employee::f_Status],
-                'total_lates'   => 0,
-                'total_leave'   => 0,
-                'total_absents' => 0,
-                'id'            => $encodedId,
+            if (!empty($qrcode))
+                $frontendData['download'] = $qrcode;
+
+            return Extensions::encodeSuccessMessage("Success!", $frontendData);
+        }
+        catch (\Exception $ex) 
+        {
+            error_log($ex->getMessage());
+            $smtpErr = "failed with errno=10054 An existing connection was forcibly closed by the remote host";
+          
+            if (Str::contains($ex->getMessage(), $smtpErr))
+                return Extensions::encodeFailMessage("Record successfully saved but failed to send QR Code through email.");
+
+            return Extensions::encodeFailMessage(Messages::REVERT_TRANSACT_ON_FAIL);
+        }
+    }
+
+    // Performs a database update
+    public function update(EmployeePostRequest $request)
+    {
+        $data = [
+            Employee::f_EmpNo       => $request->input('input-id-no'),
+            Employee::f_FirstName   => $request->input('input-fname'),
+            Employee::f_MiddleName  => $request->input('input-mname'),
+            Employee::f_LastName    => $request->input('input-lname'),
+            Employee::f_Email       => $request->input('input-email'),
+            Employee::f_Contact     => $request->input('input-phone'),
+            Employee::f_Rank        => $request->input('input-position')
+        ];
+
+        try
+        {
+            $id = $this->hashids->decode( $request->input('update-key') );
+
+            $model = DB::transaction(function() use($data, $id)
+            {
+                $employee = Employee::where('id', '=', $id[0])->firstOrFail();
+                $employee->update($data);
+
+                return $employee;
+            });
+
+            $frontendData = [
+                'emp_num'       => $model->getAttribute(Employee::f_EmpNo),
+                'id'            => $request->input('update-key'),
                 'empname'       => implode(' ', [
-                    $insertResults[Employee::f_FirstName],
-                    $insertResults[Employee::f_MiddleName],
-                    $insertResults[Employee::f_LastName],
+                    $model->getAttribute(Employee::f_LastName).',',
+                    $model->getAttribute(Employee::f_FirstName),
+                    $model->getAttribute(Employee::f_MiddleName),
                 ])
             ];
 
-            // To send the QR code into their email, we
-            // must first read the email from the newly
-            // inserted data
-            $email = $insertResults[Employee::f_Email];
+            return Extensions::encodeSuccessMessage(
+                Messages::EMPLOYEE_UPDATE_OK,
+                $frontendData
+            );
+        }
+        catch (ModelNotFoundException $ex) {
+            // When no records of leave or employee were found
+            return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);
+        }
+        catch (\Exception $ex) {
+            // Common errors
+            return Extensions::encodeFailMessage(Messages::REVERT_TRANSACT_ON_FAIL);
+        }
+    }
+   
+    public function edit(Request $request)
+    {
+        $hashids = new Hashids(
+            Employee::HASH_SALT, 
+            Employee::MIN_HASH_LENGTH
+        );
 
-            // The content of QR code is the hashed record id.
-            // Also, we will return the path to the generated
-            // image file so that we can use it as download link
-            $qrCodePathAsset = null;
-            $downloadUrl = null;
-
-            $qrcode_filename = "qr_$empNum.png";
-
-            $qrcode = QRMaker::saveFile($encodedId, $qrcode_filename, $qrCodePathAsset, $downloadUrl);
-
-            // If the email was provided, send the qr code via email
-            if (!empty($email))
-            {
-                $str_search  = ['#recipient#', '#pin#'];
-                $str_replace = [ $insertResults[Employee::f_FirstName], $insertResults['rawPinCode'] ];
-
-                // Replace the #recipient# with firstname
-                $mailMessage = str_replace($str_search, $str_replace, Messages::EMAIL_REGISTER_EMPLOYEE);
-                
-                // Build the email then send it
-                Mail::raw($mailMessage, function ($message) use ($qrcode, $email) {
-
-                    // Attach the QR code image into the mail. 
-                    $message->to($email)->subject(Messages::EMAIL_SUBJECT_QRCODE);
-                    $message->embed($qrcode, "qrcode.png");
-                });
-            }
-
-            // convert the checkbox value to boolean
-            $option_saveQR_localCopy = filter_var($request->input('save_qr_copy'), FILTER_VALIDATE_BOOLEAN);
-
-            // When the checkbox "save qr code local copy" is checked,
-            // we will send a download link to the qr code. Otherwise
-            // send the code via email if it exists. If email was not 
-            // provided, we must send a download link anyway
-            if ($option_saveQR_localCopy || empty($email))
-            {
-                $rowData['qrcode_download'] = [
-                    'fileName' => $rowData['emp_num'] . '.png',
-                    'url'      => $downloadUrl
-                ];
-            }
-            
-            // Return AJAX response
-            return Extensions::encodeSuccessMessage("Success!", $rowData);
-        } 
-        catch (\Exception $ex) 
+        try
         {
-            $emailError = "failed with errno=10054 An existing connection was forcibly closed by the remote host";
-          
-            if (Str::contains($ex->getMessage(), $emailError) )
-            {
-                return Extensions::encodeFailMessage("Record successfully saved but failed to send QR Code through email.");
-            }
+            $key = $request->input('key');
+            $id  = $hashids->decode($key);
 
-            return Extensions::encodeFailMessage("Request Failed\n\n" . $ex->getMessage());
+            if (empty($id))
+                throw new ModelNotFoundException;
+
+            $dataset = Employee::where('id', '=', $id[0])
+                ->select([
+                    Employee::f_FirstName   . ' as fname',
+                    Employee::f_MiddleName  . ' as mname',
+                    Employee::f_LastName    . ' as lname',
+                    Employee::f_Contact     . ' as phone',
+                    Employee::f_EmpNo       . ' as idNo',
+                    Employee::f_Rank        . ' as rank',
+                    Employee::f_Email       . ' as email'
+                ])
+                ->firstOrFail()
+                ->toArray();
+
+            $dataset['id'] = $key;
+            
+            return json_encode([
+                'code'      => Constants::XHR_STAT_OK,
+                'dataset'   => $dataset
+            ]);
+        }
+        catch (ModelNotFoundException $ex) {
+            // When no records of leave or employee were found
+            return Extensions::encodeFailMessage(Messages::READ_FAIL_INEXISTENT);
+        }
+        catch (\Exception $ex) {
+            // Common errors
+            return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
         }
     }
 
     private function addEmployee($inputs)
     {
-        $inputs['input-role'] = array_flip(Employee::RoleToString)[
-            $inputs['input-role']
-        ];
-
-        $rawPinCode = random_int(1000, 9999);
-
-        $data = [
-            Employee::f_EmpNo       => $inputs['input-id-no'],
-            Employee::f_FirstName   => $inputs['input-fname'],
-            Employee::f_MiddleName  => $inputs['input-mname'],
-            Employee::f_LastName    => $inputs['input-lname'],
-            Employee::f_Email       => $inputs['input-email'],
-            Employee::f_Contact     => $inputs['input-contact'],
-            Employee::f_Position    => $inputs['input-role'],
-            Employee::f_Status      => Employee::ON_STATUS_DUTY,
-            Employee::f_PINCode     => encrypt($rawPinCode)       // 4-digit PIN
-        ];
-
         // Save the newly created employee into database
-        $insert = DB::transaction(function () use ($data) 
+        $insert = DB::transaction(function () use($inputs)
         {
-            return Employee::create($data);
+            $rawPinCode = random_int(1000, 9999);
+
+            // Save the data into the database
+            $model = Employee::create([
+                Employee::f_EmpNo       => $inputs['input-id-no'],
+                Employee::f_FirstName   => $inputs['input-fname'],
+                Employee::f_MiddleName  => $inputs['input-mname'],
+                Employee::f_LastName    => $inputs['input-lname'],
+                Employee::f_Email       => $inputs['input-email'],
+                Employee::f_Contact     => $inputs['input-phone'],
+                Employee::f_Role        => $inputs['role'],
+                Employee::f_Rank        => $inputs['input-position'],
+                Employee::f_Status      => Employee::ON_STATUS_DUTY,
+                Employee::f_PINCode     => encrypt($rawPinCode)       // 4-digit PIN
+            ]);
+
+            // These data will be returned for displaying purposes.
+            // We change the encrypted PIN back to readable string
+            // after a successful insert, as it returns the model.
+            $model->setAttribute( Employee::f_PINCode, $rawPinCode );
+
+            // This hashed row id can be used both as a record identifier
+            // on the frontend, and as a QR Code content
+            $hashedRowId  = $this->hashids->encode($model->getAttribute('id'));
+
+            return [
+                'modelInstance' => $model,
+                'frontEndData'  => [
+                    'emp_num'       => $model->getAttribute(Employee::f_EmpNo),
+                    'emp_status'    => $model->getAttribute(Employee::f_Status),
+                    'id'            => $hashedRowId,
+                    'total_lates'   => 0,
+                    'total_leave'   => 0,
+                    'total_absents' => 0,
+                    'empname'       => implode(' ', [
+                        $model->getAttribute(Employee::f_LastName).',',
+                        $model->getAttribute(Employee::f_FirstName),
+                        $model->getAttribute(Employee::f_MiddleName),
+                    ])
+                ]
+            ];
         });
 
-        $insert->rawPinCode = $rawPinCode;
-
         return $insert;
+    }
+
+    private function sendEmployeeQR($modelInstance, bool $saveLocalCopy = false)
+    {
+        $empNum     = $modelInstance->getAttribute(Employee::f_EmpNo);
+        $filename   = "qr_$empNum.png";
+        $qrcode     = QRMaker::createFrom($modelInstance->getAttribute('id'), $filename);
+        $email      = $modelInstance->getAttribute(Employee::f_Email);
+
+        // If the email was provided, send the qr code via email
+        if (!empty($email)) {
+            
+            // Replace the #recipient# with firstname
+            $mailMessage = str_replace(
+                // Words to find
+                ['#recipient#', '#pin#'],
+
+                // Their replacements
+                [
+                    $modelInstance->getAttribute(Employee::f_FirstName),
+                    $modelInstance->getAttribute(Employee::f_PINCode)
+                ],
+
+                // From subject
+                Messages::EMAIL_REGISTER_EMPLOYEE
+            );
+
+            // Build the email content then send it
+            Mail::raw($mailMessage, function ($message) use ($qrcode, $email) {
+
+                // Attach the QR code image into the mail. 
+                $message->to($email)->subject(Messages::EMAIL_SUBJECT_QRCODE);
+                $message->embed($qrcode['qrcodePath'], 'qrcode.png');
+            });
+        }
+
+        // If an option to save local copy is true, or...
+        // If email was not provided, we must send a download link anyway.
+        if ($saveLocalCopy !== false || empty($email)) 
+        {
+            return [
+                'fileName' => $filename,
+                'url'      => $qrcode['downloadLink']
+            ];
+        }
+
+        return [];
     }
 
     public function destroy(Request $request)
@@ -163,178 +258,16 @@ class EmployeeController extends Controller
         return $employee->dissolve($id);
     }
 
-    // Performs a database update
-    public function update(Request $request)
-    {
-        $key = $request->input('row-key');
-
-        if (empty($key))
-        {
-            $code = Constants::RecordId_Empty;
-            $msg = Messages::UPDATE_FAIL_CANT_IDENTIFY_RECORD;
-
-            return Extensions::encodeFailMessage("$msg\n\n(Error Code $code)", $code);
-        }
-
-        $id = $this->hashids->decode($key);
-        $input = $this->validateFields($request, $id[0]);
-
-        if ($input['validation_stat'] == Constants::ValidationStat_Failed)
-            return json_encode($input);
-
-        $data = [
-            Employee::f_EmpNo       => $input['input-id-no'],
-            Employee::f_FirstName   => $input['input-fname'],
-            Employee::f_MiddleName  => $input['input-mname'],
-            Employee::f_LastName    => $input['input-lname'],
-            Employee::f_Email       => $input['input-email'],
-            Employee::f_Contact     => $input['input-contact'],
-            //Employee::f_Status      => Employee::ON_STATUS_DUTY
-        ];
-
-        try 
-        {
-            // Save the updated employee data into database
-            $update = DB::transaction(function () use ($data, $id) 
-            {
-                $employee = Employee::where('id', '=', $id[0])->first();
-
-                if ($employee)
-                {
-                    $employee->update($data);
-                    return $employee;
-                }
-                else
-                    return -1;
-            });
-
-            if (is_int($update) && $update == -1)
-            {
-                $code = Constants::RecordNotFound;
-                $msg = Messages::UPDATE_FAIL_NON_EXISTENT_RECORD;
-
-                return Extensions::encodeFailMessage("$msg.\n\n(Error Code $code)", $code);
-            }
-
-            // Convert the collection to array so that we can use
-            // these into the frontend such as adding a new row to
-            // the datatable
-            $employeeData = $update->toArray();
-            $rowData = [
-                'emp_num'       => $employeeData[Employee::f_EmpNo],
-                'fname'         => $employeeData[Employee::f_FirstName],
-                'mname'         => $employeeData[Employee::f_MiddleName],
-                'lname'         => $employeeData[Employee::f_LastName],
-                'emp_status'    => $employeeData[Employee::f_Status]
-            ];
-            
-            // Return AJAX response
-            return Extensions::encodeSuccessMessage("Success!", $rowData);
-        } 
-        catch (\Exception $ex) 
-        {    
-            //return Extensions::encodeFailMessage("Failed " . $ex->getMessage());
-            return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED, Constants::InternalServerError);
-        }
-    }
-
     // Load the employee details
     public function details(Request $request)
     {
-        try
-        {
-            $key = $request->input('key');
-            $id = $this->hashids->decode($key);
+        $key = $request->input('key');
+        $id  = $this->hashids->decode($key);
 
-            $employee = new Employee;
-            $dataset = $employee->getBasicDetails($id[0]);
+        $employee = new Employee;
+        $dataset  = $employee->getBasicDetails($id[0]);
 
-            return Extensions::encodeSuccessMessage('Basic information loaded for edit mode', $dataset);
-        }
-        catch (Exception $ex)
-        {
-            error_log($ex->getMessage());
-            return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
-        }
-    }
-
-    public function validateFields(Request $request, $ignoreId = null)
-    {
-        $validationMessages = 
-        [
-            'input-id-no.required' => ValidationMessages::required('ID Number'),
-            'input-id-no.regex'    => ValidationMessages::numericDash('ID Number'),
-            'input-id-no.unique'   => ValidationMessages::unique('ID Number'),
-
-            'input-fname.required' => ValidationMessages::required('Firstname'),
-            'input-fname.max'      => ValidationMessages::maxLength(32, 'Firstname'),
-            'input-fname.regex'    => ValidationMessages::alphaDashDotSpace('Firstname'),
-
-            'input-mname.required' => ValidationMessages::required('Middlename'),
-            'input-mname.max'      => ValidationMessages::maxLength(32, 'Middlename'),
-            'input-mname.regex'    => ValidationMessages::alphaDashDotSpace('Middlename'),
-
-            'input-lname.required' => ValidationMessages::required('Lastname'),
-            'input-lname.max'      => ValidationMessages::maxLength(32, 'Lastname'),
-            'input-lname.regex'    => ValidationMessages::alphaDashDotSpace('Lastname'),
-
-            'input-email.required' => ValidationMessages::required('Email'),
-            'input-email.unique'   => ValidationMessages::unique('Email'),
-        ];
-
-        $employeeTable = Employee::getTableName();
-        
-        $validationFields = array(
-            'input-id-no'   => [
-                'required',
-                'regex:' . RegexPatterns::NUMERIC_DASH,
-                Rule::unique($employeeTable, Employee::f_EmpNo)
-            ],
-            'input-fname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
-            'input-mname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
-            'input-lname'   => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
-            'input-email'   => [
-                'required',
-                'email',
-                'max:64',
-                Rule::unique('users', Employee::f_Email),
-                Rule::unique($employeeTable, Employee::f_Email),
-            ],
-            'input-contact' => 'nullable|regex:'        . RegexPatterns::MOBILE_NO,
-            'input-role'    => 'required|not_in:'       . implode(',', array_keys(Employee::RoleToString))
-        );
-
-        //
-        // This will be used to ignore the validation rule during Update
-        //
-        if ($ignoreId && !is_null($ignoreId))
-        {
-            $validationFields['input-email'] = [
-                'required',
-                'email',
-                'max:64',
-                Rule::unique('users', 'email')->ignore($ignoreId),
-                Rule::unique(Employee::getTableName(), Employee::f_Email)->ignore($ignoreId),
-            ];
-
-            $validationFields['input-id-no'] = [
-                'required',
-                'regex:' . RegexPatterns::NUMERIC_DASH,
-                Rule::unique($employeeTable, Employee::f_EmpNo)->ignore($ignoreId)
-            ];
-        }
-
-        // Common validation
-        $validator = Validator::make($request->all(), $validationFields, $validationMessages);
-
-        if ($validator->fails())
-            return ['validation_stat' => Constants::ValidationStat_Failed] + 
-                   ['errors' => $validator->errors()];
-        
-        $inputData = ['validation_stat' => Constants::ValidationStat_Success] + 
-                     ['errors' => $validator->validated()] + $validator->validated();
-
-        return $inputData;
+        return $dataset;
     }
 
     public function loadAutoSuggest_EmpNo()
@@ -359,4 +292,5 @@ class EmployeeController extends Controller
 
         return json_encode($empIds);
     }
+
 }

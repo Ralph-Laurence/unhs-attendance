@@ -31,9 +31,8 @@ class StaffController extends EmployeeController
     public function getStaff() 
     {
         $model = new Employee;
+        $data  = $model->getEmployees(Employee::RoleStaff);
 
-        $dataset = $model->getStaff();
-
-        return $dataset;
+        return $data;
     }
 }

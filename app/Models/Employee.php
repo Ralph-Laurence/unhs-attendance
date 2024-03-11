@@ -5,11 +5,10 @@ namespace App\Models;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
-use Carbon\Carbon;
 use Exception;
-use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -26,12 +25,15 @@ class Employee extends Model implements Auditable
     public const RoleTeacher    = 1;
     public const RoleStaff      = 2;
 
-    private const TEACHER = 'Teacher';
-    private const STAFF = 'Staff';
+    public const STR_ROLE_TEACHER = 'Teacher';
+    public const STR_ROLE_STAFF   = 'Staff';
+
+    public const STR_COLLECTIVE_ROLE_ALL     = 'Employee';
+    public const STR_COLLECTIVE_ROLE_FACULTY = 'Faculty';
     
     public const RoleToString = [
-        self::RoleTeacher   => self::TEACHER,
-        self::RoleStaff     => self::STAFF
+        self::RoleTeacher   => self::STR_ROLE_TEACHER,
+        self::RoleStaff     => self::STR_ROLE_STAFF
     ];
 
     public const ON_STATUS_LEAVE = 'Leave';
@@ -41,7 +43,8 @@ class Employee extends Model implements Auditable
     public const f_FirstName    = 'firstname';
     public const f_MiddleName   = 'middlename';
     public const f_LastName     = 'lastname';
-    public const f_Position     = 'position';
+    public const f_Role         = 'role';
+    public const f_Rank         = 'rank';
     public const f_Email        = 'email';
     public const f_Contact      = 'contact';
     public const f_Photo        = 'photo';
@@ -74,14 +77,45 @@ class Employee extends Model implements Auditable
     public static function getRoles() 
     {
         return [
-            self::TEACHER  => self::RoleTeacher,
-            self::STAFF    => self::RoleStaff
+            self::STR_ROLE_TEACHER  => self::RoleTeacher,
+            self::STR_ROLE_STAFF    => self::RoleStaff
         ];
     }
 
-    public function getTeachers()
+    public function getBasicDetails($id) : string
     {
-        $dataset = $this->getEmployees(Employee::RoleTeacher);
+        try
+        { 
+            $dataset = Employee::where('id', '=', $id)
+                ->select([
+                    self::f_EmpNo   . ' as idNo',
+                    self::f_Contact . ' as phone',
+                    self::f_Email   . ' as email',
+                    self::f_Status  . ' as status',
+                ])
+                ->selectRaw( self::getConcatNameDbRaw('', 'empname', Constants::NAME_STYLE_EASTERN) )
+                
+                ->firstOrFail();
+
+            return json_encode([
+                'code'      => Constants::XHR_STAT_OK,
+                'dataset'   => $dataset
+            ]);
+
+        }
+        catch (ModelNotFoundException $ex) {
+            // When no records of leave or employee were found
+            return Extensions::encodeFailMessage(Messages::READ_FAIL_INEXISTENT);
+        }
+        catch (\Exception $ex) {
+            // Common errors
+            return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
+        }
+    }
+
+    public function getEmployees(int $role)
+    {
+        $dataset = $this->buildSelectQuery($role)->get();
 
         Extensions::hashRowIds($dataset, self::HASH_SALT);
 
@@ -90,67 +124,67 @@ class Employee extends Model implements Auditable
         ]);
     }
 
-    public function getStaff()
+    private function buildSelectQuery(int $role)
     {
-        $dataset = $this->getEmployees(Employee::RoleStaff);
+        $a_late   = Attendance::f_Late;
+        $a_status = Attendance::f_Status;
+        $v_absent = Attendance::STATUS_ABSENT;
+        $l_empfk  = LeaveRequest::f_Emp_FK_ID;
+        $e_status = 'e.' . self::f_Status;
+        $e_idNo   = 'e.' . self::f_EmpNo;
 
-        Extensions::hashRowIds($dataset, self::HASH_SALT);
+        $e_status_active    = self::ON_STATUS_DUTY;
+        $e_status_inactive  = self::ON_STATUS_LEAVE;
 
-        return json_encode([
-            'data' => $dataset->toArray(),
-        ]);
-    }
-
-    public function getBasicDetails($id) : array
-    {
-        $dataset = Employee::where('id', '=', $id)
-            ->select([
-                Employee::f_EmpNo       . ' as idNo',
-                Employee::f_FirstName   . ' as fname',
-                Employee::f_MiddleName  . ' as mname',
-                Employee::f_LastName    . ' as lname',
-                Employee::f_Contact     . ' as phone',
-                Employee::f_Email       . ' as email',
-                Employee::f_Status      . ' as status',
-            ])
-            ->first()
-            ->toArray();
-
-        return $dataset;
-    }
-
-    private function getEmployees(int $role)
-    {
-        $fname  = Employee::f_FirstName;
-        $mname  = Employee::f_MiddleName;
-        $lname  = Employee::f_LastName;
-        $status = Employee::f_Status;
-        $empNo  = Employee::f_EmpNo;
-
-        $employeeFields = Extensions::prefixArray('e.', [
-            'id',
-            $empNo  . ' as emp_num',
-            $status . ' as emp_status',
+        $group    = array_merge(Extensions::prefixArray('e.', [
+            self::f_EmpNo,
+            self::f_FirstName,
+            self::f_MiddleName,
+            self::f_LastName,
+            self::f_Status,
+            'id'
+        ]), [
+            'l.total_leave'
         ]);
 
-        $employeeFields[] = DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname");
+        $query = DB::table(self::getTableName() . ' AS e')
+            ->where('e.' . self::f_Role, '=', $role)
+            ->select(
+                self::getConcatNameDbRaw('e', 'empname', Constants::NAME_STYLE_EASTERN)
+            )
+            ->selectRaw(
+                "e.id,
+                $e_status AS emp_status,
+                $e_idNo AS emp_num,
+                COUNT(a.$a_late) AS total_lates,
+                SUM(CASE WHEN a.$a_status = '$v_absent' THEN 1 ELSE 0 END) AS total_absents,
+                CASE 
+                    WHEN $e_status = '$e_status_active' THEN 'active'
+                    WHEN $e_status = '$e_status_inactive' THEN 'inactive'
+                END as status_style,
+                l.total_leave"
+            )
+            ->leftJoin(Attendance::getTableName() . ' AS a', 'a.' . Attendance::f_Emp_FK_ID, 'e.id')
+            ->leftJoinSub(
+                // Query
+                DB::table(LeaveRequest::getTableName())
+                    ->select($l_empfk)
+                    ->selectRaw("COUNT(id) AS total_leave")
+                    ->where(LeaveRequest::f_LeaveStatus, LeaveRequest::LEAVE_STATUS_APPROVED)
+                    ->groupBy($l_empfk),
 
-        $a_field_status = Attendance::f_Status;
-        $absents = Attendance::STATUS_ABSENT;
-        $late = Attendance::f_Late;
+                // Join alias
+                'l',
 
-        $results = DB::table(self::getTableName()   . ' as e')
-            ->leftJoin(Attendance::getTableName()   . ' as a', 'e.id', '=', 'a.' . Attendance::f_Emp_FK_ID)
-            ->leftJoin(LeaveRequest::getTableName() . ' as l', 'e.id', '=', 'l.' . LeaveRequest::f_Emp_FK_ID)
-            ->select($employeeFields)
-            ->selectRaw("SUM(CASE WHEN a.$late IS NOT NULL THEN 1 ELSE 0 END) as total_lates")
-            ->selectRaw("SUM(CASE WHEN a.$a_field_status = '$absents' THEN 1 ELSE 0 END) as total_absents")
-            ->selectRaw('COUNT(l.id) as total_leave')
-            ->where('e.' . Employee::f_Position, '=', $role)
-            ->groupBy('e.id', "e.$empNo", "e.$fname", "e.$mname", "e.$lname", "e.$status")
-            ->get();
-
-        return $results;
+                // On
+                function ($join) use ($l_empfk) {
+                    $join->on('l.' . $l_empfk, '=', 'e.id');
+                }
+            )
+            ->groupBy( $group )
+            ->orderBy($e_idNo);
+        
+        return $query;
     }
 
     public function dissolve($employeeId)
@@ -172,8 +206,8 @@ class Employee extends Model implements Auditable
             // Find the employee
             $employee = Employee::where('id', '=', $employeeId)
                 ->select([
-                    Employee::f_EmpNo    . ' as empNo',
-                    Employee::f_Position . ' as role'
+                    self::f_EmpNo    . ' as empNo',
+                    self::f_Role . ' as role'
                 ])
                 ->first();
 

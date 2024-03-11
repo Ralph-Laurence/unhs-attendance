@@ -61,7 +61,8 @@ function showTextboxError(target, message)
 
     root.addClass('has-error');
 
-    if (typeof message === 'object' && message.length > 1)
+    // if (typeof message === 'object' && message.length > 1)
+    if ( Array.isArray(message) && message.length > 1 )
         root.find('.error-label').html( sanitize(message.join('<br><br>')) );
     else
         root.find('.error-label').text(message);

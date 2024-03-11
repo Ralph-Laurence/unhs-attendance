@@ -10,11 +10,11 @@
 @endonce
 
 <div class="dropdown droplist">
-    <button {{ $disabled }} class="btn btn-secondary flat-button dropdown-toggle shadow-0 d-block text-truncate {{ $buttonClasses }}" 
+    <button {{ $disabled }} class="btn btn-secondary flat-button dropdown-toggle shadow-0 d-block text-truncate px-3 {{ $required }} {{ $buttonClasses }}" 
         id="{{ $as }}-drop-btn" data-mdb-toggle="dropdown" aria-expanded="false">
         <div class="w-100 d-flex align-items-center gap-2">
-            <span class="button-text d-inline text-truncate me-auto">{{ $text }}</span>
-            <i class="fas fa-chevron-down opacity-65"></i>
+            <span class="button-text d-inline text-start text-truncate flex-fill me-1">{{ $text }}</span>
+            <i class="fas fa-chevron-down droplist-arrow ms-auto"></i>
         </div>
     </button>
 
