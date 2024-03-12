@@ -147,6 +147,7 @@ let GenericMessages = (function()
 
         // LOCAL Messages
         ROW_ACTION_FAIL     : "Unable to process the requested action because the record can't be read or has missing information. Please try again later.",
-        ALERT_ABORT_CHANGES : 'You have unsaved changes. Do you wish to abort the operation?'
+        ALERT_ABORT_CHANGES : 'You have unsaved changes. Do you wish to abort the operation?',
+        ROW_REDRAW_FAIL     : 'Your changes to the record were saved successfully. However, we encountered an issue displaying the updated record. Please refresh the page to see the changes.',
     }
 })();

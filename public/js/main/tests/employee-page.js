@@ -274,8 +274,39 @@ var employeeDatatables = (function()
         });
         
         // store the new row instance
-        dataTable.newRowInstance = newRow;  
+        dataTable.newRowInstance = newRow;
 
+        goToNewRowPage(newRow);
+    }
+
+    function __updateRow(response)
+    {
+        if (
+            response && 
+            (response.data && Object.keys(response.data).length > 0) && 
+            (response.row  && Object.keys(response.row).length > 0)
+        )
+        {
+            let temp_row = dataTable.row(response.data.row);
+            let temp_rowData = temp_row.data();
+
+            temp_rowData.empname = response.data['empname'];
+
+            let newRow = dataTable.row(temp_row).data(temp_rowData).invalidate().draw(false);
+            
+            // store the new row instance
+            dataTable.newRowInstance = newRow;
+
+            goToNewRowPage(newRow);
+        }
+        else
+        {
+            alertModal.showWarn(GenericMessages.ROW_REDRAW_FAIL);
+        }
+    }
+
+    function goToNewRowPage(newRow)
+    {
         var rowIndex   = newRow.index();
         var pageNumber = Math.ceil((rowIndex + 1) / dataTable.page.len());
 
@@ -405,7 +436,8 @@ var employeeDatatables = (function()
     return {
         'bindDataSource' : __bindTableDataSource,
         'beginDataTable' : __initialize,
-        'insertRow'      : __insertRow
+        'insertRow'      : __insertRow,
+        'updateRow'      : __updateRow
     };
 
 })();
@@ -440,12 +472,15 @@ var employeePage = (function()
 
         eventBus.subscribe(EV_UPDATED_EMP, (response) => {
 
-            //employeeDatatables.
-            snackbar.showSuccess(response.message);
+            employeeDatatables.updateRow(response);
+            snackbar.showSuccess(response.data.message);
         });
 
         globalEventBus.subscribe(GEV_LOAD_EDIT, (response) => {
-            crudModal.fill(response.data.dataset);
+            crudModal.fill(
+                response.data.dataset,
+                response.row
+            );
         });
     }
 
@@ -456,8 +491,9 @@ var employeePage = (function()
             const selector = '#createEmployeeModal';
             const instance = new mdb.Modal(selector);
             
-            let actionMode   = null;
-            let empUpdateKey = $(selector).find('#record-key');
+            let actionMode      = null;
+            let empUpdateKey    = $(selector).find('#record-key');
+            let rowRef_forEdit  = null;
 
             let modal = {
                 'MODE_CREATE' : 1,
@@ -472,8 +508,11 @@ var employeePage = (function()
                     actionMode = mode;
                     instance.show();
                 },
-                'fill'  : function(data)
+                'fill'  : function(data, rowReference)
                 {
+                    if (rowReference)
+                        rowRef_forEdit = rowReference;
+
                     // Fill the modal with the loaded details
                     inputs['input-fname'].setValue(data.fname);
                     inputs['input-mname'].setValue(data.mname);
@@ -486,8 +525,21 @@ var employeePage = (function()
                     empUpdateKey.val(data.id);
 
                     this.open(this.MODE_UPDATE);
+                },
+                'resetRowRef' : () => {
+                    rowRef_forEdit = null;
+                    console.warn(rowRef_forEdit)
                 }
+                    
             };
+
+            // $(document).on('keypress', (e) => {
+            //     if (e.which == 117)
+            //     {
+            //         console.warn('rowRef_forEdit @ keypress')
+            //         console.warn(rowRef_forEdit)
+            //     }
+            // })
 
             let modalTitle  = $(selector).find('.modal-title');
             let modalTitles = {
@@ -574,6 +626,10 @@ var employeePage = (function()
                     data    : data,
                     success : function(response) {
 
+                        let updatedRow = (actionMode == modal.MODE_UPDATE)
+                                       ? rowRef_forEdit
+                                       : null;
+
                         terminateModal();
 
                         if (!response)
@@ -584,7 +640,7 @@ var employeePage = (function()
 
                         response = JSON.parse(response);
 
-                        if (response.code == -1)
+                        if (response.code == -1 || response.code != 0)
                         {
                             alertModal.showDanger(response.message);
                             return;
@@ -597,13 +653,18 @@ var employeePage = (function()
                                 break;
 
                             case modal.MODE_UPDATE:
-                                eventBus.publish(EV_UPDATED_EMP, response);
+                                eventBus.publish(EV_UPDATED_EMP, {
+                                    'data' : response,
+                                    'row'  : updatedRow
+                                });
                                 break;
                         }
                     },
                     error   : function(xhr, status, error) 
                     {
+                        //
                         // Validation Error
+                        //
                         if (xhr.status === 422)
                         {
                             let errorFields = xhr.responseJSON.errors;
@@ -615,8 +676,9 @@ var employeePage = (function()
 
                             return;
                         }
-                    
+                        //
                         // Handle General Error
+                        //
                         terminateModal();
                         alertModal.showDanger(GenericMessages.XHR_FAIL_ERROR);
                     },
@@ -632,7 +694,9 @@ var employeePage = (function()
             {
                 upsertForm.trigger('reset');
                 Object.values(inputs).forEach( i => i.reset());
+                
                 modal.isDirty = false;
+                modal.resetRowRef();
             }
 
             // Force closes the modal without warning on Dirty state
