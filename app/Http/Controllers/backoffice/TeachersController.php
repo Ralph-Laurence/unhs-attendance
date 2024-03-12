@@ -12,15 +12,15 @@ class TeachersController extends EmployeeController
     public function index()
     {
         $routes = [
-            'defaultDataSource'     => route(RouteNames::Teachers['all']),
-            'POST_Create_Employee'  => route(RouteNames::Teachers['create']),
-            'POST_Update_Employee'  => route(RouteNames::Teachers['update']),
-            'DELETE_Employee'       => route(RouteNames::Teachers['destroy']),
-            'DETAILS_Employee'      => route(RouteNames::Teachers['details']),
+            'defaultDataSource'     => route(RouteNames::Faculty['all']),
+            'POST_Create_Employee'  => route(RouteNames::Faculty['create']),
+            'POST_Update_Employee'  => route(RouteNames::Faculty['update']),
+            'DELETE_Employee'       => route(RouteNames::Faculty['destroy']),
+            'DETAILS_Employee'      => route(RouteNames::Faculty['show']),
 
-            'actionCreate'          => route(RouteNames::Teachers['create']),
-            'actionUpdate'          => route(RouteNames::Teachers['update']),
-            'actionEdit'            => route(RouteNames::Teachers['edit'])
+            'actionCreate'          => route(RouteNames::Faculty['create']),
+            'actionUpdate'          => route(RouteNames::Faculty['update']),
+            'actionEdit'            => route(RouteNames::Faculty['edit'])
         ];
 
         $roleStr    = Employee::RoleToString[Employee::RoleTeacher];

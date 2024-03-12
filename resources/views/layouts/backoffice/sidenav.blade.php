@@ -9,7 +9,7 @@ $routeItems =
     ['wildcard' => 'backoffice.late',                   'icon' => 'fa-calendar-minus',      'text' => 'Late',           'target' => route(RouteNames::Late['index']),        'menu_type' => 'sub'],
     ['wildcard' => 'backoffice.leave',                  'icon' => 'fa-calendar-week',       'text' => 'Leave',          'target' => route(RouteNames::Leave['index']),       'menu_type' => 'sub'],
     ['wildcard' => '',                                  'icon' => 'fa-qrcode',              'text' => 'Scanner',        'target' => route(RouteNames::Scanner['index']),     'menu_type' => 'sub'],
-    ['wildcard' => 'backoffice.teachers',               'icon' => 'fa-person-chalkboard',   'text' => 'Faculty',        'target' => route(RouteNames::Teachers['index'])],
+    ['wildcard' => 'backoffice.faculty',                'icon' => 'fa-person-chalkboard',   'text' => 'Faculty',        'target' => route(RouteNames::Faculty['index'])],
     ['wildcard' => 'backoffice.staff',                  'icon' => 'fa-people-carry-box',    'text' => 'Staff',          'target' => route(RouteNames::Staff['index'])],
     ['separator' => true],
     ['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-shield',              'text' => 'Administrator',  'target' => ''], // route(RouteNames::Staffs['index'])

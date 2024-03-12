@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="bg-image"></div>
-<div class="position-relative d-flex align-items-center justify-content-centerx auth-container flex-column w-100 h-100">
+<div class="position-relative d-flex align-items-center justify-content-center auth-container flex-column w-100 h-100">
 
     
     <div class="card login-card shadow-4-strong p-4">

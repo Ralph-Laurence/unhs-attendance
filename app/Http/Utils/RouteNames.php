@@ -50,14 +50,14 @@ class RouteNames
         'reject'     => 'backoffice.leave.reject'
     ];
 
-    public const Teachers = [
-        'index'     => 'backoffice.teachers',
-        'all'       => 'backoffice.teachers.all',
-        'edit'      => 'backoffice.teachers.edit',
-        'create'    => 'backoffice.teachers.create',
-        'update'    => 'backoffice.teachers.update',
-        'details'   => 'backoffice.teachers.details',
-        'destroy'   => 'backoffice.teachers.destroy',
+    public const Faculty = [
+        'index'     => 'backoffice.faculty',
+        'all'       => 'backoffice.faculty.all',
+        'edit'      => 'backoffice.faculty.edit',
+        'create'    => 'backoffice.faculty.create',
+        'update'    => 'backoffice.faculty.update',
+        'show'      => 'backoffice.faculty.show',
+        'destroy'   => 'backoffice.faculty.destroy',
     ];
 
     public const Trails = [

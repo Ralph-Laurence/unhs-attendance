@@ -104,8 +104,11 @@ function to_employeeDetailsDialog(selector)
         $(`${selector} #emp-details-idno`).text(jsonObj.idNo);
         $(`${selector} #emp-details-email`).text(jsonObj.email);
 
+        $(`${selector} #emp-details-rank`).text(jsonObj.rank);
         $(`${selector} #emp-details-status`).text(jsonObj.status);
         $(`${selector} #emp-details-contact`).text(jsonObj.phone);
+
+        $(`${selector} #emp-details-qrcode`).attr('src', jsonObj.qrCode);
     }
 
     let dialog = {

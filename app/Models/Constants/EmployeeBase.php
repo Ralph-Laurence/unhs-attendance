@@ -17,7 +17,7 @@ abstract class EmployeeBase implements IEmployeeRanks
 {
     public static function describeRank(int $rank): string
     {
-        $ranks = self::getRanks();
+        $ranks = static::getRanks();
 
         if (!array_key_exists($rank, $ranks))
             return 'Unknown';

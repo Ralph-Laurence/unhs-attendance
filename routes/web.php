@@ -44,8 +44,6 @@ Route::controller(DailyTimeRecordController::class)->middleware(['auth'])
     Route::post('/backoffice/dtr',             'index')          ->name(RouteNames::DailyTimeRecord['index']);
     Route::post('/backoffice/dtr/timerecords', 'getTimeRecords') ->name(RouteNames::DailyTimeRecord['get']);
     Route::post('/backoffice/dtr/export/pdf',  'exportPdf')      ->name(RouteNames::DailyTimeRecord['exportPdf']);
-    
-    // Route::get('/printtest/{id}', 'printTest');
 });
 
 Route::controller(ScannerController::class)->group(function()
@@ -109,14 +107,14 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
 Route::controller(TeachersController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::get('/backoffice/employees/teachers',           'index')        ->name(RouteNames::Teachers['index']);
+    Route::get('/backoffice/employees/faculty',           'index')        ->name(RouteNames::Faculty['index']);
     
-    Route::post('/backoffice/employees/teachers/get',      'getTeachers')  ->name(RouteNames::Teachers['all']);
-    Route::post('/backoffice/employees/teachers/create',   'store')        ->name(RouteNames::Teachers['create']);
-    Route::post('/backoffice/employees/teachers/delete',   'destroy')      ->name(RouteNames::Teachers['destroy']);
-    Route::post('/backoffice/employees/teachers/details',  'details')      ->name(RouteNames::Teachers['details']);
-    Route::post('/backoffice/employees/teachers/update',   'update')       ->name(RouteNames::Teachers['update']);
-    Route::post('/backoffice/employees/teachers/edit',     'edit')         ->name(RouteNames::Teachers['edit']);
+    Route::post('/backoffice/employees/faculty/get',      'getTeachers')  ->name(RouteNames::Faculty['all']);
+    Route::post('/backoffice/employees/faculty/create',   'store')        ->name(RouteNames::Faculty['create']);
+    Route::post('/backoffice/employees/faculty/delete',   'destroy')      ->name(RouteNames::Faculty['destroy']);
+    Route::post('/backoffice/employees/faculty/details',  'show')         ->name(RouteNames::Faculty['show']);
+    Route::post('/backoffice/employees/faculty/update',   'update')       ->name(RouteNames::Faculty['update']);
+    Route::post('/backoffice/employees/faculty/edit',     'edit')         ->name(RouteNames::Faculty['edit']);
 });
 
 Route::controller(StaffController::class)->middleware(['auth'])
@@ -149,21 +147,6 @@ Route::controller(TestController::class)->group(function(){
     Route::get('/qrtest',   'qrsamples');
     Route::get('/pintest',  'pinsamples');
 });
-
-// Route::get('/download/qr-code/{filename}/{outputname?}', function($filename)
-// {
-//     // Define the file path
-//     $path = Extensions::getQRCode_storagePath($filename);
-
-//     // Download the file
-//     $file = response()->download($path, 'qr-code.png');
-
-//     // Delete the file after download
-//     $file->deleteFileAfterSend(true);
-
-//     return $file;
-
-// })->name('qr-download')->middleware(['auth']);
 
 Route::get('/download/qr-code/{filename}', function($filename)
 {

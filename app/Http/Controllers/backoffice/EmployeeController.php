@@ -25,6 +25,18 @@ class EmployeeController extends Controller
         $this->hashids = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
     }
 
+    // Load the employee details
+    public function show(Request $request)
+    {
+        $key = $request->input('key');
+        $id  = $this->hashids->decode($key);
+
+        $employee = new Employee;
+        $dataset  = $employee->getBasicDetails($id[0], $key);
+
+        return $dataset;
+    }
+
     public function store(EmployeePostRequest $request)
     {
         try
@@ -151,6 +163,15 @@ class EmployeeController extends Controller
         }
     }
 
+    public function destroy(Request $request)
+    {
+        $key = $request->input('rowKey');
+        $id = $this->hashids->decode($key);
+
+        $employee = new Employee;
+        return $employee->dissolve($id);
+    }
+
     private function addEmployee($inputs)
     {
         // Save the newly created employee into database
@@ -247,27 +268,6 @@ class EmployeeController extends Controller
         }
 
         return [];
-    }
-
-    public function destroy(Request $request)
-    {
-        $key = $request->input('rowKey');
-        $id = $this->hashids->decode($key);
-
-        $employee = new Employee;
-        return $employee->dissolve($id);
-    }
-
-    // Load the employee details
-    public function details(Request $request)
-    {
-        $key = $request->input('key');
-        $id  = $this->hashids->decode($key);
-
-        $employee = new Employee;
-        $dataset  = $employee->getBasicDetails($id[0]);
-
-        return $dataset;
     }
 
     public function loadAutoSuggest_EmpNo()

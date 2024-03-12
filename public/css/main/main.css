@@ -251,6 +251,11 @@ Dropdown Menu Overrides
 .text-14 {
     font-size: 14px;
 }
+
+.text-justify {
+    text-align: justify;
+    text-justify: inter-word;
+}
 /* 
 .text-xs {
     font-size: 0.75rem;

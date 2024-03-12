@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
+use App\Http\Utils\QRMaker;
+use App\Models\Constants\Faculty;
+use App\Models\Constants\Staff;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -82,7 +85,7 @@ class Employee extends Model implements Auditable
         ];
     }
 
-    public function getBasicDetails($id) : string
+    public function getBasicDetails($id, $hashedKey = '') : string
     {
         try
         { 
@@ -92,10 +95,28 @@ class Employee extends Model implements Auditable
                     self::f_Contact . ' as phone',
                     self::f_Email   . ' as email',
                     self::f_Status  . ' as status',
+                    self::f_Role    . ' as role',
+                    self::f_Rank    . ' as rank'
                 ])
                 ->selectRaw( self::getConcatNameDbRaw('', 'empname', Constants::NAME_STYLE_EASTERN) )
-                
-                ->firstOrFail();
+                ->firstOrFail()
+                ->toArray();
+
+            switch ($dataset['role'])
+            {
+                case Employee::RoleTeacher:
+                    $dataset['rank'] = Faculty::describeRank( $dataset['rank'] );
+                    break;
+
+                case Employee::RoleStaff:
+                    $dataset['rank'] = Staff::describeRank( $dataset['rank'] );
+                    break;
+            }
+
+            // This QR image is generated as Base64 URI with its content from Hashed Key. 
+            // When the hashed key is not provided, we simply return 404 string.
+            $qrCodeImg = !empty($hashedKey) ? QRMaker::generate($hashedKey) : '404';
+            $dataset['qrCode'] = $qrCodeImg;
 
             return json_encode([
                 'code'      => Constants::XHR_STAT_OK,
@@ -108,6 +129,7 @@ class Employee extends Model implements Auditable
             return Extensions::encodeFailMessage(Messages::READ_FAIL_INEXISTENT);
         }
         catch (\Exception $ex) {
+            error_log($ex->getMessage());
             // Common errors
             return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
         }
