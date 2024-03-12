@@ -46,6 +46,7 @@ var employeeDatatables = (function()
             width: '120px',
             className: 'text-truncate',
             data: 'emp_num',
+            name: 'emp_num',
             defaultContent: ''
         },
         // Third Column -> Name
@@ -291,6 +292,7 @@ var employeeDatatables = (function()
             let temp_rowData = temp_row.data();
 
             temp_rowData.empname = response.data['empname'];
+            temp_rowData.emp_num = response.data['emp_num'];
 
             let newRow = dataTable.row(temp_row).data(temp_rowData).invalidate().draw(false);
             
@@ -532,14 +534,6 @@ var employeePage = (function()
                 }
                     
             };
-
-            // $(document).on('keypress', (e) => {
-            //     if (e.which == 117)
-            //     {
-            //         console.warn('rowRef_forEdit @ keypress')
-            //         console.warn(rowRef_forEdit)
-            //     }
-            // })
 
             let modalTitle  = $(selector).find('.modal-title');
             let modalTitles = {
