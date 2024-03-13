@@ -1,7 +1,7 @@
 @extends('layouts.backoffice')
 
 @section('title')
-{{ 'Faculty' }}
+{{ 'Staff' }}
 @endsection
 
 @push('styles')
@@ -15,35 +15,10 @@
 
         <div class="row">
             <div class="col-2 flex-start">
-                <h6 class="card-title m-0">Faculty Directory</h6>
+                <h6 class="card-title m-0">Staff Directory</h6>
             </div>
             <div class="col flex-start gx-0 flex-row">
-                {{-- <div class="filter-indicators me-auto flex-start gap-2 d-hidden">
-                    <div class="filter-arrow filter-arrow-head-cap px-2">
-                        <i class="fas fa-filter me-2"></i>
-                        <span class="text-uppercase">Filters</span>
-                    </div>
-                    {{ -- MONTH FILTER -- }}
-                    <div class="filter-arrow filter-arrow-item">
-                        <i class="fas fa-calendar-days me-2"></i>
-                        <span class="text-uppercase text-truncate lbl-month-filter">Filters</span>
-                    </div>
-                    {{ -- EMPLOYEE FILTER -- }}
-                    <div class="filter-arrow filter-arrow-item">
-                        <i class="fas fa-user-tie me-2"></i>
-                        <span class="text-uppercase text-truncate lbl-role-filter">Filters</span>
-                    </div>
-                    {{ -- LEAVE TYPE FILTER -- }}
-                    <div class="filter-arrow filter-arrow-item">
-                        <i class="fas fa-chart-area me-2"></i>
-                        <span class="text-uppercase text-truncate lbl-leave-filter">Filters</span>
-                    </div>
-                    {{ -- LEAVE STATUS FILTER -- }}
-                    <div class="filter-arrow filter-arrow-item">
-                        <i class="fas fa-chart-line me-2"></i>
-                        <span class="text-uppercase text-truncate lbl-status-filter">Filters</span>
-                    </div>
-                </div> --}}
+                {{-- Nothing --}}
             </div>
             <div class="col-4 flex-end gap-2">
                 {{-- ADD BUTTON --}}
@@ -92,30 +67,22 @@
         </div>
     </div>
 </div>
-
-@push('dialogs')
-{{-- @include('modals.employee-form', [
-'employeeType' => $empType,
-'requireEmail' => true,
-'postCreate' => $routes['POST_Create_Employee'], // Route for create
-'postUpdate' => $routes['POST_Update_Employee'] // Route for update
-]) --}}
-
-@include('modals.create-employee', ['positions' => $positions, 'modalSetup' => $modalSetup])
-
-<x-employee-details-dialog as="employeeDetailsModal" :modalFor="$role"
-    datasource="{{ $routes['DETAILS_Employee'] }}" />
-@endpush
-
 @endsection
 
+@push('dialogs')
+
+    @include('modals.create-employee', ['positions' => $positions, 'modalSetup' => $modalSetup])
+
+    <x-employee-details-dialog 
+        as="employeeDetailsModal" 
+        :modalFor="$role" 
+        datasource="{{ $routes['DETAILS_Employee'] }}" />
+
+@endpush
+
 @push('scripts')
-<script>
-    //const route_deleteRecord  = "{{ $routes['DELETE_Employee'] }}";
-</script>
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
-{{-- <script src="{{ asset('js/main/backoffice/employee-page.js') }}"></script> --}}
 <script src="{{ asset('js/main/tests/employee-page.js') }}"></script>
 @endpush

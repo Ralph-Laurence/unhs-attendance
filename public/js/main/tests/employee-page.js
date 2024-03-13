@@ -102,7 +102,7 @@ var employeeDatatables = (function()
         eventBus   = addModuleEventBus();
         datasource = $(DATA_TABLE_SELECTOR).data('src-default');
 
-        empDetailsDialog = to_employeeDetailsDialog('#employeeDetailsModal2');
+        empDetailsDialog = to_employeeDetailsDialog('#employeeDetailsModal');
 
         __bindEvents();
         __bindTableDataSource();

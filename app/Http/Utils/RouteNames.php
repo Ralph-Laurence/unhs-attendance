@@ -66,19 +66,27 @@ class RouteNames
         'destroy'   => 'backoffice.faculty.destroy',
     ];
 
+    public const Staff = [
+        // 'index'     => 'backoffice.staff',
+        // 'all'       => 'backoffice.staff.all',
+        // 'create'    => 'backoffice.staff.create',
+        // 'update'    => 'backoffice.staff.update',
+        // 'details'   => 'backoffice.staff.details',
+        // 'destroy'   => 'backoffice.staff.destroy',
+
+        'index'     => 'backoffice.staff',
+        'all'       => 'backoffice.staff.all',
+        'edit'      => 'backoffice.staff.edit',
+        'create'    => 'backoffice.staff.create',
+        'update'    => 'backoffice.staff.update',
+        'show'      => 'backoffice.staff.show',
+        'destroy'   => 'backoffice.staff.destroy',
+    ];
+
     public const Trails = [
         'index'     => 'backoffice.attendance.index',
         'all'       => 'backoffice.attendance.trails.all',
         'exportPdf' => 'backoffice.attendance.trails.export.pdf',
-    ];
-
-    public const Staff = [
-        'index'     => 'backoffice.staff',
-        'all'       => 'backoffice.staff.all',
-        'create'    => 'backoffice.staff.create',
-        'update'    => 'backoffice.staff.update',
-        'details'   => 'backoffice.staff.details',
-        'destroy'   => 'backoffice.staff.destroy',
     ];
 
     public const AuditTrails = [

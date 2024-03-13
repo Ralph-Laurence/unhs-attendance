@@ -14,15 +14,15 @@ use Intervention\Image\Facades\Image;
 
 class QRMaker
 {
-    private static function getRelativePath($filename) 
-    {
-        return "public/qrcodes/$filename";
-    }
+    // private static function getRelativePath($filename) 
+    // {
+    //     return "public/qrcodes/$filename";
+    // }
 
-    private static function getAbsolutePath($filename) 
-    {
-        return Storage::path(self::getRelativePath($filename));
-    }
+    // private static function getAbsolutePath($filename) 
+    // {
+    //     return Storage::path(self::getRelativePath($filename));
+    // }
 
     //
     // Create the partial qr code with the frame
@@ -79,7 +79,9 @@ class QRMaker
         });
         
         // Delete the temporary QR code
-        Storage::delete($qrpath);
+        // Storage::delete($qrpath);
+        // Fire the custom event
+        event(new \App\Events\QRCodeSentEvent($qrpath));
     }
 
     public static function encodeQRCodeToPng(string $content)

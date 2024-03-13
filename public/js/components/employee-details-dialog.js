@@ -194,7 +194,7 @@ function to_employeeDetailsDialog(selector)
             url     : url,
             type    : 'POST',
             data    : {
-                //'_token': el.find('.frm-view-dtr .csrf').val(),
+                '_token': el.find('.frm-view-dtr .csrf').val(),
                 'key'   : employeeKey
             },
             success: function(response) 

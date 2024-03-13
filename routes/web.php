@@ -125,13 +125,22 @@ Route::controller(TeachersController::class)->middleware(['auth'])
 Route::controller(StaffController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::get('/backoffice/employees/staff',           'index')    ->name(RouteNames::Staff['index']);
+    // Route::get('/backoffice/employees/staff',           'index')    ->name(RouteNames::Staff['index']);
 
-    Route::post('/backoffice/employees/staff/get',      'getStaff') ->name(RouteNames::Staff['all']);
-    Route::post('/backoffice/employees/staff/create',   'store')    ->name(RouteNames::Staff['create']);
-    Route::post('/backoffice/employees/staff/delete',   'destroy')  ->name(RouteNames::Staff['destroy']);
-    Route::post('/backoffice/employees/staff/details',  'details')  ->name(RouteNames::Staff['details']);
-    Route::post('/backoffice/employees/staff/update',   'update')   ->name(RouteNames::Staff['update']);
+    // Route::post('/backoffice/employees/staff/get',      'getStaff') ->name(RouteNames::Staff['all']);
+    // Route::post('/backoffice/employees/staff/create',   'store')    ->name(RouteNames::Staff['create']);
+    // Route::post('/backoffice/employees/staff/delete',   'destroy')  ->name(RouteNames::Staff['destroy']);
+    // Route::post('/backoffice/employees/staff/details',  'details')  ->name(RouteNames::Staff['details']);
+    // Route::post('/backoffice/employees/staff/update',   'update')   ->name(RouteNames::Staff['update']);
+
+    Route::get('/backoffice/employees/staff',           'index')        ->name(RouteNames::Staff['index']);
+    
+    Route::post('/backoffice/employees/staff/get',      'getStaff')     ->name(RouteNames::Staff['all']);
+    Route::post('/backoffice/employees/staff/create',   'store')        ->name(RouteNames::Staff['create']);
+    Route::post('/backoffice/employees/staff/delete',   'destroy')      ->name(RouteNames::Staff['destroy']);
+    Route::post('/backoffice/employees/staff/details',  'show')         ->name(RouteNames::Staff['show']);
+    Route::post('/backoffice/employees/staff/update',   'update')       ->name(RouteNames::Staff['update']);
+    Route::post('/backoffice/employees/staff/edit',     'edit')         ->name(RouteNames::Staff['edit']);
 });
 
 Route::controller(EmployeeController::class)->middleware(['auth'])
