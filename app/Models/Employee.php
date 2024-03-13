@@ -6,6 +6,7 @@ use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\QRMaker;
+use App\Http\Utils\RouteNames;
 use App\Models\Constants\Faculty;
 use App\Models\Constants\Staff;
 use Exception;
@@ -115,7 +116,8 @@ class Employee extends Model implements Auditable
 
             // This QR image is generated as Base64 URI with its content from Hashed Key. 
             // When the hashed key is not provided, we simply return 404 string.
-            $dataset['qrCode'] = '404';
+            $dataset['qrCode']       = '404';
+            $dataset['qrCodeResend'] = route(RouteNames::Employee['resendqr']);
 
             if ( !empty($hashedKey) )
             {
@@ -123,7 +125,7 @@ class Employee extends Model implements Auditable
 
                 $dataset['qrCode'] = $qrcode['imageUrl'];
                 $dataset['qrBlob'] = $qrcode['blobUrl'];
-                $dataset['qrFile'] = 'qr_code_'. $dataset['idNo'] . '.png';
+                $dataset['qrFile'] = 'qr-code-'.$dataset['idNo'].'-'.$dataset['empname'].'.png';
             }
 
             return json_encode([

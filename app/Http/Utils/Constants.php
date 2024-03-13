@@ -54,4 +54,6 @@ class Constants
 
     public const CTYPE_VOWEL     = 1;
     public const CTYPE_CONSONANT = 2;
+
+    public const MIME_TYPE_PNG = 'image/png';
 }

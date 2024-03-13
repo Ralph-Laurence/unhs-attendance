@@ -1,11 +1,11 @@
 .indef-meter {
-    height: 10px;
+    height: fit-content;
     position: relative;
 }
 
 .indef-meter > span {
     display: block;
-    height: 100%;
+    height: 10px;
     border-radius: 20px;
     background-image: linear-gradient(#ffac34, #f36d0a);
     position: relative;

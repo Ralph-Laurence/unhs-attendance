@@ -2,6 +2,8 @@
 
 namespace App\Http\Utils;
 
+use App\Models\Employee;
+
 class RouteNames
 {
     public const Dashboard = [
@@ -48,6 +50,10 @@ class RouteNames
         'edit'       => 'backoffice.leave.edit',
         'approve'    => 'backoffice.leave.approve',
         'reject'     => 'backoffice.leave.reject'
+    ];
+
+    public const Employee = [
+        'resendqr'  => 'backoffice.faculty.resendqr',
     ];
 
     public const Faculty = [

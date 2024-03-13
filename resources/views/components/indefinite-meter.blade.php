@@ -1,5 +1,5 @@
 <div id="{{ $as }}" {{ $attributes->merge(['class' => "indef-meter "]) }}>
-    <span></span>
+    <span class="d-block"></span>
     <small class="text-sm fst-italic indef-caption">
         @if ($caption)
             {{ $caption }}

@@ -143,12 +143,21 @@ var employeeDatatables = (function()
         eventBus.subscribe(BC_ROW_ACTION_ENDED   , (row) => showRowActionLoader(row, false));
         eventBus.subscribe(BC_ROW_ACTION_FAILED  , (row) => showRowActionLoader(row, false));
 
-        empDetailsDialog.loadEnd    = (response) => eventBus.publish(BC_ROW_ACTION_ENDED, response.row);
+        empDetailsDialog.loadEnd = (response) => {
+
+            if (response.row)
+                eventBus.publish(BC_ROW_ACTION_ENDED, response.row);
+        };
 
         empDetailsDialog.loadFailed = (response) => {
             alertModal.showDanger(response.message);
-            eventBus.publish(BC_ROW_ACTION_FAILED, response.row);
+
+            if (response.row)
+                eventBus.publish(BC_ROW_ACTION_FAILED, response.row);
         };
+
+        empDetailsDialog.emailSendFail  = (response) => alertModal.showDanger(response);
+        empDetailsDialog.emailSendOK    = (response) => snackbar.showSuccess(response);
     }
 
     function showRowActionLoader(row, show)
@@ -184,10 +193,7 @@ var employeeDatatables = (function()
                 var api = this.api();
 
                 if (api.rows().count() === 0)
-                {
-                    snackbar.showInfo('No records to show');
                     return;
-                }
 
                 updateRowEntryNumbers(api);
 
@@ -195,7 +201,6 @@ var employeeDatatables = (function()
 
                 if ('newRowInstance' in dataTable && dataTable.newRowInstance !== null)
                 {
-                    console.warn('new row')
                     if (!dataTable.newRowInstance.node())
                         return;
 
@@ -219,7 +224,10 @@ var employeeDatatables = (function()
                 dataSrc  : function (json) 
                 {
                     if (!json)
+                    {
+                        snackbar.showInfo('No records to show');
                         return;
+                    }
 
                     // Display Messages By Error Codes
                     if ('code' in json) 
@@ -240,10 +248,6 @@ var employeeDatatables = (function()
                 {
                     return {
                         '_token': getCsrfToken(),
-                        // 'monthIndex': recordFilters.month.getValue(),
-                        // 'role': recordFilters.role.getValue(),
-                        // 'type': recordFilters.leave.getValue(),
-                        // 'status': recordFilters.status.getValue(),
                     }
                 }
             },

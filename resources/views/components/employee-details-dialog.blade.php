@@ -7,7 +7,7 @@
                     <img src="{{ $modalIcon }}" width="24" height="24" alt="icon" class="modal-icon" />
                     <h6 class="modal-title mb-0" id="{{ $modalLabel }}">{{ $modalTitle }}</h6>
                 </div>
-                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                <button type="button" class="btn-close close-button" data-mdb-ripple-init data-mdb-dismiss="modal"
                     aria-label="Close"></button>
             </div>
             <div class="modal-body px-4">
@@ -127,11 +127,16 @@
                                             <span class="me-1">Save</span>
                                             <i class="fa-solid fa-download"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-warning flat-button shadow-0">
+                                        <button type="button" class="btn btn-sm btn-warning flat-button shadow-0" id="btn-send-qr">
                                             <span class="me-1">Send</span>
                                             <i class="fa-solid fa-paper-plane"></i>
                                         </button>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <x-indefinite-meter as="send-qr-progress"/>
                                 </div>
                             </div>
                         </div>
@@ -142,7 +147,7 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary flat-button" data-mdb-ripple-init
+                <button type="button" class="btn btn-secondary flat-button close-button" data-mdb-ripple-init
                     data-mdb-dismiss="modal">Close</button>
             </div>
         </div>

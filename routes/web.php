@@ -103,6 +103,11 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
 //     return view('home');
 // })->middleware(['auth']);
 
+Route::controller(EmployeeController::class)->middleware(['auth'])
+->group(function()
+{
+    Route::post('/backoffice/employees/send/qrcode',      'resendQR')     ->name(RouteNames::Employee['resendqr']);
+});
 
 Route::controller(TeachersController::class)->middleware(['auth'])
 ->group(function()

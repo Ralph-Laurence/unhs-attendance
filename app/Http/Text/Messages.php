@@ -18,7 +18,10 @@ class Messages
     public const GENERIC_DELETE_FAIL     = 'A problem has occurred while trying to delete the record.';
     public const GENERIC_DELETE_OK       = 'Record successfully deleted.';
 
-    public const EMPLOYEE_INEXISTENT     = 'Employee does not exist.';
+    public const EMPLOYEE_INEXISTENT     = 'The specified employee does not exist in our records.';
+    public const EMPLOYEE_QR_SENT_OK     = 'The QR Code has been successfully sent.';
+    public const EMPLOYEE_QR_SEND_FAIL   = 'There was an error handing off the email to the mail server. Please try again later.';
+
     public const READ_FAIL_INEXISTENT    = 'It seems the record doesn\'t exist or has already been removed.';
     public const MODIFY_FAIL_INEXISTENT  = 'It seems the record you\'re trying to modify doesn\'t exist or has already been removed.';
 

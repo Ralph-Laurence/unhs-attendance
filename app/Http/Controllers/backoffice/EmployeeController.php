@@ -9,6 +9,7 @@ use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\QRMaker;
 use App\Models\Employee;
+use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -268,6 +269,39 @@ class EmployeeController extends Controller
         }
 
         return [];
+    }
+
+    public function resendQR(Request $request)
+    {
+        $employeeKey = $request->input('key');
+        $id = $this->hashids->decode($employeeKey);
+
+        if (empty($id))
+            return Extensions::encodeFailMessage(Messages::CANT_PERFORM_ACTION);
+
+        try 
+        {
+            $employee = Employee::select([
+                Employee::f_EmpNo,
+                Employee::f_PINCode,
+                Employee::f_LastName,
+                Employee::f_FirstName,
+                Employee::f_Email
+            ])
+            ->findOrFail($id[0]);
+
+            QRMaker::generateAndSendTo($employee, $employeeKey);
+            
+            return Extensions::encodeSuccessMessage(Messages::EMPLOYEE_QR_SENT_OK);
+        } 
+        catch (ModelNotFoundException $ex)
+        {
+            return Extensions::encodeFailMessage(Messages::EMPLOYEE_INEXISTENT);
+        }
+        catch (Exception $ex) 
+        {
+            return Extensions::encodeFailMessage(Messages::EMPLOYEE_QR_SEND_FAIL);
+        }
     }
 
     public function loadAutoSuggest_EmpNo()

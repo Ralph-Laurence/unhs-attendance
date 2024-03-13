@@ -2,16 +2,32 @@
 
 namespace App\Http\Utils;
 
+use App\Http\Text\Messages;
+use App\Models\Employee;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
 class QRMaker
 {
-    public static function encodeQRCodeToPng(string $content)
+    private static function getRelativePath($filename) 
+    {
+        return "public/qrcodes/$filename";
+    }
+
+    private static function getAbsolutePath($filename) 
+    {
+        return Storage::path(self::getRelativePath($filename));
+    }
+
+    //
+    // Create the partial qr code with the frame
+    //
+    private static function makePartialQRCode(string $content)
     {
         $framePath  = public_path('images/internal/templates/qr-frame.png');
         $frame      = Image::make($framePath);
@@ -20,16 +36,56 @@ class QRMaker
         $pngWriter  = new PngWriter;
 
         $qrcode->setEncoding(new Encoding('UTF-8'))
-                ->setErrorCorrectionLevel(new ErrorCorrectionLevelHigh)
-                ->setSize(200)
-                ->setMargin(3);
+            ->setErrorCorrectionLevel(new ErrorCorrectionLevelHigh)
+            ->setSize(200)
+            ->setMargin(3);
 
         $generated  = $pngWriter->write($qrcode);
         $qrImage    = Image::make($generated->getString());
 
         $frame->insert($qrImage, 'center');
 
-        return $frame->encode('png');
+        return $frame;
+    }
+
+    public static function generateAndSendTo(Employee $employee, string $content)
+    {
+        // Build a filename for the qr code image file, with a format of:
+        // qrcode-[employee number]-[employee lastname].png
+
+        $fileName = 'qrcode-'.
+            $employee->getAttribute(Employee::f_EmpNo).'-'.
+            $employee->getAttribute(Employee::f_LastName).
+            '.png';
+
+        // Temporarily save the QR Code to a file.
+        $qrCode = self::makePartialQRCode($content);
+        $qrpath = Extensions::getQRCode_storagePath($fileName);
+       
+        $qrCode->save($qrpath);
+
+        Mail::send('emails.resendqrcode', [
+            'recipientName' => $employee->getAttribute(Employee::f_FirstName),
+            'timestamp'     => date('M. d, Y @g:i a')
+        ],
+        function($message) use($employee, $qrpath, $fileName) 
+        {
+            $message->to($employee->getAttribute(Employee::f_Email))
+                    ->subject('QR Code Attendance Pass')
+                    ->attach($qrpath, [
+                        'as'    => $fileName,
+                        'mime'  => Constants::MIME_TYPE_PNG
+                    ]);
+        });
+        
+        // Delete the temporary QR code
+        Storage::delete($qrpath);
+    }
+
+    public static function encodeQRCodeToPng(string $content)
+    {
+        $qrCode = self::makePartialQRCode($content);
+        return $qrCode->encode('png');
     }
 
     /**

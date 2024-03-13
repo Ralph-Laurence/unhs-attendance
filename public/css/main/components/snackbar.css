@@ -1,5 +1,5 @@
 .snackbar-frame {
-    z-index: 1020;
+    z-index: 1060; /* Slightly higher than Modal of 1055z */
     padding-bottom: 20px;
     /* padding-right: 20px; */
     overflow: hidden;
