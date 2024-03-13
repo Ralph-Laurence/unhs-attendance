@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Http\Utils\Extensions;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -162,6 +161,7 @@ class DailyTimeRecord extends Model
             // Order the final result by date series in ascending
             ->orderBy(DB::raw("DATE($seriesAlias.date)"), 'asc');
         
+        error_log($query->toSql());
         return $query;
     }
 

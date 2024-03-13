@@ -119,10 +119,6 @@ function addModuleEventBus()
             if (events[eventName])
             {
                 events[eventName].forEach( (listener) => listener(data) );
-                // events[eventName].forEach(function (listener)
-                // {
-                //     listener(data);
-                // })
             }
         }
 

@@ -11,11 +11,7 @@ use Intervention\Image\Facades\Image;
 
 class QRMaker
 {
-    /**
-     * Generates a QR code file that returns the BASE64 Image string
-     * that can be displayed inside an <img>
-     */
-    public static function generate(string $content)
+    public static function encodeQRCodeToPng(string $content)
     {
         $framePath  = public_path('images/internal/templates/qr-frame.png');
         $frame      = Image::make($framePath);
@@ -33,10 +29,32 @@ class QRMaker
 
         $frame->insert($qrImage, 'center');
 
-        // convert the generated qrImage to a data url
-        $imageURL = 'data:image/png;base64,' . base64_encode($frame->encode('png'));
+        return $frame->encode('png');
+    }
 
-        return $imageURL;
+    /**
+     * Generates a QR code file that returns the BASE64 Image string
+     * that can be displayed inside an <img>.
+     * 
+     * When $includeBlob = true, it returns an Object. Otherwise returns base64
+     */
+    public static function generate(string $content, bool $includeBlob = false)
+    {
+        $qrcode = self::encodeQRCodeToPng($content);
+
+        // convert the generated qrImage to a data url
+        $imageURL = 'data:image/png;base64,' . base64_encode($qrcode);
+
+        if (!$includeBlob)
+            return $imageURL;
+
+        // create a blob URL for the image data
+        $blob = 'data:application/octet-stream;base64,' . base64_encode($qrcode);
+
+        return [
+            'imageUrl' => $imageURL,
+            'blobUrl'  => $blob
+        ];
     }
 
     /**

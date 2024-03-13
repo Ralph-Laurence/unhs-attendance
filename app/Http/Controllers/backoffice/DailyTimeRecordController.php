@@ -128,6 +128,7 @@ class DailyTimeRecordController extends Controller
         }
         catch (Exception $ex) {
             error_log($ex->getMessage());
+            error_log($ex);
             // Handle general error
             return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
         }

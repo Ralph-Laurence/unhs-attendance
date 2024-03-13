@@ -123,7 +123,7 @@
                                         height="290">
                                     </div>
                                     <div class="qr-options flex-center gap-3">
-                                        <button class="btn btn-sm btn-warning flat-button shadow-0">
+                                        <button type="button" class="btn btn-sm btn-warning flat-button shadow-0" id="btn-save-qr">
                                             <span class="me-1">Save</span>
                                             <i class="fa-solid fa-download"></i>
                                         </button>

@@ -115,8 +115,16 @@ class Employee extends Model implements Auditable
 
             // This QR image is generated as Base64 URI with its content from Hashed Key. 
             // When the hashed key is not provided, we simply return 404 string.
-            $qrCodeImg = !empty($hashedKey) ? QRMaker::generate($hashedKey) : '404';
-            $dataset['qrCode'] = $qrCodeImg;
+            $dataset['qrCode'] = '404';
+
+            if ( !empty($hashedKey) )
+            {
+                $qrcode = QRMaker::generate($hashedKey, true);
+
+                $dataset['qrCode'] = $qrcode['imageUrl'];
+                $dataset['qrBlob'] = $qrcode['blobUrl'];
+                $dataset['qrFile'] = 'qr_code_'. $dataset['idNo'] . '.png';
+            }
 
             return json_encode([
                 'code'      => Constants::XHR_STAT_OK,

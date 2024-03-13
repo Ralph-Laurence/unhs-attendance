@@ -1,12 +1,13 @@
 function to_employeeDetailsDialog(selector)
 {
-    let el      = $(selector);
-    let modal   = new mdb.Modal(el);
+    let el              = $(selector);
+    let modal           = new mdb.Modal(el);
     
-    let empKey  = el.find('.frm-view-dtr #employee-key');
+    let empKey          = el.find('.frm-view-dtr #employee-key');
+    let btnSaveQR       = el.find('#btn-save-qr');
 
     if (empKey.length < 1)
-        return;//alert('cant find emp key');
+        return;
 
     el.find('.btn-view-dtr').on('click', function() 
     {
@@ -108,7 +109,46 @@ function to_employeeDetailsDialog(selector)
         $(`${selector} #emp-details-status`).text(jsonObj.status);
         $(`${selector} #emp-details-contact`).text(jsonObj.phone);
 
-        $(`${selector} #emp-details-qrcode`).attr('src', jsonObj.qrCode);
+        if (jsonObj.qrCode)
+        {
+            if (jsonObj.qrCode == '404')
+            {
+                toggleDownloadButton(false);
+                return;
+            }
+
+            toggleDownloadButton(true);
+
+            $(`${selector} #emp-details-qrcode`).attr('src', jsonObj.qrCode);
+
+            btnSaveQR.off('click').on('click', () => 
+            {
+                toggleDownloadButton(false);
+                beginDownload(jsonObj);
+
+                setTimeout(() => {
+                    toggleDownloadButton(true); 
+                }, 2000);
+            });
+        }
+    }
+
+    function toggleDownloadButton(toggle) 
+    {
+        btnSaveQR.prop('disabled', !toggle);
+    }
+
+    function beginDownload(data)
+    {
+        var a = document.createElement('a');
+
+        a.href = data.qrBlob;
+        a.download = data.qrFile;
+
+        document.body.appendChild(a);
+
+        a.click();  // Calling click() initiates the download
+        a.remove(); // Remove the element from the body
     }
 
     let dialog = {
