@@ -4,9 +4,8 @@ namespace App\Models;
 
 use App\Models\Base\IModelCommons;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class Staff extends Model implements IModelCommons
+class Staff extends Employee implements IModelCommons
 {
     use HasFactory;
 

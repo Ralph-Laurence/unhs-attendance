@@ -6,6 +6,7 @@ use App\Http\Controllers\backoffice\EmployeeControllerBase;
 use App\Http\Utils\RouteNames;
 use App\Models\Constants\StaffConstants;
 use App\Models\Employee;
+use App\Models\Staff;
 use Illuminate\Http\Request;
 
 class StaffController extends EmployeeControllerBase
@@ -67,8 +68,15 @@ class StaffController extends EmployeeControllerBase
         return $data;
     }
 
-    public function destroy(Request $request)
+    protected function Delete(int $employeeId) 
     {
+        $staff = new Staff;
+        return $staff->dissolve($employeeId);
+    }
 
+    protected function Insert(array $data)
+    {
+        $staff = new Staff;
+        return $staff->insert($data);
     }
 }
