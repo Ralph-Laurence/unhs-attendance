@@ -2,7 +2,7 @@
 // Not a Model, but a class that holds constant values
 namespace App\Models\Constants;
 
-class Faculty extends EmployeeBase
+class FacultyConstants extends EmployeeBase
 {
     // TEACHER ROLES ARE PREFIXED WITH '10' TO 
     // DIFFER BETWEEN STAFFS WITH PREFIX '20'

@@ -10,11 +10,12 @@
             &emsp;&emsp;&emsp;Hello {{ $recipientName }}, attached below is the QR code that will be used for your
             <span class="underline">authentication</span> in our Attendance Monitoring System.
 
-            To use it, simply present the QR code at the QR Code Scanner. This will automatically log your
+            To use it, simply present the QR code at the Scanner. This will automatically log your
             attendance in our system.
             <br><br>
-            Please keep it secure to prevent it from being lost.<br><br><span class="note">Here are some steps to
-                secure your QR code:</span>
+            Just in case you misplaced your QR Code, you may still log your attendance in to the system using your PIN Code. You must
+            not share this with anyone else.<br><br><b>PIN: <span class="underline">{{ $pin }}</span></b>
+            <br><br><span class="note">Here are some steps to secure your QR code:</span>
         </p>
         <ol type="1">
             <li> Store it in a secure location on your device or</li>

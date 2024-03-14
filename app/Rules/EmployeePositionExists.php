@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use App\Models\Constants\Faculty;
-use App\Models\Constants\Staff;
+use App\Models\Constants\FacultyConstants;
+use App\Models\Constants\StaffConstants;
 use App\Models\Employee;
 use Illuminate\Contracts\Validation\Rule;
 
@@ -36,7 +36,7 @@ class EmployeePositionExists implements Rule
         {
             case Employee::RoleTeacher:
                 
-                $teacherPositions = array_keys( Faculty::getRanks() );
+                $teacherPositions = array_keys( FacultyConstants::getRanks() );
                 
                 if (!in_array($this->position, $teacherPositions))
                     return false;
@@ -45,7 +45,7 @@ class EmployeePositionExists implements Rule
 
             case Employee::RoleStaff:
 
-                $staffPositions = array_keys( Staff::getRanks() );
+                $staffPositions = array_keys( StaffConstants::getRanks() );
                 
                 if (!in_array($this->position, $staffPositions))
                     return false;

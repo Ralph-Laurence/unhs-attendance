@@ -470,7 +470,51 @@ var employeePage = (function()
         eventBus.subscribe(EV_CREATED_EMP, (response) => {
 
             if ('download' in response)
-                downloadQRCode(response);
+            {
+                // This allows the browser to start the download by navigating to the url
+                // var base64String = response.download.split('base64,')[1];
+                // var byteCharacters = atob(base64String);
+                // var byteNumbers = new Array(byteCharacters.length);
+                // for (var i = 0; i < byteCharacters.length; i++)
+                // {
+                //     byteNumbers[i] = byteCharacters.charCodeAt(i);
+                // }
+                // var byteArray = new Uint8Array(byteNumbers);
+                // var blob = new Blob([byteArray], { type: 'application/octet-stream' });
+                // var blobUrl = URL.createObjectURL(blob);
+                // window.location = blobUrl;
+
+                // This version of download allows filenames
+                // Parse blob from JSON response
+                var base64String = response.download.split('base64,')[1];
+                var byteCharacters = atob(base64String);
+                var byteNumbers = new Array(byteCharacters.length);
+                for (var i = 0; i < byteCharacters.length; i++)
+                {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                var byteArray = new Uint8Array(byteNumbers);
+                var blob = new Blob([byteArray], { type: 'application/octet-stream' });
+
+                // Create a hidden <a> element
+                var a = document.createElement('a');
+                a.style.display = 'none';
+                document.body.appendChild(a);
+
+                // Set its href attribute to the blob's URL
+                a.href = window.URL.createObjectURL(blob);
+
+                // Set its download attribute to the filename from the response
+                a.download = response.filename;
+
+                // Programmatically click the <a> tag to start the download
+                a.click();
+
+                // Cleanup
+                window.URL.revokeObjectURL(a.href);
+                document.body.removeChild(a);
+                // downloadQRCode(response);
+            }
 
             employeeDatatables.insertRow(response);
             snackbar.showSuccess(response.message);

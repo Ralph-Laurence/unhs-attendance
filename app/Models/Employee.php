@@ -2,17 +2,23 @@
 //Fat Model, Skinny Controller
 namespace App\Models;
 
+use App\Http\Controllers\backoffice\StaffController;
+use App\Http\Controllers\backoffice\TeachersController;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
+use App\Http\Utils\EmployeeQRMail;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\QRMaker;
 use App\Http\Utils\RouteNames;
-use App\Models\Constants\Faculty;
-use App\Models\Constants\Staff;
+use App\Models\Constants\FacultyConstants;
+use App\Models\Constants\StaffConstants;
 use Exception;
+use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -22,6 +28,11 @@ class Employee extends Model implements Auditable
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
+
+    public function getMorphClass()
+    {
+        return get_class($this);
+    }
 
     public const HASH_SALT = 'EB7A1F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
@@ -106,11 +117,11 @@ class Employee extends Model implements Auditable
             switch ($dataset['role'])
             {
                 case Employee::RoleTeacher:
-                    $dataset['rank'] = Faculty::describeRank( $dataset['rank'] );
+                    $dataset['rank'] = FacultyConstants::describeRank( $dataset['rank'] );
                     break;
 
                 case Employee::RoleStaff:
-                    $dataset['rank'] = Staff::describeRank( $dataset['rank'] );
+                    $dataset['rank'] = StaffConstants::describeRank( $dataset['rank'] );
                     break;
             }
 
@@ -219,69 +230,89 @@ class Employee extends Model implements Auditable
         return $query;
     }
 
-    public function dissolve($employeeId)
+    public function dissolve(int $employeeId)
     {
-        $messages =
-        [
-            'fail' =>  [
-                self::RoleTeacher   => Messages::TEACHER_DELETE_FAIL,
-                self::RoleStaff     => Messages::STAFF_DELETE_FAIL,
-            ],
-            'success' =>  [
-                self::RoleTeacher   => Messages::TEACHER_DELETE_OK,
-                self::RoleStaff     => Messages::STAFF_DELETE_OK,
-            ],
-        ];
-
         try 
         {
-            // Find the employee
-            $employee = Employee::where('id', '=', $employeeId)
-                ->select([
-                    self::f_EmpNo    . ' as empNo',
-                    self::f_Role . ' as role'
-                ])
-                ->first();
+            // Make sure that employee exists before deleting
+            $employee = Employee::findOrFail($employeeId);
 
-            // Check if employee exists
-            if ($employee === null)
-                throw new Exception('Employee not found');
+            $delete = $employee->delete();
 
-            $employee = $employee->toArray();
+            if (!$delete)
+                throw new Exception;
 
-            // Grab a copy of his employee number. We will use his
-            // employee number to identify the qr code filename
-            $empNo = $employee['empNo'];
-            $role  = $employee['role'];
-
-            $delete = DB::transaction(function () use ($empNo, $employeeId, $role, $messages) 
-            {
-                // Delete the employee from database
-                $rowsDeleted = Employee::where('id', '=', $employeeId)->delete();
-
-                if ($rowsDeleted > 0) 
-                {
-                    // Delete his qr code file
-                    $qrCodeFile = Extensions::getQRCode_storagePath("qr_$empNo.png");
-
-                    if (File::exists($qrCodeFile)) 
-                    {
-                        if (!File::delete($qrCodeFile))
-                            throw new Exception('File deletion failed');
-                    }
-
-                    return Extensions::encodeSuccessMessage($messages['success'][$role]);
-                } 
-                else 
-                {
-                    return Extensions::encodeFailMessage($messages['fail'][$role]);
-                }
-            });
-
-            return $delete;
+            return Extensions::encodeSuccessMessage(Messages::GENERIC_DELETE_OK);
         } 
+        catch (ModelNotFoundException $ex){
+            return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);    
+        }
         catch (Exception $ex) {
-            return Extensions::encodeFailMessage($messages['fail'][$role]);
+            return Extensions::encodeFailMessage(Messages::GENERIC_DELETE_FAIL);
+        }
+    }
+
+    public function insert(array $data)
+    {
+        try
+        {
+            $model = Employee::create( $data['insertData'] );
+
+            // This hashed row id can be used both as a record identifier
+            // on the frontend tables, and as a QR Code content
+            $hashids      = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+            $hashedRowId  = $hashids->encode($model->getAttribute('id'));
+            
+            $extraData = $data['extraData'];
+
+            $emp_firstname = $model->getAttribute( self::f_FirstName );
+            $emp_lastname  = $model->getAttribute( self::f_LastName  );
+            $emp_number    = $model->getAttribute( self::f_EmpNo );
+
+            $frontendData = [
+                'emp_num'       => $emp_number,
+                'emp_status'    => $model->getAttribute(self::f_Status),
+                'id'            => $hashedRowId,
+                'total_lates'   => 0,
+                'total_leave'   => 0,
+                'total_absents' => 0,
+                'empname'       => implode(' ', [
+                    $emp_lastname . ',',
+                    $emp_firstname,
+                    $model->getAttribute( self::f_MiddleName ),
+                ])
+            ];
+
+            $qrcode = QRMaker::createAndSend($model, [
+                'qrContent'  => $hashedRowId,
+                'rawPinCode' => $extraData['rawPinCode'],
+                'saveQRCode' => $extraData['saveQRCode'],
+                'viewName'   => 'emails.newemployee'
+            ]);
+
+            if (is_array($qrcode) && array_key_exists('blob', $qrcode))
+            {
+                $frontendData['download'] = $qrcode['blob'];
+                $frontendData['filename'] = $qrcode['file'];
+            }
+
+            return Extensions::encodeSuccessMessage("Success!", $frontendData);
+        }
+        catch (QueryException $e) 
+        {
+            // Handle the error
+            echo $e->getMessage();            
+            return Extensions::encodeFailMessage('[Database Error] : '. Messages::CANT_SAVE_RECORD);   
+        }
+        catch (\Exception $ex) 
+        {
+            error_log($ex->getMessage());
+            $smtpErr = "failed with errno=10054 An existing connection was forcibly closed by the remote host";
+          
+            if (Str::contains($ex->getMessage(), $smtpErr))
+                return Extensions::encodeFailMessage("Record successfully saved but failed to send QR Code through email.");
+
+            return Extensions::encodeFailMessage(Messages::GENERIC_INSERT_FAIL);
         }
     }
 

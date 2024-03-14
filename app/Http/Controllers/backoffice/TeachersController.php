@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers\backoffice;
 
-use App\Http\Controllers\backoffice\EmployeeController;
+use App\Http\Controllers\backoffice\EmployeeControllerBase;
+use App\Http\Text\Messages;
+use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
 use App\Models\Employee;
-use App\Models\Constants\Faculty;
+use App\Models\Constants\FacultyConstants;
+use App\Models\Faculty;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 
-class TeachersController extends EmployeeController
+class TeachersController extends EmployeeControllerBase
 {
     public function index()
     {
@@ -24,7 +30,7 @@ class TeachersController extends EmployeeController
         ];
 
         $roleStr    = Employee::RoleToString[Employee::RoleTeacher];
-        $positions  = Faculty::getRanks(true);
+        $positions  = FacultyConstants::getRanks(true);
 
         $modalSetup = [
             'titleAdd'  => "Add new $roleStr",
@@ -47,5 +53,17 @@ class TeachersController extends EmployeeController
         $data  = $model->getEmployees(Employee::RoleTeacher);
 
         return $data;
+    }
+
+    protected function Delete(int $employeeId) 
+    {
+        $faculty = new Faculty;
+        return $faculty->dissolve($employeeId);
+    }
+
+    protected function Insert(array $data)
+    {
+        $faculty = new Faculty;
+        return $faculty->insert($data);
     }
 }

@@ -2,7 +2,7 @@
 // Not a Model, but a class that holds constant values
 namespace App\Models\Constants;
 
-class Staff extends EmployeeBase
+class StaffConstants extends EmployeeBase
 {
     public const GENERIC_STAFF      = 200;
 

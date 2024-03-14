@@ -14,16 +14,6 @@ use Intervention\Image\Facades\Image;
 
 class QRMaker
 {
-    // private static function getRelativePath($filename) 
-    // {
-    //     return "public/qrcodes/$filename";
-    // }
-
-    // private static function getAbsolutePath($filename) 
-    // {
-    //     return Storage::path(self::getRelativePath($filename));
-    // }
-
     //
     // Create the partial qr code with the frame
     //
@@ -48,7 +38,17 @@ class QRMaker
         return $frame;
     }
 
-    public static function generateAndSendTo(Employee $employee, string $content)
+    private static function encodeQRCodeToPng(string $content)
+    {
+        $qrCode = self::makePartialQRCode($content);
+        return $qrCode->encode('png');
+    }
+    //
+    //
+    //
+    //
+    //
+    public static function resendTo(Employee $employee, string $content)
     {
         // Build a filename for the qr code image file, with a format of:
         // qrcode-[employee number]-[employee lastname].png
@@ -84,11 +84,59 @@ class QRMaker
         event(new \App\Events\QRCodeSentEvent($qrpath));
     }
 
-    public static function encodeQRCodeToPng(string $content)
+    public static function uniformFilename(string $empNumber, string $empLastname) : string
     {
-        $qrCode = self::makePartialQRCode($content);
-        return $qrCode->encode('png');
+        return "qrcode-$empNumber-$empLastname.png";
     }
+
+    public static function createAndSend(Employee $employee, array $properties)//(EmployeeQRMail $qrmail)
+    {
+        error_log(print_r($properties, true));
+        // Build a filename for the qr code image file, with a format of:
+        // qrcode-[employee number]-[employee lastname].png
+        $fileName = self::uniformFilename(
+            $employee->getAttribute(Employee::f_EmpNo),
+            $employee->getAttribute(Employee::f_LastName)
+        );
+
+        // Temporarily save the QR Code to a file.
+        $qrCode = self::makePartialQRCode( $properties['qrContent'] );
+        $qrpath = Extensions::getQRCode_storagePath($fileName);
+       
+        $qrCode->save($qrpath);
+
+        Mail::send( $properties['viewName'], [
+            'recipientName' => $employee->getAttribute(Employee::f_FirstName),
+            'timestamp'     => date('M. d, Y @g:i a'),
+            'pin'           => $properties['rawPinCode']
+        ],
+        function($message) use($employee, $qrpath, $fileName) 
+        {
+            $message->to($employee->getAttribute(Employee::f_Email))
+                    ->subject('QR Code Attendance Pass')
+                    ->attach($qrpath, [
+                        'as'    => $fileName,
+                        'mime'  => Constants::MIME_TYPE_PNG
+                    ]);
+        });
+        
+        // Delete the temporary QR code
+        event(new \App\Events\QRCodeSentEvent($qrpath));
+
+        // create a blob URL for the image data including the download filename
+        if (array_key_exists('saveQRCode', $properties) && $properties['saveQRCode'] === true)
+        {
+            return [
+                'blob' => 'data:application/octet-stream;base64,' . base64_encode( $qrCode->encode('png') ),
+                'file' => $fileName
+            ];
+        }
+
+        return [];
+    }
+    //
+    //
+    //
 
     /**
      * Generates a QR code file that returns the BASE64 Image string
@@ -115,11 +163,15 @@ class QRMaker
         ];
     }
 
-    /**
-     * Generates a QR code file then returns the path
-     */
+
+
+    // [ |> OBSOLETE <| ]
     public static function saveFile(string $content, string $fileName = null, &$pathToAsset = null, &$downloadUrl = null) : string
     {
+            /**
+     * Generates a QR code file then returns the path
+     */
+
         // Load the QR Code frame template image
         $framePath  = public_path('images/internal/templates/qr-frame.png');
         $frame      = Image::make($framePath);
@@ -160,6 +212,7 @@ class QRMaker
         return $path;
     }
 
+    // [ |> OBSOLETE <| ]
     public static function createFrom(string $content, string $fileName = null) : array
     {
         // Load the QR Code frame template image

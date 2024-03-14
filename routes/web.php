@@ -6,7 +6,7 @@ use App\Http\Controllers\backoffice\AuditTrailsController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\backoffice\DashboardController;
-use App\Http\Controllers\backoffice\EmployeeController;
+use App\Http\Controllers\backoffice\EmployeeControllerBase;
 use App\Http\Controllers\backoffice\TeachersController;
 use App\Http\Controllers\backoffice\StaffController;
 use App\Http\Controllers\backoffice\LateAttendanceController;
@@ -14,7 +14,8 @@ use App\Http\Controllers\backoffice\LeaveRequestsController;
 use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
-
+use App\Models\Employee;
+use Hashids\Hashids;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -103,7 +104,7 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
 //     return view('home');
 // })->middleware(['auth']);
 
-Route::controller(EmployeeController::class)->middleware(['auth'])
+Route::controller(EmployeeControllerBase::class)->middleware(['auth'])
 ->group(function()
 {
     Route::post('/backoffice/employees/send/qrcode',      'resendQR')     ->name(RouteNames::Employee['resendqr']);
@@ -143,7 +144,7 @@ Route::controller(StaffController::class)->middleware(['auth'])
     Route::post('/backoffice/employees/staff/edit',     'edit')         ->name(RouteNames::Staff['edit']);
 });
 
-Route::controller(EmployeeController::class)->middleware(['auth'])
+Route::controller(EmployeeControllerBase::class)->middleware(['auth'])
 ->group(function()
 {
     Route::post('/ajax/employees/list/empno', 'loadAutoSuggest_EmpNo')->name(RouteNames::AJAX['list-empno']);
@@ -176,3 +177,11 @@ Route::get('/download/qr-code/{filename}', function($filename)
     return $file;
 
 })->name('qr-download')->middleware(['auth']);
+
+Route::get('/testscan', function() {
+    $hash = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
+    $encode = '0GAqKE3Wwz';
+    $decode = $hash->decode($encode)[0];
+
+    return "decoded -> $decode";
+});

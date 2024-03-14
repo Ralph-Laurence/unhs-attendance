@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\backoffice;
 
-use App\Http\Controllers\backoffice\EmployeeController;
+use App\Http\Controllers\backoffice\EmployeeControllerBase;
 use App\Http\Utils\RouteNames;
-use App\Models\Constants\Staff;
+use App\Models\Constants\StaffConstants;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 
-class StaffController extends EmployeeController
+class StaffController extends EmployeeControllerBase
 {
     public function index()
     {
@@ -43,7 +43,7 @@ class StaffController extends EmployeeController
         ];
 
         $roleStr    = Employee::RoleToString[Employee::RoleStaff];
-        $positions  = Staff::getRanks(true);
+        $positions  = StaffConstants::getRanks(true);
 
         $modalSetup = [
             'titleAdd'  => "Add new $roleStr",
@@ -65,5 +65,10 @@ class StaffController extends EmployeeController
         $data  = $model->getEmployees(Employee::RoleStaff);
 
         return $data;
+    }
+
+    public function destroy(Request $request)
+    {
+
     }
 }

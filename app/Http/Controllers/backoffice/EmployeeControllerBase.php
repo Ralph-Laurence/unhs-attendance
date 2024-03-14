@@ -17,9 +17,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
-class EmployeeController extends Controller
+//
+// Abstract Members will be Captilized to prevent confusion
+//
+abstract class EmployeeControllerBase extends Controller
 {
-    private $hashids;
+    protected abstract function Delete(int $employeeId);
+    protected abstract function Insert(array $data);
+
+    protected $hashids;
 
     public function __construct() 
     {
@@ -38,35 +44,91 @@ class EmployeeController extends Controller
         return $dataset;
     }
 
+    public function destroy(Request $request)
+    {
+        $key = $request->input('rowKey');
+        $id = $this->hashids->decode($key);
+
+        if (empty($id))
+            return Extensions::encodeFailMessage(Messages::READ_FAIL_INCOMPLETE);
+
+        return $this->Delete($id[0]);
+    }
+
     public function store(EmployeePostRequest $request)
     {
-        try
-        {
-            $inputs        = $request->validated();
-            $insertResults = $this->addEmployee( $inputs );
-            $saveLocalCopy = $inputs['option-save-qr'] == Constants::CHECKBOX_ON;
-            $frontendData  = $insertResults['frontEndData'];
+        $inputs = $request->validated();
+        $rawPin = random_int(1000, 9999);
 
-            $qrcode = $this->sendEmployeeQR(
-                $insertResults['modelInstance'], 
-                $saveLocalCopy
-            );
+        $data = [
+            'insertData' => [
+                Employee::f_EmpNo       => $inputs['input-id-no'],
+                Employee::f_FirstName   => $inputs['input-fname'],
+                Employee::f_MiddleName  => $inputs['input-mname'],
+                Employee::f_LastName    => $inputs['input-lname'],
+                Employee::f_Email       => $inputs['input-email'],
+                Employee::f_Contact     => $inputs['input-phone'],
+                Employee::f_Role        => $inputs['role'],
+                Employee::f_Rank        => $inputs['input-position'],
+                Employee::f_Status      => Employee::ON_STATUS_DUTY,
+                Employee::f_PINCode     => encrypt($rawPin)
+            ],
+            'extraData' => [
+                'rawPinCode' => $rawPin,
+                'saveQRCode' => ($inputs['option-save-qr'] == Constants::CHECKBOX_ON)
+            ]
+        ];
 
-            if (!empty($qrcode))
-                $frontendData['download'] = $qrcode;
+        return $this->Insert($data);
 
-            return Extensions::encodeSuccessMessage("Success!", $frontendData);
-        }
-        catch (\Exception $ex) 
-        {
-            error_log($ex->getMessage());
-            $smtpErr = "failed with errno=10054 An existing connection was forcibly closed by the remote host";
-          
-            if (Str::contains($ex->getMessage(), $smtpErr))
-                return Extensions::encodeFailMessage("Record successfully saved but failed to send QR Code through email.");
+        // try
+        // {
+            
 
-            return Extensions::encodeFailMessage(Messages::REVERT_TRANSACT_ON_FAIL);
-        }
+            // These data will be returned for displaying purposes.
+            // We change the encrypted PIN back to readable string
+            // after a successful insert, as it returns the model.
+            //$model->setAttribute(Employee::f_PINCode, $rawPinCode);
+
+            
+            // // on the frontend, and as a QR Code content
+            // $hashedRowId  = $this->hashids->encode($model->getAttribute('id'));
+
+            // return [
+            //     'modelInstance' => $model,
+            //     'frontEndData'  => [
+            //         'emp_num'       => $model->getAttribute(Employee::f_EmpNo),
+            //         'emp_status'    => $model->getAttribute(Employee::f_Status),
+            //         'id'            => $hashedRowId,
+            //         'total_lates'   => 0,
+            //         'total_leave'   => 0,
+            //         'total_absents' => 0,
+            //         'empname'       => implode(' ', [
+            //             $model->getAttribute(Employee::f_LastName) . ',',
+            //             $model->getAttribute(Employee::f_FirstName),
+            //             $model->getAttribute(Employee::f_MiddleName),
+            //         ])
+            //     ]
+            // ];
+
+
+
+
+            //$insertResults = $this->addEmployee( $inputs );
+        //     $saveLocalCopy = $inputs['option-save-qr'] == Constants::CHECKBOX_ON;
+        //     $frontendData  = $insertResults['frontEndData'];
+
+        //     $qrcode = $this->sendEmployeeQR(
+        //         $insertResults['modelInstance'], 
+        //         $saveLocalCopy
+        //     );
+
+        //     if (!empty($qrcode))
+        //         $frontendData['download'] = $qrcode;
+
+        //     return Extensions::encodeSuccessMessage("Success!", $frontendData);
+        // }
+        
     }
 
     // Performs a database update
@@ -164,64 +226,55 @@ class EmployeeController extends Controller
         }
     }
 
-    public function destroy(Request $request)
-    {
-        $key = $request->input('rowKey');
-        $id = $this->hashids->decode($key);
-
-        $employee = new Employee;
-        return $employee->dissolve($id);
-    }
-
     private function addEmployee($inputs)
     {
-        // Save the newly created employee into database
-        $insert = DB::transaction(function () use($inputs)
-        {
-            $rawPinCode = random_int(1000, 9999);
+        // // Save the newly created employee into database
+        // $insert = DB::transaction(function () use($inputs)
+        // {
+        //     $rawPinCode = random_int(1000, 9999);
 
-            // Save the data into the database
-            $model = Employee::create([
-                Employee::f_EmpNo       => $inputs['input-id-no'],
-                Employee::f_FirstName   => $inputs['input-fname'],
-                Employee::f_MiddleName  => $inputs['input-mname'],
-                Employee::f_LastName    => $inputs['input-lname'],
-                Employee::f_Email       => $inputs['input-email'],
-                Employee::f_Contact     => $inputs['input-phone'],
-                Employee::f_Role        => $inputs['role'],
-                Employee::f_Rank        => $inputs['input-position'],
-                Employee::f_Status      => Employee::ON_STATUS_DUTY,
-                Employee::f_PINCode     => encrypt($rawPinCode)       // 4-digit PIN
-            ]);
+        //     // Save the data into the database
+        //     $model = Employee::create([
+        //         Employee::f_EmpNo       => $inputs['input-id-no'],
+        //         Employee::f_FirstName   => $inputs['input-fname'],
+        //         Employee::f_MiddleName  => $inputs['input-mname'],
+        //         Employee::f_LastName    => $inputs['input-lname'],
+        //         Employee::f_Email       => $inputs['input-email'],
+        //         Employee::f_Contact     => $inputs['input-phone'],
+        //         Employee::f_Role        => $inputs['role'],
+        //         Employee::f_Rank        => $inputs['input-position'],
+        //         Employee::f_Status      => Employee::ON_STATUS_DUTY,
+        //         Employee::f_PINCode     => encrypt($rawPinCode)       // 4-digit PIN
+        //     ]);
 
-            // These data will be returned for displaying purposes.
-            // We change the encrypted PIN back to readable string
-            // after a successful insert, as it returns the model.
-            $model->setAttribute( Employee::f_PINCode, $rawPinCode );
+        //     // These data will be returned for displaying purposes.
+        //     // We change the encrypted PIN back to readable string
+        //     // after a successful insert, as it returns the model.
+        //     $model->setAttribute( Employee::f_PINCode, $rawPinCode );
 
-            // This hashed row id can be used both as a record identifier
-            // on the frontend, and as a QR Code content
-            $hashedRowId  = $this->hashids->encode($model->getAttribute('id'));
+        //     // This hashed row id can be used both as a record identifier
+        //     // on the frontend, and as a QR Code content
+        //     $hashedRowId  = $this->hashids->encode($model->getAttribute('id'));
 
-            return [
-                'modelInstance' => $model,
-                'frontEndData'  => [
-                    'emp_num'       => $model->getAttribute(Employee::f_EmpNo),
-                    'emp_status'    => $model->getAttribute(Employee::f_Status),
-                    'id'            => $hashedRowId,
-                    'total_lates'   => 0,
-                    'total_leave'   => 0,
-                    'total_absents' => 0,
-                    'empname'       => implode(' ', [
-                        $model->getAttribute(Employee::f_LastName).',',
-                        $model->getAttribute(Employee::f_FirstName),
-                        $model->getAttribute(Employee::f_MiddleName),
-                    ])
-                ]
-            ];
-        });
+        //     return [
+        //         'modelInstance' => $model,
+        //         'frontEndData'  => [
+        //             'emp_num'       => $model->getAttribute(Employee::f_EmpNo),
+        //             'emp_status'    => $model->getAttribute(Employee::f_Status),
+        //             'id'            => $hashedRowId,
+        //             'total_lates'   => 0,
+        //             'total_leave'   => 0,
+        //             'total_absents' => 0,
+        //             'empname'       => implode(' ', [
+        //                 $model->getAttribute(Employee::f_LastName).',',
+        //                 $model->getAttribute(Employee::f_FirstName),
+        //                 $model->getAttribute(Employee::f_MiddleName),
+        //             ])
+        //         ]
+        //     ];
+        // });
 
-        return $insert;
+        // return $insert;
     }
 
     private function sendEmployeeQR($modelInstance, bool $saveLocalCopy = false)
@@ -290,7 +343,7 @@ class EmployeeController extends Controller
             ])
             ->findOrFail($id[0]);
 
-            QRMaker::generateAndSendTo($employee, $employeeKey);
+            QRMaker::resendTo($employee, $employeeKey);
             
             return Extensions::encodeSuccessMessage(Messages::EMPLOYEE_QR_SENT_OK);
         } 

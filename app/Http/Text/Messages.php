@@ -15,6 +15,7 @@ class Messages
 
     public const DTR_PERIOD_UNRECOGNIZED = 'The date period was not recognized as a valid date range.';
 
+    public const GENERIC_INSERT_FAIL     = 'A problem has occurred while trying to create the record.';
     public const GENERIC_DELETE_FAIL     = 'A problem has occurred while trying to delete the record.';
     public const GENERIC_DELETE_OK       = 'Record successfully deleted.';
 
@@ -60,4 +61,6 @@ class Messages
     public const SEC_ERR_HASH_ID         = "Oops! It seems like the security key for the record you're trying to access doesn't match. Please try again later.\n\nIf the problem persists, consider reaching out to our support team for help.";
 
     public const CANT_PERFORM_ACTION     = 'The requested action could not be performed because some information was missing.';
+
+    public const CANT_SAVE_RECORD        = 'A problem is preventing your record from being saved. Please try again later.';
 }
