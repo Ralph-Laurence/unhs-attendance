@@ -252,6 +252,46 @@ class Employee extends Model implements Auditable
         }
     }
 
+    public function modify(array $data)
+    {
+        $hashids = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+        $extraData = $data['extraData'];
+
+        try
+        {
+            $updateKey = $extraData['updateKey'];
+            $id = $hashids->decode( $updateKey );
+
+            $model = Employee::where('id', '=', $id[0])->firstOrFail();
+            $model->update($data['updateData']);
+            
+            $frontendData = [
+                'emp_num'       => $model->getAttribute(Employee::f_EmpNo),
+                'id'            => $updateKey,
+                'empname'       => implode(' ', [
+                    $model->getAttribute(Employee::f_LastName).',',
+                    $model->getAttribute(Employee::f_FirstName),
+                    $model->getAttribute(Employee::f_MiddleName),
+                ])
+            ];
+
+            return Extensions::encodeSuccessMessage(
+                Messages::EMPLOYEE_UPDATE_OK,
+                $frontendData
+            );
+        }
+        catch (ModelNotFoundException $ex) {
+            // When no records of leave or employee were found
+            error_log($ex->getMessage());
+            return Extensions::encodeFailMessage(Messages::MODIFY_FAIL_INEXISTENT);
+        }
+        catch (\Exception $ex) {
+            // Common errors
+            error_log($ex->getMessage());
+            return Extensions::encodeFailMessage(Messages::REVERT_TRANSACT_ON_FAIL);
+        }
+    }
+
     public function insert(array $data)
     {
         try
@@ -301,7 +341,7 @@ class Employee extends Model implements Auditable
         catch (QueryException $e) 
         {
             // Handle the error
-            echo $e->getMessage();            
+            error_log($e->getMessage());
             return Extensions::encodeFailMessage('[Database Error] : '. Messages::CANT_SAVE_RECORD);   
         }
         catch (\Exception $ex) 

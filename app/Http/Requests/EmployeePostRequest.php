@@ -39,18 +39,18 @@ class EmployeePostRequest extends FormRequest
         // ->ignore($id) to exclude the current record.
         if ($this->has('update-key') && $this->filled('update-key'))
         {
-            $hashids = new Hashids(
-                Employee::HASH_SALT, 
-                Employee::MIN_HASH_LENGTH
-            );
-
-            $id = $hashids->decode( $this->input('update-key') )[0];
+            $hashids = new Hashids( Employee::HASH_SALT, Employee::MIN_HASH_LENGTH );
+            $id      = $hashids->decode( $this->input('update-key') )[0];
 
             $email_unique->ignore($id);
             $empid_unique->ignore($id);
         }
 
+        // The sometimes rule means that the field under validation must be present and 
+        // not empty only if it is present in the input data. This is useful for fields 
+        // that should be validated only when they are present in the input array.
         return [
+            'update-key'  => 'sometimes',
             'input-id-no' => [
                 'required',
                 'regex:' . RegexPatterns::NUMERIC_DASH,

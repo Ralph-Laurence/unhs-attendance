@@ -79,4 +79,10 @@ class StaffController extends EmployeeControllerBase
         $staff = new Staff;
         return $staff->insert($data);
     }
+
+    protected function Modify(array $data)
+    {
+        $staff = new Staff;
+        return $staff->modify($data);
+    }
 }

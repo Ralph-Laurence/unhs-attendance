@@ -66,4 +66,10 @@ class TeachersController extends EmployeeControllerBase
         $faculty = new Faculty;
         return $faculty->insert($data);
     }
+
+    protected function Modify(array $data)
+    {
+        $faculty = new Faculty;
+        return $faculty->modify($data);
+    }
 }
