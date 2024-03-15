@@ -116,6 +116,5 @@
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
-{{-- <script src="{{ asset('js/main/backoffice/employee-page.js') }}"></script> --}}
-<script src="{{ asset('js/main/tests/employee-page.js') }}"></script>
+<script src="{{ asset('js/main/backoffice/employee-page.js') }}"></script>
 @endpush

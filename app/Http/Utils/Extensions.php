@@ -220,7 +220,7 @@ class Extensions
         $mapping = "CASE ";
         
         foreach ($haystack as $key => $value) {
-            $mapping .= "WHEN $needle = $key THEN '$value' ";
+            $mapping .= "WHEN $needle = '$key' THEN '$value' ";
         }
 
         $mapping .= "END as $as";

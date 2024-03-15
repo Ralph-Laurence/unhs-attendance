@@ -41,9 +41,9 @@ class Constants
     public const TABLE_EMPLOYEES        = 'employees';
     public const TABLE_AUDIT_TRAILS     = 'audits';
 
-    public const AUDIT_EVENT_CREATE     = 'create';
-    public const AUDIT_EVENT_UPDATE     = 'update';
-    public const AUDIT_EVENT_DELETE     = 'delete';
+    public const AUDIT_EVENT_CREATE     = 'created';
+    public const AUDIT_EVENT_UPDATE     = 'updated';
+    public const AUDIT_EVENT_DELETE     = 'deleted';
 
     public const CHECKBOX_ON        = 'on';
     public const CHECKBOX_OFF       = 'off';

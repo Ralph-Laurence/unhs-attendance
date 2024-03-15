@@ -4,8 +4,12 @@ namespace App\Models;
 
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
+use App\Models\Constants\AuditableTypesMapping;
+use App\Models\Constants\FacultyConstants;
+use App\Models\Constants\StaffConstants;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 // This is a mask for the Audit model class. We don't want to 
@@ -32,41 +36,129 @@ class AuditTrails extends Model
         return Constants::TABLE_AUDIT_TRAILS;
     }
 
+    private array $actionIcons = [
+        Constants::AUDIT_EVENT_CREATE => 'action-create',
+        Constants::AUDIT_EVENT_UPDATE => 'action-update',
+        Constants::AUDIT_EVENT_DELETE => 'action-delete',
+    ];
+
+    private array $customEmployeeMap = [
+        Employee::f_Rank
+    ];
+
     public function getBasic()
     {
-        $fields = array_merge(Extensions::prefixArray('a.', [
-            self::f_Event        . ' as action',
-            self::f_Model_Type   . ' as target',
-            self::f_Old_Values   . ' as old_vals',
-            self::f_New_Values   . ' as new_vals',
+        $dataset  = $this->buildQueryBasic()->get();
+        $fieldMap = new AuditableTypesMapping;
+        
+        $employeeRankMappingSource = [
+            Faculty::getFriendlyName() => FacultyConstants::getRanks(),
+            Staff::getFriendlyName()   => StaffConstants::getRanks()
+        ];
 
-        ]), [
-            DB::raw(
-                "CASE 
-                    WHEN DATE(a.created_at) = CURDATE() THEN 'Today'
-                    ELSE DATE_FORMAT(a.created_at, '%b %d, %Y')
-                END as `date`"
-            ),
-            Extensions::time_format_hip('a.created_at'),
-            DB::raw("CONCAT(e.firstname,' ',e.lastname) AS adminname")
-        ]);
-
-        $dataset = DB::table(self::getTableName() . ' as a')
-                 ->select($fields)
-                 ->leftJoin('users as e', 'e.id', '=', 'a.'. self::f_User_FK)
-                 ->orderBy('a.created_at', 'DESC')
-                 ->get();
-                
         foreach ($dataset as $d)
         {
-            $model = $d->target;
+            $model = $d->affected;
 
+            // Change the auditable type to human-readable names
             if (method_exists($model, 'getFriendlyName'))
-                $d->target = $model::getFriendlyName();
+                $d->affected = $model::getFriendlyName();
             else
-                $d->target = 'Unknown Target Name';
+                $d->affected = 'Unknown';
+
+            $affected = strtolower($d->affected);
+
+            if ($affected == strtolower(Employee::STR_COLLECTIVE_ROLE_FACULTY))
+                $affected = strtolower(Employee::STR_ROLE_TEACHER);
+
+            // Sentence connector
+            $connector = (Extensions::getCTypeAlpha($affected) == Constants::CTYPE_VOWEL)
+                ? 'an'
+                : 'a';
+
+            // Describe the actions
+            switch ($d->action)
+            {
+                case Constants::AUDIT_EVENT_CREATE:
+                    $d->description = "Added a new $affected.";
+                    break;
+
+                case Constants::AUDIT_EVENT_UPDATE:
+                    
+                    if (!empty($d->old_values) && !empty($d->new_values))
+                    {
+                        $oldValues = json_decode($d->old_values, true);
+                        $newValues = json_decode($d->new_values, true);
+                        $changed   = array_diff_assoc($oldValues, $newValues);
+
+                        $description = [];
+                        
+                        foreach ($changed as $fieldName => $fieldValue)
+                        {
+                            $field = $fieldMap->mapField($model, $fieldName);
+                            $value = '';
+   
+                            // Only for employees, because it uses a separate rank
+                            // foreach employee type
+                            if ($fieldName == Employee::f_Rank)
+                            {
+                                $value = $fieldMap->mapValue(
+                                    $fieldName, 
+                                    $fieldValue, 
+                                    $employeeRankMappingSource[$d->affected], 
+                                    true
+                                );
+                            }
+
+                            // For others
+                            else
+                            {
+                                $value = $fieldMap->mapValue($fieldName, $fieldValue);
+                            }
+                            
+                            $description[] = "$field to $value";
+                        }
+
+                        $d->description = 'Changed ' . implode(', ', $description);
+                    }
+                    else
+                    {
+                        $d->description = "Modified $connector $affected record";
+                    }
+                    break;
+
+                case Constants::AUDIT_EVENT_DELETE:
+                    $d->description = "Removed $connector $affected.";
+                    break;
+            }
         }
 
         return $dataset;
+    }
+
+    private function buildQueryBasic() : Builder
+    {
+        $fields = Extensions::prefixArray('a.', [
+            self::f_Event        . ' as action',
+            self::f_Model_Type   . ' as affected',
+            self::f_Old_Values   . ' as old_values',
+            self::f_New_Values   . ' as new_values',
+        ]);
+
+        $query = DB::table(self::getTableName() . ' as a')
+               ->select($fields)
+               ->selectRaw(
+                   "CASE 
+                       WHEN DATE(a.created_at) = CURDATE() THEN 'Today'
+                       ELSE DATE_FORMAT(a.created_at, '%b %d, %Y')
+                   END as `date`,
+                   CONCAT(e.firstname,' ',e.lastname) AS adminname"
+               )
+               ->selectRaw(Extensions::mapCaseWhen($this->actionIcons, 'a.' . self::f_Event, 'action_icon'))
+               ->selectRaw(Extensions::time_format_hip('a.created_at'))
+               ->leftJoin('users as e', 'e.id', '=', 'a.' . self::f_User_FK)
+               ->orderBy('a.created_at', 'DESC');
+
+        return $query;
     }
 }

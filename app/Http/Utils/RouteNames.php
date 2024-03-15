@@ -53,7 +53,8 @@ class RouteNames
     ];
 
     public const Employee = [
-        'resendqr'  => 'backoffice.faculty.resendqr',
+        'resendqr'   => 'backoffice.employee.resendqr',
+        'list-empno' => 'backoffice.employee.list.empno',
     ];
 
     public const Faculty = [
@@ -95,6 +96,6 @@ class RouteNames
     ];
 
     public const AJAX = [
-        'list-empno' => 'backoffice.staff.list.empno',
+
     ];
 }

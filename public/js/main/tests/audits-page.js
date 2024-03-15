@@ -51,7 +51,7 @@ var auditsPage = (function ()
                     },
                     {
                         className: 'td-employee-name text-truncate',
-                        width: '240px',
+                        width: '180px',
                         data: 'adminname',
                         name: 'adminname',
                         defaultContent: ''
@@ -60,16 +60,37 @@ var auditsPage = (function ()
                         className: 'td-action text-truncate',
                         width: '120px',
                         data: 'action',
+                        render: function(data, type, row) {
+                            
+                            let html =
+                            `<div class="action-badge ${row.action_icon} px-2 py-1 w-100">
+                                <i class="fas me-1 fasicon"></i>
+                                <span class="label text-capitalize text-sm">${data}</span>
+                            </div>`;
+
+                            return html;
+                        }
                     },
                     {
-                        className: 'td-target text-truncate',
+                        className: 'td-affected text-truncate td-120',
                         width: '150px',
-                        data: 'target',
+                        data: 'affected',
                     },
                     {
-                        className: 'td-desc text-truncate',
-                        width: '200px',
-                        data: null //'description',
+                        className: 'td-desc text-truncate text-14',
+                        width: '250px',
+                        data: 'description',
+                    },
+                    {
+                        className: 'td-view-detail text-center px-1 position-sticky end-0 z-100 sticky-cell',
+                        width: '80px',
+                        data: null,
+                        render: function() 
+                        {
+                            let classList = `btn btn-sm btn-view px-2 btn-link text-primary-dark text-capitalize rounded-3`;
+
+                            return `<button type="button" class="${classList}">View</button>`;
+                        }
                     }
                 ];
             },
@@ -95,10 +116,7 @@ var auditsPage = (function ()
                         {
                             if (!json)
                                 return null;
-        
-                            // if (iconStyles == undefined)
-                            //     iconStyles = json.icon;
-        
+
                             // Display Messages By Error Codes
                             if ('code' in json) 
                             {

@@ -31,7 +31,7 @@ class LeaveRequestsController extends Controller
     {
         $routes = [
             'ajax_get_all'      => route(RouteNames::Leave['get']),
-            'ajax_load_empids'  => route(RouteNames::AJAX['list-empno']),
+            'ajax_load_empids'  => route(RouteNames::Employee['list-empno']),
             'deleteRoute'       => route(RouteNames::Leave['delete']),
             'editRoute'         => route(RouteNames::Leave['edit']),
             'approveRoute'      => route(RouteNames::Leave['approve']),

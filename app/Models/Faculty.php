@@ -13,6 +13,11 @@ class Faculty extends Employee implements IModelCommons
     // presenting this model in the Audits table.
     public static function getFriendlyName() : string 
     {
+        return 'Faculty';
+    }
+
+    public static function getBaseName(): string
+    {
         $fullClassName = static::class;
 
         return class_basename($fullClassName);

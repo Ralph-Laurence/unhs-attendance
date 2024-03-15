@@ -7,6 +7,7 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\backoffice\DashboardController;
 use App\Http\Controllers\backoffice\EmployeeControllerBase;
+use App\Http\Controllers\backoffice\GenericEmployeeController;
 use App\Http\Controllers\backoffice\TeachersController;
 use App\Http\Controllers\backoffice\StaffController;
 use App\Http\Controllers\backoffice\LateAttendanceController;
@@ -15,6 +16,8 @@ use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
 use App\Models\Employee;
+use App\Models\Faculty;
+use App\Models\Staff;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Route;
 
@@ -104,10 +107,13 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
 //     return view('home');
 // })->middleware(['auth']);
 
-Route::controller(EmployeeControllerBase::class)->middleware(['auth'])
+
+Route::controller(GenericEmployeeController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::post('/backoffice/employees/send/qrcode',      'resendQR')     ->name(RouteNames::Employee['resendqr']);
+    Route::post('/xhr/employees/list/empno',  'loadEmpNumbers')->name(RouteNames::Employee['list-empno']);
+    Route::post('/xhr/employees/send/qrcode', 'resendQRCode')  ->name(RouteNames::Employee['resendqr']);
+
 });
 
 Route::controller(TeachersController::class)->middleware(['auth'])
@@ -126,14 +132,6 @@ Route::controller(TeachersController::class)->middleware(['auth'])
 Route::controller(StaffController::class)->middleware(['auth'])
 ->group(function()
 {
-    // Route::get('/backoffice/employees/staff',           'index')    ->name(RouteNames::Staff['index']);
-
-    // Route::post('/backoffice/employees/staff/get',      'getStaff') ->name(RouteNames::Staff['all']);
-    // Route::post('/backoffice/employees/staff/create',   'store')    ->name(RouteNames::Staff['create']);
-    // Route::post('/backoffice/employees/staff/delete',   'destroy')  ->name(RouteNames::Staff['destroy']);
-    // Route::post('/backoffice/employees/staff/details',  'details')  ->name(RouteNames::Staff['details']);
-    // Route::post('/backoffice/employees/staff/update',   'update')   ->name(RouteNames::Staff['update']);
-
     Route::get('/backoffice/employees/staff',           'index')        ->name(RouteNames::Staff['index']);
     
     Route::post('/backoffice/employees/staff/get',      'getStaff')     ->name(RouteNames::Staff['all']);
@@ -142,12 +140,6 @@ Route::controller(StaffController::class)->middleware(['auth'])
     Route::post('/backoffice/employees/staff/details',  'show')         ->name(RouteNames::Staff['show']);
     Route::post('/backoffice/employees/staff/update',   'update')       ->name(RouteNames::Staff['update']);
     Route::post('/backoffice/employees/staff/edit',     'edit')         ->name(RouteNames::Staff['edit']);
-});
-
-Route::controller(EmployeeControllerBase::class)->middleware(['auth'])
-->group(function()
-{
-    Route::post('/ajax/employees/list/empno', 'loadAutoSuggest_EmpNo')->name(RouteNames::AJAX['list-empno']);
 });
 
 Route::controller(AuditTrailsController::class)->middleware(['auth']) //['only_su']
@@ -184,4 +176,15 @@ Route::get('/testscan', function() {
     $decode = $hash->decode($encode)[0];
 
     return "decoded -> $decode";
+});
+
+Route::get('/uri', function()
+{
+    $models = [
+        Employee::class,
+        Staff::class,
+        Faculty::class
+    ];
+
+    return dump(print_r($models, true));
 });

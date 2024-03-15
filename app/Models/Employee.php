@@ -10,6 +10,7 @@ use App\Http\Utils\EmployeeQRMail;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\QRMaker;
 use App\Http\Utils\RouteNames;
+use App\Models\Base\IDescriptiveAudit;
 use App\Models\Constants\FacultyConstants;
 use App\Models\Constants\StaffConstants;
 use Exception;
@@ -24,7 +25,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class Employee extends Model implements Auditable
+class Employee extends Model implements Auditable//, IDescriptiveAudit
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;

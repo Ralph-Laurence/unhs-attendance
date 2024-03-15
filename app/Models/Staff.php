@@ -13,6 +13,11 @@ class Staff extends Employee implements IModelCommons
     // presenting this model in the Audits table.
     public static function getFriendlyName() : string 
     {
+        return 'Staff';
+    }
+
+    public static function getBaseName(): string
+    {
         $fullClassName = static::class;
 
         return class_basename($fullClassName);

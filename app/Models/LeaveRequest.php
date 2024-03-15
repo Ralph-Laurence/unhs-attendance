@@ -69,7 +69,7 @@ class LeaveRequest extends Model implements Auditable
     // This is the friendly name that will be used when 
     // presenting this model in the Audits table.
     public static function getFriendlyName() : string {
-        return 'Leave Requests';
+        return 'Leave Request';
     }
     
     protected $guarded = [
@@ -95,12 +95,45 @@ class LeaveRequest extends Model implements Auditable
         return $leaveTypes;
     }
 
+    public static function getTypes($onlyValues = false) : array
+    {
+        $leaveTypes = [
+            self::LEAVE_TYPE_SICK               => self::LEAVE_SICK        ,
+            self::LEAVE_TYPE_VACATION           => self::LEAVE_VACATION    ,
+            self::LEAVE_TYPE_MATERNITY          => self::LEAVE_MATERNITY   ,
+            self::LEAVE_TYPE_PATERNITY          => self::LEAVE_PATERNITY   ,
+            self::LEAVE_TYPE_SERVICE_INCENTIVE  => self::LEAVE_SIL         ,
+            self::LEAVE_TYPE_SOLO_PARENT        => self::LEAVE_SOLO_PARENT ,
+            self::LEAVE_TYPE_SPECIAL            => self::LEAVE_SPECIAL     ,
+            self::LEAVE_TYPE_VAWC               => self::LEAVE_VAWC        ,
+        ];
+
+        if ($onlyValues)
+            return array_values($leaveTypes);
+
+        return $leaveTypes;
+    }
+
     public static function getLeaveStatuses($onlyValues = false) : array
     {
         $leaveStatuses = [
             self::LEAVE_PENDING  => self::LEAVE_STATUS_PENDING,
             self::LEAVE_APPROVED => self::LEAVE_STATUS_APPROVED,
             self::LEAVE_REJECTED => self::LEAVE_STATUS_REJECTED,
+        ];
+
+        if ($onlyValues)
+            return array_values($leaveStatuses);
+
+        return $leaveStatuses;
+    }
+
+    public static function getStatuses($onlyValues = false) : array
+    {
+        $leaveStatuses = [
+            self::LEAVE_STATUS_PENDING  => self::LEAVE_PENDING,
+            self::LEAVE_STATUS_APPROVED => self::LEAVE_APPROVED,
+            self::LEAVE_STATUS_REJECTED => self::LEAVE_REJECTED,
         ];
 
         if ($onlyValues)

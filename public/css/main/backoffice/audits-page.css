@@ -1,0 +1,45 @@
+#records-table .btn-view {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#records-table .btn-view:hover {
+    background-color: var(--primary-dark);
+    color: white;
+}
+
+#records-table .action-badge{
+    border-radius: 16px;
+    color: #221D39;
+    font-weight: 600;
+}
+
+#records-table .action-badge.action-create {
+    background-color: #1fc9a415;
+}
+
+#records-table .action-badge.action-delete {
+    background-color: #FF264115;
+}
+
+#records-table .action-badge.action-update {
+    background-color: #F1C75120;
+}
+
+#records-table .action-badge.action-create .fasicon::after {
+    font-family: var(--font-awesome);
+    content: '\f055';
+    color: #1FC9A4;
+}
+
+#records-table .action-badge.action-delete .fasicon::after {
+    font-family: var(--font-awesome);
+    content: '\f057';
+    color: #FF2641;
+}
+
+#records-table .action-badge.action-update .fasicon::after {
+    font-family: var(--font-awesome);
+    content: '\f0e7';
+    color: #F1C751;
+}

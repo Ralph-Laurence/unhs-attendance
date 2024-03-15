@@ -36,3 +36,17 @@ td.td-h30 {
     min-height: 30px;
     max-height: 30px;
 }
+
+th.th-250,
+td.td-250 {
+    height: 250px;
+    min-height: 250px;
+    max-height: 250px;
+}
+
+th.th-280,
+td.td-280 {
+    height: 280px;
+    min-height: 280px;
+    max-height: 280px;
+}
