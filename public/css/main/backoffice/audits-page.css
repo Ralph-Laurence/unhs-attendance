@@ -43,3 +43,48 @@
     content: '\f0e7';
     color: #F1C751;
 }
+
+/* AUDITING DETAILS MODAL */
+.audit-details-table {
+    font-size: 13px;
+}
+
+.audit-updates-table thead th {
+    background-color: #F1C75145;
+}
+
+.audit-deleted-table thead th {
+    background-color: #ffc9cfe0;
+}
+
+.audit-created-table thead th {
+    background-color: #C1E2CF;
+}
+
+.audit-details-table thead th 
+{
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+.audit-details-modal .description .affected {
+    border-bottom: 2px solid var(--warning-color);
+}
+
+.audit-details-modal .description .user {
+    color: var(--primary-dark);
+}
+
+.audit-details-modal .tracing-details .tracing-tag 
+{
+    min-width: 120px;
+    width: 120px;
+}
+
+.audit-details-modal .tracing-details .user-agent {
+    color: #452E5C;
+}
+
+.audit-details-modal .tracing-details .ip {
+    color: #BB3455;
+}

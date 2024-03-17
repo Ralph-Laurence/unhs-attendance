@@ -93,6 +93,7 @@ class RouteNames
     public const AuditTrails = [
         'index'     => 'backoffice.audits',
         'all'       => 'backoffice.audits.all',
+        'show'      => 'backoffice.audits.show',
     ];
 
     public const AJAX = [

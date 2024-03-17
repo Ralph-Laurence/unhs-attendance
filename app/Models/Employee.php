@@ -2,15 +2,12 @@
 //Fat Model, Skinny Controller
 namespace App\Models;
 
-use App\Http\Controllers\backoffice\StaffController;
-use App\Http\Controllers\backoffice\TeachersController;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
-use App\Http\Utils\EmployeeQRMail;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\QRMaker;
 use App\Http\Utils\RouteNames;
-use App\Models\Base\IDescriptiveAudit;
+use App\Models\Traits\EmployeesAudit;
 use App\Models\Constants\FacultyConstants;
 use App\Models\Constants\StaffConstants;
 use Exception;
@@ -19,21 +16,32 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 
 class Employee extends Model implements Auditable//, IDescriptiveAudit
 {
     use HasFactory;
+    use EmployeesAudit;
     use \OwenIt\Auditing\Auditable;
 
     public function getMorphClass()
     {
         return get_class($this);
     }
+
+     /**
+     * Attributes to exclude from the Audit.
+     *
+     * @var array
+     */
+    protected $auditExclude = [
+        self::f_PINCode   ,
+        self::f_PINFlags  ,
+        self::f_Photo     ,
+        self::f_QrSecLevel,
+    ];
 
     public const HASH_SALT = 'EB7A1F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
@@ -89,6 +97,16 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
     protected $guarded = [
         'id'
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transformAudit(array $data): array
+    {
+        $this->beautifyTransforms($data);
+        
+        return $data;
+    }
 
     public static function getRoles() 
     {

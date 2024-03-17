@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
-use App\Models\Constants\AuditableTypesMapping;
-use App\Models\Constants\FacultyConstants;
-use App\Models\Constants\StaffConstants;
+
+use Hashids\Hashids;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -31,7 +33,16 @@ class AuditTrails extends Model
     public const f_Ip_Address   = 'ip_address';
     public const f_User_Agent   = 'user_agent';
 
-    public static function getTableName() 
+    public const HASH_SALT = 'BEEFC0DE'; // Just random string, nothing special
+    public const MIN_HASH_LENGTH = 10;
+
+    private function hashDecode(string $hash)
+    {
+        $hashids = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+        return $hashids->decode($hash)[0];
+    }
+
+    public static function getTableName()
     {
         return Constants::TABLE_AUDIT_TRAILS;
     }
@@ -42,103 +53,101 @@ class AuditTrails extends Model
         Constants::AUDIT_EVENT_DELETE => 'action-delete',
     ];
 
-    private array $customEmployeeMap = [
-        Employee::f_Rank
-    ];
+    public function viewAuditDetails(int $id)
+    {
+        try 
+        {
+            $row = $this->buildQueryViewDetails($id)->first();
+
+            if (!$row)
+                throw new ModelNotFoundException;
+
+            // Change the auditable type to human-readable names
+            $this->setAuditableModelFriendlyName($row);
+            
+            return json_encode([
+                'code'    => Constants::XHR_STAT_OK,
+                'dataset' => $row
+            ]);
+        } 
+        catch (ModelNotFoundException $ex) 
+        {
+            error_log($ex->getMessage());
+            // When no records of audit trails were found
+            return Extensions::encodeFailMessage(Messages::READ_FAIL_INEXISTENT);
+        } 
+        catch (\Exception $ex) 
+        {
+            error_log($ex->getMessage());
+            // Common errors
+            return Extensions::encodeFailMessage(Messages::READ_RECORD_FAIL);
+        }
+    }
 
     public function getBasic()
     {
         $dataset  = $this->buildQueryBasic()->get();
-        $fieldMap = new AuditableTypesMapping;
-        
-        $employeeRankMappingSource = [
-            Faculty::getFriendlyName() => FacultyConstants::getRanks(),
-            Staff::getFriendlyName()   => StaffConstants::getRanks()
-        ];
-
-        foreach ($dataset as $d)
+        $hashids  = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+    
+        foreach ($dataset as $row) 
         {
-            $model = $d->affected;
-
-            // Change the auditable type to human-readable names
-            if (method_exists($model, 'getFriendlyName'))
-                $d->affected = $model::getFriendlyName();
-            else
-                $d->affected = 'Unknown';
-
-            $affected = strtolower($d->affected);
-
-            if ($affected == strtolower(Employee::STR_COLLECTIVE_ROLE_FACULTY))
-                $affected = strtolower(Employee::STR_ROLE_TEACHER);
-
-            // Sentence connector
-            $connector = (Extensions::getCTypeAlpha($affected) == Constants::CTYPE_VOWEL)
-                ? 'an'
-                : 'a';
-
-            // Describe the actions
-            switch ($d->action)
-            {
-                case Constants::AUDIT_EVENT_CREATE:
-                    $d->description = "Added a new $affected.";
-                    break;
-
-                case Constants::AUDIT_EVENT_UPDATE:
-                    
-                    if (!empty($d->old_values) && !empty($d->new_values))
-                    {
-                        $oldValues = json_decode($d->old_values, true);
-                        $newValues = json_decode($d->new_values, true);
-                        $changed   = array_diff_assoc($oldValues, $newValues);
-
-                        $description = [];
-                        
-                        foreach ($changed as $fieldName => $fieldValue)
-                        {
-                            $field = $fieldMap->mapField($model, $fieldName);
-                            $value = '';
-   
-                            // Only for employees, because it uses a separate rank
-                            // foreach employee type
-                            if ($fieldName == Employee::f_Rank)
-                            {
-                                $value = $fieldMap->mapValue(
-                                    $fieldName, 
-                                    $fieldValue, 
-                                    $employeeRankMappingSource[$d->affected], 
-                                    true
-                                );
-                            }
-
-                            // For others
-                            else
-                            {
-                                $value = $fieldMap->mapValue($fieldName, $fieldValue);
-                            }
-                            
-                            $description[] = "$field to $value";
-                        }
-
-                        $d->description = 'Changed ' . implode(', ', $description);
-                    }
-                    else
-                    {
-                        $d->description = "Modified $connector $affected record";
-                    }
-                    break;
-
-                case Constants::AUDIT_EVENT_DELETE:
-                    $d->description = "Removed $connector $affected.";
-                    break;
-            }
+            $this->beautifyBasicAuditResults($row, $hashids);
         }
-
+    
         return $dataset;
     }
 
-    private function buildQueryBasic() : Builder
+    private function beautifyBasicAuditResults(&$row, $hashids)
+    {
+        $row->id = $hashids->encode($row->id);
+
+        // Change the auditable type to human-readable names
+        $this->setAuditableModelFriendlyName($row);
+
+        $recordFromAffected = 'record from ' . $row->affected;
+
+        // Describe the actions
+        switch ($row->action) 
+        {
+            case Constants::AUDIT_EVENT_CREATE:
+                $row->description = "Added a $recordFromAffected.";
+                return;
+
+            case Constants::AUDIT_EVENT_UPDATE:
+                if (empty($row->new_values)) 
+                {
+                    $row->description = "Modified a $recordFromAffected.";
+                    return;
+                }
+
+                $description = [];
+
+                foreach (json_decode($row->new_values, true) as $field => $value) 
+                {
+                    $description[] = "$field into '$value'";
+                }
+
+                $row->description = 'Changed ' . implode(', ', $description);
+                return;
+
+            case Constants::AUDIT_EVENT_DELETE:
+                $row->description = "Removed a $recordFromAffected.";
+                return;
+        }
+    }
+
+    private function setAuditableModelFriendlyName(&$row)
+    {
+        if (method_exists($row->affected, 'getFriendlyName'))
+            $row->affected = $row->affected::getFriendlyName();
+        else
+            $row->affected = 'Unknown';
+    }
+
+    private function buildQueryBasic(): Builder
     {
         $fields = Extensions::prefixArray('a.', [
+            'id',
             self::f_Event        . ' as action',
             self::f_Model_Type   . ' as affected',
             self::f_Old_Values   . ' as old_values',
@@ -146,18 +155,45 @@ class AuditTrails extends Model
         ]);
 
         $query = DB::table(self::getTableName() . ' as a')
-               ->select($fields)
-               ->selectRaw(
-                   "CASE 
+            ->select($fields)
+            ->selectRaw(
+                "CASE 
                        WHEN DATE(a.created_at) = CURDATE() THEN 'Today'
                        ELSE DATE_FORMAT(a.created_at, '%b %d, %Y')
                    END as `date`,
                    CONCAT(e.firstname,' ',e.lastname) AS adminname"
-               )
-               ->selectRaw(Extensions::mapCaseWhen($this->actionIcons, 'a.' . self::f_Event, 'action_icon'))
-               ->selectRaw(Extensions::time_format_hip('a.created_at'))
-               ->leftJoin('users as e', 'e.id', '=', 'a.' . self::f_User_FK)
-               ->orderBy('a.created_at', 'DESC');
+            )
+            ->selectRaw(Extensions::mapCaseWhen($this->actionIcons, 'a.' . self::f_Event, 'action_icon'))
+            ->selectRaw(Extensions::time_format_hip('a.created_at'))
+            ->leftJoin('users as e', 'e.id', '=', 'a.' . self::f_User_FK)
+            ->orderBy('a.created_at', 'DESC');
+
+        return $query;
+    }
+
+    private function buildQueryViewDetails(int $id) : Builder
+    {
+        $select = array_merge(
+            Extensions::prefixArray('a.', [
+                self::f_Event      . ' as action',
+                self::f_Model_Type . ' as affected',
+                self::f_Old_Values . ' as old_values',
+                self::f_New_Values . ' as new_values',
+                self::f_Url        . ' as url',
+                self::f_Ip_Address . ' as ip',
+                self::f_User_Agent . ' as ua',
+            ]), 
+            [
+                DB::raw("CONCAT_WS(' ', u.firstname, u.lastname) as user"),
+                'u.username as username',
+                DB::raw(Extensions::time_format_hip('a.created_at')),
+                DB::raw(Extensions::date_format_bdY('a.created_at'))
+            ]);
+
+        $query = DB::table(self::getTableName(), 'a')
+            ->leftJoin('users as u', 'u.id', '=', 'a.' . self::f_User_FK)
+            ->where('a.id', '=', $id)
+            ->select($select);
 
         return $query;
     }

@@ -58,7 +58,8 @@
         {{-- DATASET TABLE --}}
         <div class="w-100 position-relative overflow-hidden">
             <table class="table table-striped table-fixed w-100 table-sm table-hover dataset-table" id="records-table"
-                data-src-datasource="{{ $routes['getAll'] }}">
+                data-src-datasource="{{ $routes['getAll'] }}"
+                data-src-view-audit="{{ $routes['viewAudit'] }}">
                 <thead class="user-select-none">
                     <tr>
                         <th style="width: 80px;" class="record-counter sticky-header">#</th>
@@ -78,7 +79,14 @@
 </div>
 @endsection
 
+@push('dialogs')
+    <x-audit-trail-detail-create as="audit-details-create" />
+    <x-audit-trail-detail-delete as="audit-details-delete" />
+    <x-audit-trail-detail-update as="audit-details-update" />
+@endpush
+
 @push('scripts')
+<script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('js/main/tests/audits-page.js') }}"></script>
 @endpush

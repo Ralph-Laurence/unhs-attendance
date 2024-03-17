@@ -6,7 +6,7 @@
     gap: 0.5rem;
 }
 
-.row-actions button {
+.row-actions:not(.unstyled-buttons) button {
     border-radius: 2rem;
     width: 26px;
     height: 26px;

@@ -146,7 +146,10 @@ Route::controller(AuditTrailsController::class)->middleware(['auth']) //['only_s
 ->group(function()
 {
     Route::get('/backoffice/audit-trails',  'index')->name(RouteNames::AuditTrails['index']);
-    Route::post('/backoffice/audit-trails', 'getAll')->name(RouteNames::AuditTrails['all']);
+
+    Route::post('/backoffice/audit-trails/all',  'getAll')->name(RouteNames::AuditTrails['all']);
+    Route::post('/backoffice/audit-trails/view', 'show')->name(RouteNames::AuditTrails['show']);
+
 });
 
 Route::controller(TestController::class)->group(function(){
@@ -169,22 +172,3 @@ Route::get('/download/qr-code/{filename}', function($filename)
     return $file;
 
 })->name('qr-download')->middleware(['auth']);
-
-Route::get('/testscan', function() {
-    $hash = new Hashids(Employee::HASH_SALT, Employee::MIN_HASH_LENGTH);
-    $encode = '0GAqKE3Wwz';
-    $decode = $hash->decode($encode)[0];
-
-    return "decoded -> $decode";
-});
-
-Route::get('/uri', function()
-{
-    $models = [
-        Employee::class,
-        Staff::class,
-        Faculty::class
-    ];
-
-    return dump(print_r($models, true));
-});
