@@ -181,6 +181,14 @@ class AuditTrails extends Model
     
                     $query->where(self::f_Model_Type, '=', $models[$affected]);
                 }
+
+                if ($this->inputExists($request, 'searchTerm'))
+                {
+                    $searchTerm = $request->input('searchTerm');
+                    
+                    $query->whereRaw('CAST(old_values AS CHAR) LIKE ?',   ['%' . $searchTerm . '%'])
+                          ->orWhereRaw('CAST(new_values AS CHAR) LIKE ?', ['%' . $searchTerm . '%']);
+                }
             }
 
             $dataset  = $query->get();

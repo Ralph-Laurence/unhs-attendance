@@ -48,6 +48,11 @@ function to_timepicker(selector)
         $input.val( defaultValue ).trigger('input');
     };
 
+    let _toggle = function(enable)
+    {
+        $input.prop('disabled', !enable);
+    };
+
     _begin();
 
     return {
@@ -59,6 +64,8 @@ function to_timepicker(selector)
         getInput        : () => $input,
         getType         : () => 'timepicker',
         getValue        : () => $instance.value(),
+        disable         : () => _toggle(false),
+        enable          : () => _toggle(true),
         show            : _open
     }
 }

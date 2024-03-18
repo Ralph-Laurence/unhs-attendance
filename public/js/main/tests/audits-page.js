@@ -3,6 +3,7 @@ let auditDeleteDetailsModal;
 let auditCreateDetailsModal;
 
 let recordFilters = {};
+let recordFiltersState = {};
 let filtersContainer;
 
 var auditsPage = (function ()
@@ -100,6 +101,21 @@ var auditsPage = (function ()
         $('.filter-options-dialog .btn-close').on('click',   () => cancelFilter());
         $("#filters-dropdown-button").on('hide.bs.dropdown', () => cancelFilter());
 
+        recordFilters.fullTime.changed = () => {
+
+            let state = recordFilters.fullTime.getValue();
+ 
+            if (state == 'on')
+            {
+                recordFilters.timeFrom.disable();
+                recordFilters.timeTo.disable();
+                return;
+            }
+
+            recordFilters.timeFrom.enable();
+            recordFilters.timeTo.enable();
+        };
+
     };
 
     let viewAuditDetails = function(row)
@@ -188,8 +204,32 @@ var auditsPage = (function ()
 
     function cancelFilter() 
     {
-        // Read the last filter values from their history
-        Object.values(recordFilters).forEach(f => f.reset());
+        // Clear the state of the filters in the dropdown of filters
+        // only when we actually did a filter
+        if (recordFilters.useFilter.getValue() == 0)
+        {
+            Object.values(recordFilters).forEach(f => f.reset());
+        }
+        // Restore the filter states
+        else
+        {
+            for (let key in recordFiltersState)
+            {
+                if ( !(key in recordFilters) )
+                    continue;
+                
+                let state = recordFiltersState[key];
+
+                if (!state)
+                {
+                    recordFilters[key].reset();
+                    continue;
+                }
+
+                recordFilters[key].setValue(state);
+            }
+
+        }
 
         filtersContainer.hide();
     }
@@ -351,15 +391,12 @@ var auditsPage = (function ()
                         '_token': getCsrfToken(),
                     };
 
-                    console.warn("RECORD FILTERS: ");
-                    console.warn(recordFilters);
-
-                    console.warn("DATA TO SEND: ");
-                    console.warn(dataToSend);
-
                     for (let key in recordFilters)
                     {
-                        dataToSend[key] = recordFilters[key].getValue();
+                        let filterItem  = recordFilters[key].getValue();
+                        dataToSend[key] = filterItem;
+
+                        recordFiltersState[key] = filterItem;
                     }
 
                     return dataToSend;
