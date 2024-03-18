@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
+use App\Models\Traits\LeaveRequestsAudit;
 use Carbon\Carbon;
 use Exception;
 use Hashids\Hashids;
@@ -20,7 +21,18 @@ use OwenIt\Auditing\Contracts\Auditable;
 class LeaveRequest extends Model implements Auditable
 {
     use HasFactory;
+    use LeaveRequestsAudit;
     use \OwenIt\Auditing\Auditable;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transformAudit(array $data): array
+    {
+        $this->beautifyTransforms($data);
+        
+        return $data;
+    }
 
     public const f_Emp_FK_ID    = 'emp_fk_id';
     public const f_StartDate    = 'start_date';

@@ -18,7 +18,7 @@ class AuditTrailDetailUpdate extends Component
     public function __construct($as = null)
     {
         if (empty($as))
-            $this->as = 'employeeDetailsModal-' . Str::random(6);
+            $this->as = 'auditDetailsModal-' . Str::random(6);
         else
             $this->as = $as;
 
