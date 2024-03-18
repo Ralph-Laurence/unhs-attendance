@@ -15,14 +15,8 @@ let metaCSRF;
 let pinAuthTarget;
 let pinAuthModal;
 
-const scannerStopButton     = '#html5-qrcode-button-camera-stop';
-const scannerStartButton    = '#html5-qrcode-button-camera-start';
-const tableWrapperSelector  = '.attendance-table-wrapper';
-const attendanceTable       = '.attendance-table';
-const refractoryPeriod      = 10000; //ms
-
-const inactivityTime = 10000; // ms
-let inactivityTimer;
+const attendanceTable  = '.attendance-table';
+const refractoryPeriod = 10000; //ms
 
 $(document).ready(function() 
 {
@@ -58,9 +52,6 @@ function initialize()
 
     inputId = $('#input-id-no');
     inputPin = $('#input-pin-no');
-
-    // Start the timer when the page loads
-    resetTimer();
 }
 //
 // Handle events here   
@@ -112,21 +103,6 @@ function handleEvents()
         if ($(this).val())
             hideTextboxError($(this));
     });
-
-    $(scannerStopButton).on('click', () => {
-        hideScanTable();
-    });
-
-    $(scannerStartButton).on('click', () => {
-        showScanTable();
-
-        setTimeout(() => {
-            // allow 3secs before resetting the timer
-            // because the scanner is too slow when starting
-            resetTimer();
-        }, 3000);
-       
-    });
 }
 
 //==================================================//
@@ -155,10 +131,6 @@ function onScanSuccess(decodedText, decodedResult)
         playSound(beep_timeIn);                         // Play a beep sound after a successful scan
         submitScanResult(decodedText);                  // Process the scanned result
     } 
-
-    // Reset inactivity
-    resetTimer();
-
     // Otherwise, ignore the scanned qr code
 }
 //
@@ -293,36 +265,6 @@ function bindDatatableData()
     dataTable = $(attendanceTable).DataTable(options);
 }
 
-// Function to hide the table and stop the scanner
-function handleInactivity() {
-    hideScanTable();
-    closeScanner();
-    // Add your scanner stop code here
-}
-
-// Function to show the table and reset the timer
-function resetTimer() 
-{
-    clearTimeout(inactivityTimer);
-    showScanTable();
-    inactivityTimer = setTimeout(handleInactivity, inactivityTime);
-}
-
-function hideScanTable() {
-    $(tableWrapperSelector).addClass('d-none');
-}
-
-function showScanTable() {
-    $(tableWrapperSelector).removeClass('d-none');
-}
-
-function closeScanner() {
-    $(scannerStopButton).click();
-}
-
-function openScanner() {
-    $(scannerStartButton).click();
-}
 //==================================================//
 //:::::::::::::::    PIN CODE FORM   ::::::::::::::://
 //==================================================//
