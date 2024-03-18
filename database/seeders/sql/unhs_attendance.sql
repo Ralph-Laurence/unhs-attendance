@@ -86,9 +86,9 @@ INSERT INTO `attendances` (`id`, `emp_fk_id`, `time_in`, `lunch_start`, `lunch_e
 (35, 8, NULL, NULL, NULL, NULL, 'Absent', NULL, NULL, NULL, NULL, 3, '2024-01-15 18:00:01', '2024-01-15 18:00:01'),
 (36, 9, NULL, NULL, NULL, NULL, 'Absent', NULL, NULL, NULL, NULL, 3, '2024-01-15 18:00:01', '2024-01-15 18:00:01'),
 (37, 10, NULL, NULL, NULL, NULL, 'Absent', NULL, NULL, NULL, NULL, 3, '2024-01-15 18:00:01', '2024-01-15 18:00:01'),
-(38, 1, '2024-01-17 11:28:56', '2024-01-17 11:29:06', NULL, NULL, 'Lunch', NULL, NULL, NULL, '3Hrs 58mins 55secs', 3, '2024-01-16 11:28:56', '2024-01-16 11:29:06'),
+(38, 1, '2024-01-17 11:28:56', '2024-01-17 11:29:06', NULL, NULL, 'Lunch Break', NULL, NULL, NULL, '3Hrs 58mins 55secs', 3, '2024-01-16 11:28:56', '2024-01-16 11:29:06'),
 (39, 2, '2024-01-17 11:28:59', NULL, NULL, NULL, 'Present', NULL, NULL, NULL, '3Hrs 58mins 59secs', 3, '2024-01-16 11:28:59', '2024-01-16 11:28:59'),
-(40, 1, '2024-01-21 17:18:16', '2024-01-21 17:19:49', NULL, NULL, 'Lunch', NULL, NULL, NULL, '9Hrs 48mins 15secs', 3, '2024-01-21 09:18:16', '2024-01-21 09:19:49');
+(40, 1, '2024-01-21 17:18:16', '2024-01-21 17:19:49', NULL, NULL, 'Lunch Break', NULL, NULL, NULL, '9Hrs 48mins 15secs', 3, '2024-01-21 09:18:16', '2024-01-21 09:19:49');
 
 -- --------------------------------------------------------
 

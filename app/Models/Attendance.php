@@ -33,7 +33,7 @@ class Attendance extends Model
     public const f_WeekNo       = 'week_no';
 
     public const STATUS_PRESENT = 'Present';
-    public const STATUS_BREAK   = 'Lunch';
+    public const STATUS_BREAK   = 'Lunch Break';
     public const STATUS_ABSENT  = 'Absent';
     public const STATUS_LATE    = 'Late';
     public const STATUS_REST    = 'Rest';
