@@ -27,9 +27,9 @@
                 <div class="d-flex align-items-center mb-2 px-1 chart-title">
                     <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">Total Employees
                     </h6>
-                    <h5 class="my-1">123</h5>
+                    <h5 class="my-1" id="employee-count">0</h5>
                 </div>
-                <canvas id="employees-diff" class="min-chart-height"></canvas>
+                <canvas id="employees-diff" class="min-chart-height" data-src="{{ $routes['employeeCompare'] }}"></canvas>
             </div>
         </div>
     </div>

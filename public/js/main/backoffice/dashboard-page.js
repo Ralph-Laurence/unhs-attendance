@@ -38,31 +38,6 @@ new Chart(dailyAttendances, {
     }
 });
 
-const employeesDiffCtx = document.getElementById("employees-diff");
-
-new Chart(employeesDiffCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Faculty', 'Staff'],
-        datasets: [{
-            label: 'Count Diff.',
-            data: [50, 100],
-            backgroundColor: [
-                chartColors['primary'],
-                chartColors['success']
-            ]
-        }]
-    },
-    options: {
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        },
-        cutout: '70%'
-    }
-});
-
 const dailyWorkHrs = document.getElementById("daily-work-hrs");
 
 new Chart(dailyWorkHrs, {
@@ -82,4 +57,81 @@ new Chart(dailyWorkHrs, {
             tension         : 0.1,
         }]
     }
+});
+
+let dashboardPage = (function() {
+
+    let init = function() 
+    {
+        getEmployeeGraphings();
+    };
+
+    let bindEvents = function() {
+
+    };
+
+    function getEmployeeGraphings()
+    {
+        $.ajax({
+            url: $("#employees-diff").data('src'),
+            data: {
+                '_token' : getCsrfToken()
+            },
+            type: 'post',
+            success: function (response) 
+            {
+                let roles = [];
+                let count = [];
+                let total = 0;
+   
+                for (let key in response.data) 
+                {
+                    roles.push(key);
+                    count.push(response.data[key]);
+                    total += response.data[key];
+                }
+                
+                $('#employee-count').text(total);
+
+                const employeesDiffCtx = document.getElementById("employees-diff");
+
+                new Chart(employeesDiffCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: roles,
+                        datasets: [{
+                            label: 'Difference',
+                            data: count,
+                            backgroundColor: [
+                                chartColors['primary'],
+                                chartColors['success']
+                            ]
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            },
+            error: function (xhr, status, error) {  
+
+            }
+        });
+    }
+
+    return {
+        'init'   : init,
+        'handle' : bindEvents
+    }
+})();
+
+$(document).ready(function () 
+{
+    dashboardPage.init();
+    dashboardPage.handle();
 });
