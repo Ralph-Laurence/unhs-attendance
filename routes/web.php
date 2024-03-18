@@ -147,8 +147,8 @@ Route::controller(AuditTrailsController::class)->middleware(['auth']) //['only_s
 {
     Route::get('/backoffice/audit-trails',  'index')->name(RouteNames::AuditTrails['index']);
 
-    Route::post('/backoffice/audit-trails/all',  'getAll')->name(RouteNames::AuditTrails['all']);
-    Route::post('/backoffice/audit-trails/view', 'show')->name(RouteNames::AuditTrails['show']);
+    Route::post('/backoffice/audit-trails/all'      , 'getAll')->name(RouteNames::AuditTrails['all']);
+    Route::post('/backoffice/audit-trails/view'     , 'show')->name(RouteNames::AuditTrails['show']);
 
 });
 

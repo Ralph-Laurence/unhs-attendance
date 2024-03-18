@@ -8,7 +8,7 @@ class Constants
     public const OrgNameShort           = 'UNHS';
     public const OrganizationAddress    = 'Solano, Nueva Vizcaya';
     public const SystemName             = 'Attendance Monitoring System';
-    public const BuildVersion           = 'Alpha v1.0.0';
+    public const BuildVersion           = 'Alpha v1.2.0';
 
     public const BasicTimeFormat        = 'g:i A';
     public const TimestampFormat        = 'Y-m-d H:i:s';

@@ -40,8 +40,8 @@
 
 #records-table .action-badge.action-update .fasicon::after {
     font-family: var(--font-awesome);
-    content: '\f0e7';
-    color: #F1C751;
+    content: '\f021';
+    color: #f8ba35;
 }
 
 /* AUDITING DETAILS MODAL */

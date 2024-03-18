@@ -1,0 +1,79 @@
+.datetimepicker-textbox {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.datetimepicker-textbox .input-wrapper {
+    background-color: #F1F2F3;
+    box-shadow: 0 0 0 1px #d8d8d8;
+    height: 36px;
+    max-height: 36px;
+    overflow: hidden;
+    border-radius: 2rem;
+    padding-left: 10px;
+    padding-right: 10px;
+    /* width: 100%; */
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+}
+
+.datetimepicker-textbox .input-wrapper .gj-timepicker,
+.datetimepicker-textbox .input-wrapper .gj-datepicker {
+    width: 100%;
+}
+
+.datetimepicker-textbox .input-wrapper .gj-icon {
+    display: none;
+}
+
+.datetimepicker-textbox input {
+    appearance: none !important;
+    background: none;
+    border: none !important;
+    outline: none !important;
+    height: 100%;
+    width: 100%;
+    font-size: 15px;
+    font-family: var(--primary-font);
+    margin-right: auto !important;
+    /* padding-bottom: 2px; */
+}
+
+.datetimepicker-textbox input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #F1F2F3 inset !important;
+}
+
+.datetimepicker-textbox.has-error  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #FBD3D4 inset !important;
+}
+
+.datetimepicker-textbox.has-error input::placeholder {
+    /* color: #FF3651; */
+    color: #AF233A;
+}
+
+.datetimepicker-textbox.has-error .input-wrapper {
+    background-color: #FBD3D4;
+    box-shadow: 0 0 0 1px #FA8E96;
+}
+
+.datetimepicker-textbox.has-error .input-wrapper .main-control {
+    background-color: #FBD3D4 !important;
+}
+
+.datetimepicker-textbox.has-error .error-icon {
+    display: inline;
+    color: #FF283D;
+}
+
+.datetimepicker-textbox:not(.has-error) .error-icon {
+    display: none;
+}
+
+.datetimepicker-textbox.required .input-wrapper::after {
+    font-family: var(--font-awesome);
+    content: '\2a';
+    font-size: 9px;
+    color: var(--primary-dark);
+}

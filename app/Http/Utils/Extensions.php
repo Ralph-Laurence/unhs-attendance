@@ -25,30 +25,6 @@ class Extensions
         return Carbon::now()->weekOfYear;
     }
 
-    /**
-     * Returns an array containing the dates of the week, 
-     * with the first date having the array key "start" and 
-     * the last date having the array key "end". The dates 
-     * are formatted as "f d Y".
-     */
-    // public static function getWeekDateRange($weekNumber, $year) 
-    // {
-    //     $startDate = Carbon::now()->setISODate($year, $weekNumber, 1)->startOfDay();
-    //     $endDate = Carbon::now()->setISODate($year, $weekNumber, 7)->endOfDay();
-
-    //     $dates = [];
-
-    //     for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
-    //         $dates[] = $date->format('F d, Y');
-    //     }
-
-    //     return [
-    //         'start' => $dates[0],
-    //         'end' => $dates[count($dates) - 1],
-    //         'dates' => $dates
-    //     ];
-    // }
-
     /** 
      * Takes a date range as input and returns an array of day numbers 
      * that fall on a weekend within that range. 

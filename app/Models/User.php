@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Hashids\Hashids;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,6 +12,9 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    public const HASH_SALT = 'BADC0DE'; // Just random string, nothing special
+    public const MIN_HASH_LENGTH = 10;
 
     /**
      * The attributes that are mass assignable.
@@ -41,4 +45,22 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // Get users as associative array.
+    // We will use this for dropdowns
+    public static function getUsersAssc()
+    {
+        $hashids = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+
+        $user = User::selectRaw("id, CONCAT_WS(', ', lastname, firstname) as user")->get();
+        $dataset = [];
+
+        foreach ($user as $row)
+        {
+            $key = $hashids->encode($row->id);
+            $dataset[$row->user] = $key;
+        }
+        error_log(print_r($dataset, true));
+        return $dataset;
+    }
 }

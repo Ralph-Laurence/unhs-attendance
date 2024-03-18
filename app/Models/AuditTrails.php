@@ -5,13 +5,16 @@ namespace App\Models;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
-
+use App\Models\Constants\AuditableTypesProvider;
+use Carbon\Carbon;
+use Exception;
 use Hashids\Hashids;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 // This is a mask for the Audit model class. We don't want to 
@@ -84,17 +87,165 @@ class AuditTrails extends Model
         }
     }
 
-    public function getBasic()
+    private function inputExists($request, $input)
     {
-        $dataset  = $this->buildQueryBasic()->get();
-        $hashids  = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
-    
-        foreach ($dataset as $row) 
+        return $request->has($input) && $request->filled($input);
+    }
+
+    public function getBasic(Request $request)
+    {
+        $query = $this->buildQueryBasic();
+
+        try
         {
-            $this->beautifyBasicAuditResults($row, $hashids);
+            if ($this->inputExists($request, 'useFilter') && $request->input('useFilter') == 1)
+            {
+                if (
+                    $this->inputExists($request, 'timeFrom') && 
+                    $this->inputExists($request, 'timeTo')   && 
+                    $this->inputExists($request, 'date')
+                )
+                {
+                    if (
+                        $this->inputExists($request, 'fullTime') && 
+                        $request->input('fullTime') == Constants::CHECKBOX_ON
+                    )
+                    {
+                        $date = Carbon::parse($request->input('date'));
+                        
+                        if (is_int($date) && $date == -1)
+                            throw new \Carbon\Exceptions\InvalidFormatException;
+    
+                        $timeFrom = $date->startOfDay();
+                        $timeTo   = $date->copy()->endOfDay();
+
+                        $query->whereBetween('a.created_at', [$timeFrom, $timeTo]);
+                    }
+                    else
+                    {
+                        $timeFrom  = $request->input('timeFrom');
+                        $timeTo    = $request->input('timeTo');
+                        $rangeFrom = $this->parseDateTime($request->input('date'), $timeFrom);
+                        $rangeTo   = $this->parseDateTime($request->input('date'), $timeTo);
+
+                        if ((is_int($rangeFrom) && $rangeFrom == -1) ||
+                            (is_int($rangeTo) && $rangeTo == -1)
+                        )
+                            throw new \Carbon\Exceptions\InvalidFormatException;
+
+                        $query->whereBetween('a.created_at', [$rangeFrom, $rangeTo]);
+                    }
+                }
+    
+                if ($this->inputExists($request, 'user'))
+                {
+                    $userHash = new Hashids(User::HASH_SALT, User::MIN_HASH_LENGTH);
+                    $userid  = $userHash->decode($request->input('user'));
+    
+                    if (empty($userid))
+                    {
+                        throw new Exception('invalid user filter');
+                    }
+    
+                    $query->where(self::f_User_FK, '=', $userid);
+                }
+    
+                if ($this->inputExists($request, 'action'))
+                {
+                    $action  = $request->input('action');
+                    $actions = [ 
+                        Constants::AUDIT_EVENT_CREATE, 
+                        Constants::AUDIT_EVENT_UPDATE, 
+                        Constants::AUDIT_EVENT_DELETE
+                    ];
+    
+                    if (!in_array($action, $actions))
+                    {
+                        throw new Exception('invalid action filter');
+                    }
+    
+                    $query->where(self::f_Event, '=', $action);
+                }
+    
+                if ($this->inputExists($request, 'affected'))
+                {
+                    $affected = $request->input('affected');
+    
+                    $provider = new AuditableTypesProvider;
+                    $models = $provider->getAuditableTypes();
+    
+                    if (!in_array($affected, array_keys($models)))
+                    {
+                        throw new Exception('invalid affected filter');
+                    }
+    
+                    $query->where(self::f_Model_Type, '=', $models[$affected]);
+                }
+            }
+
+            $dataset  = $query->get();
+            $hashids  = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+
+            foreach ($dataset as $row) 
+            {
+                $this->beautifyBasicAuditResults($row, $hashids);
+            }
+
+            return json_encode([
+                'code' => Constants::XHR_STAT_OK,
+                'data' => $dataset
+            ]);
+        }
+        catch (\Carbon\Exceptions\InvalidFormatException $cx)
+        {
+            return Extensions::encodeFailMessage('Invalid date and time filter combination.');
+        }
+        catch (Exception $ex)
+        {
+            error_log($ex->getMessage() . ' happend at -> ' . $ex->getLine());
+            return Extensions::encodeFailMessage('The given filter combination contains invalid data.');
         }
     
         return $dataset;
+    }
+
+    // private function parseTime(string $timeString)
+    // {
+    //     try 
+    //     {
+    //         return Carbon::parse($timeString);
+    //     }
+    //     catch (Exception $ex)
+    //     {
+    //         return -1;
+    //     }
+    // }
+
+    private function parseDate(string $dateString)
+    {
+        try 
+        {
+            return Carbon::parse($dateString);
+        }
+        catch (Exception $ex)
+        {
+            error_log($ex->getMessage() . ' happend at -> ' . $ex->getLine());
+            return -1;
+        }
+    }
+
+
+    private function parseDateTime($date, $time)
+    {
+        try 
+        {
+            return Carbon::createFromFormat('H:i a', $time)->setDateFrom(Carbon::parse($date)); //parse("$date $time");
+        } 
+        catch (Exception $e) 
+        {
+            error_log("Failed to parse date and time: " . $e->getMessage());
+            return -1;
+        }
     }
 
     private function beautifyBasicAuditResults(&$row, $hashids)
