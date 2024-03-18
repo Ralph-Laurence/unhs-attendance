@@ -113,22 +113,87 @@ function handleEvents()
             hideTextboxError($(this));
     });
 
-    $(scannerStopButton).on('click', () => {
-        hideScanTable();
-    });
-
-    $(scannerStartButton).on('click', () => {
-        showScanTable();
-
-        setTimeout(() => {
-            // allow 3secs before resetting the timer
-            // because the scanner is too slow when starting
-            resetTimer();
-        }, 3000);
-       
-    });
+    // Use this pattern to observe changes to the render box.
+    // We will take advantage of this pattern to listen to 
+    // DOM mutations such as when the scanner is initialized,
+    // we can have access to the button selectors
+    observeRenderboxMutation();
 }
 
+function onStartButtonClick()
+{
+    showScanTable();
+
+    setTimeout(() =>
+    {
+        // allow 3secs before resetting the timer
+        // because the scanner is too slow when starting
+        resetTimer();
+    }, 3000);
+}
+
+function onStopButtonClick()
+{
+    hideScanTable();
+}
+
+function observeRenderboxMutation()
+{
+    // Select the node that will be observed for mutations
+    var targetNode = document.getElementById('reader');
+
+    // Options for the observer (which mutations to observe)
+    var config = { attributes: true, childList: true, subtree: true };
+
+    // Callback function to execute when mutations are observed
+    var startAdded = false;
+    var stopAdded = false;
+
+    var callback = function (mutationsList, observer)
+    {
+        for (let mutation of mutationsList)
+        {
+            if (mutation.type === 'childList')
+            {
+                var startElement = document.querySelector('#reader .html5-qrcode-element#html5-qrcode-button-camera-start');
+                var stopElement = document.querySelector('#reader .html5-qrcode-element#html5-qrcode-button-camera-stop');
+                if (startElement && !startAdded)
+                {
+                    // Once the start element is found, use it here
+                    startElement.addEventListener('click', function ()
+                    {
+                        onStartButtonClick();
+                        // alert('clicked start');
+                    });
+                    startAdded = true;
+                }
+                if (stopElement && !stopAdded)
+                {
+                    // Once the stop element is found, use it here
+                    stopElement.addEventListener('click', function ()
+                    {
+                        onStopButtonClick();
+                        // alert('clicked stop');
+                    });
+                    stopAdded = true;
+                }
+                if (startAdded && stopAdded)
+                {
+                    // Stop observing if both elements are found
+                    observer.disconnect();
+                    break;
+                }
+            }
+        }
+    };
+
+
+    // Create an observer instance linked to the callback function
+    var observer = new MutationObserver(callback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(targetNode, config);
+}
 //==================================================//
 //:::::::::::::::   QR CODE SCANNER  ::::::::::::::://
 //==================================================//
