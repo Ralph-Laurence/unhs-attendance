@@ -14,9 +14,11 @@ let inputPin;
 let metaCSRF;
 let pinAuthTarget;
 let pinAuthModal;
+let pinAuthFab;
 
-const scannerStopButton     = '#html5-qrcode-button-camera-stop';
-const scannerStartButton    = '#html5-qrcode-button-camera-start';
+// const scannerStopButton     = '#html5-qrcode-button-camera-stop';
+// const scannerStartButton    = '#html5-qrcode-button-camera-start';
+let btnScannerStop;
 const tableWrapperSelector  = '.attendance-table-wrapper';
 const attendanceTable       = '.attendance-table';
 const refractoryPeriod      = 10000; //ms
@@ -37,6 +39,7 @@ function initialize()
     metaCSRF      = $('meta[name="csrf-token"]').attr('content');
     pinAuthTarget = $('.frm-pin-auth').data('action-target');
     pinAuthModal  = new mdb.Modal($('#pinAuthModal'));
+    pinAuthFab    = $('#fab-pin-auth');
 
     // Initially load datatable data
     bindDatatableData();
@@ -120,21 +123,27 @@ function handleEvents()
     observeRenderboxMutation();
 }
 
-function onStartButtonClick()
+function onStartButtonClick(button)
 {
     showScanTable();
+    resetTimer();
 
+    pinAuthFab.prop('disabled', false);
+    /*
     setTimeout(() =>
     {
         // allow 3secs before resetting the timer
         // because the scanner is too slow when starting
         resetTimer();
-    }, 3000);
+    }, 3000);*/
 }
 
 function onStopButtonClick()
 {
+    stopTimer();
     hideScanTable();
+
+    pinAuthFab.prop('disabled', true);
 }
 
 function observeRenderboxMutation()
@@ -162,7 +171,7 @@ function observeRenderboxMutation()
                     // Once the start element is found, use it here
                     startElement.addEventListener('click', function ()
                     {
-                        onStartButtonClick();
+                        onStartButtonClick(startElement);
                         // alert('clicked start');
                     });
                     startAdded = true;
@@ -175,6 +184,7 @@ function observeRenderboxMutation()
                         onStopButtonClick();
                         // alert('clicked stop');
                     });
+                    btnScannerStop = $(stopElement);
                     stopAdded = true;
                 }
                 if (startAdded && stopAdded)
@@ -361,7 +371,10 @@ function bindDatatableData()
 // Function to hide the table and stop the scanner
 function handleInactivity() {
     hideScanTable();
-    closeScanner();
+    btnScannerStop.click();
+    pinAuthFab.prop('disabled', true);
+
+    snackbar.showWarn('Scanner has been stopped due to inactivity.');
     // Add your scanner stop code here
 }
 
@@ -373,20 +386,17 @@ function resetTimer()
     inactivityTimer = setTimeout(handleInactivity, inactivityTime);
 }
 
+function stopTimer()
+{
+    clearTimeout(inactivityTimer);
+}
+
 function hideScanTable() {
     $(tableWrapperSelector).addClass('d-none');
 }
 
 function showScanTable() {
     $(tableWrapperSelector).removeClass('d-none');
-}
-
-function closeScanner() {
-    $(scannerStopButton).click();
-}
-
-function openScanner() {
-    $(scannerStartButton).click();
 }
 //==================================================//
 //:::::::::::::::    PIN CODE FORM   ::::::::::::::://

@@ -107,7 +107,8 @@
     </div>
 
     <button type="button" data-mdb-toggle="modal" data-mdb-target="#pinAuthModal" data-mdb-ripple-init
-        class="btn shadow shadow-4-strong btn-floating fab fab-danger position-fixed mx-4 my-5 bottom-0 end-0" >
+        class="btn shadow shadow-4-strong btn-floating fab fab-danger position-fixed mx-4 my-5 bottom-0 end-0" 
+        id="fab-pin-auth">
         <i class="fa-solid fa-key"></i>
       </button>
 
