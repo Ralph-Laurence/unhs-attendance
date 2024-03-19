@@ -56,6 +56,7 @@ class RouteNames
     public const Employee = [
         'resendqr'   => 'backoffice.employee.resendqr',
         'list-empno' => 'backoffice.employee.list.empno',
+        'get-empnos' => 'backoffice.employee.list.empnos',
     ];
 
     public const Faculty = [

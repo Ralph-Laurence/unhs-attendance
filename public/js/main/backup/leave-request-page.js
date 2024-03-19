@@ -83,19 +83,19 @@ var auditsPage = (function ()
         };
 
         // Load employee id numbers into autocomplete textbox
-        // var inputIdNo = to_auto_suggest_ajax('#input-id-no',
-        //     {
-        //         'action'   : $(jq_RECORDS_TABLE).data('src-emp-ids'),
-        //         'csrfToken': getCsrfToken(),
-        //     },
-        //     (dataSource) => employeeMapping = dataSource
-        // );
+        var inputIdNo = to_auto_suggest_ajax('#input-id-no',
+            {
+                'action'   : $(jq_RECORDS_TABLE).data('src-emp-ids'),
+                'csrfToken': getCsrfToken(),
+            },
+            (dataSource) => employeeMapping = dataSource
+        );
 
         formElements = {
             mainForm : $('#frm-leave-request'),
             isDirty  : false,
             fields   : {
-                'idNo'          : { label: 'ID Number'      , input: to_typeahead('#input-id-no') }, // inputIdNo },
+                'idNo'          : { label: 'ID Number'      , input: inputIdNo },
                 'empName'       : { label: null             , input: to_textbox('#input-employee-name'), nullable: true },
                 'updateKey'     : { label: null             , input: to_textbox('#input-update-key')   , nullable: true },
                 'startDate'     : { label: 'Start Date'     , input: to_date_picker("#input-leave-start")   },
@@ -113,11 +113,6 @@ var auditsPage = (function ()
         };
 
         bindTableDataSource();
-        
-        loadEmployeeNumbers( (data) => {
-            console.warn(formElements.fields.idNo.input)
-            formElements.fields.idNo.input.setAdapter(data)
-        });
     };
 
     //============================
@@ -137,28 +132,20 @@ var auditsPage = (function ()
             });
         });
 
-        formElements.fields.idNo.input.itemSelected = (label, value) => {
-            formElements.fields.empName.input.setValue(value)
-        };
-
-        formElements.fields.idNo.input.changed = () => {
-            if (!formElements.fields.idNo.input.getValue())
-                formElements.fields.empName.input.reset()
-        };
         // Reflect the employee's name when an employee id was selected
-        // formElements.fields.idNo.input.getInput().on('valueSelected', function ()
-        // {
-        //     let needle = $(this).val();
+        formElements.fields.idNo.input.getInput().on('valueSelected', function ()
+        {
+            let needle = $(this).val();
 
-        //     if (!(needle in employeeMapping)) 
-        //     {
-        //         formElements.fields.empName.input.reset();
-        //         return;
-        //     }
+            if (!(needle in employeeMapping)) 
+            {
+                formElements.fields.empName.input.reset();
+                return;
+            }
             
-        //     formElements.fields.empName.input.setValue(employeeMapping[needle]);
-        // })
-        // .on('valueCleared', () => formElements.fields.empName.input.reset());
+            formElements.fields.empName.input.setValue(employeeMapping[needle]);
+        })
+        .on('valueCleared', () => formElements.fields.empName.input.reset());
 
         // Handle form submission when save button was clicked
         leaveReqModal.getSaveButton().on('click', () => 
@@ -440,36 +427,6 @@ var auditsPage = (function ()
 
         // Initialize datatable if not yet created
         dataTable = $('.dataset-table').DataTable(options);
-    }
-
-    function loadEmployeeNumbers(ready) 
-    {
-        var err = 'Failed to load the list of Employee Numbers.';
-
-        $.ajax({
-            type: 'POST',
-            url:  $('.dataset-table').data('src-emp-nos'),
-            data: {
-                '_token' : getCsrfToken()
-            },
-            success: function(response)
-            {
-                if (!response || (response && ('code' in response && response.code == -1)))
-                {
-                    alertModal.showDanger(err);
-                    return;
-                }
-
-                if (typeof ready === 'function')
-                    ready(response.data);
-                // console.warn(response);
-            },
-            error: function(xhr, status, error)
-            {
-                alertModal.showDanger(err);
-                console.warn(xhr);
-            }
-        });
     }
 
     function applyFilters(applyFilter)
@@ -854,7 +811,10 @@ var auditsPage = (function ()
     {
         leaveReqModal.finish();
 
-        formElements.fields.idNo.input.enable();
+        var inputIdNo = formElements.fields.idNo.input;
+        
+        if (!inputIdNo.isEnabled())
+            inputIdNo.enable();
 
         // Clear the reference to the last clicked table row
         stateStackFrame.lastClickedRow = null;

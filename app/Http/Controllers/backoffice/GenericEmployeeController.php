@@ -4,6 +4,7 @@ namespace App\Http\Controllers\backoffice;
 
 use App\Http\Controllers\Controller;
 use App\Http\Text\Messages;
+use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\QRMaker;
 use App\Models\Employee;
@@ -80,5 +81,31 @@ class GenericEmployeeController extends EmployeeControllerBase
         {
             return Extensions::encodeFailMessage(Messages::EMPLOYEE_QR_SEND_FAIL);
         }
+    }
+
+    public function listEmployeeNos(Request $request)
+    {
+        $f_empNo  = Employee::f_EmpNo;
+        $fname    = Employee::f_FirstName;
+        $mname    = Employee::f_MiddleName;
+        $lname    = Employee::f_LastName;
+
+        // These data will be applied to the options of the auto-suggest input.
+        // For consistency, the displayed text will be called as 'label' while
+        // the actual data will be called 'value'.
+        //
+        $empIds = Employee::orderBy($f_empNo)->select([
+            $f_empNo . ' as label',
+
+            // Concatenate the names then do not include spaces if mname is empty
+            DB::raw("CONCAT_WS(' ', $lname, ',', $fname, NULLIF($mname, '')) as value")
+        ])
+        ->get()
+        ->toArray();
+
+        return response()->json([
+            'code' => Constants::XHR_STAT_OK,
+            'data' => $empIds
+        ]);
     }
 }

@@ -139,7 +139,8 @@
         {{-- DATASET TABLE --}}
         <div class="w-100 position-relative overflow-hidden">
             <table class="table table-striped table-fixed w-100 table-sm table-hover dataset-table" id="records-table"
-                data-src-emp-ids="{{ $routes['ajax_load_empids'] }}">
+                data-src-emp-ids="{{ $routes['ajax_load_empids'] }}"
+                data-src-emp-nos="{{ $routes['getEmpNos'] }}">
                 <thead class="user-select-none">
                     <tr>
                         <th class="record-counter sticky-header">#</th>
@@ -180,8 +181,9 @@
                     <div class="container">
                         <div class="row mb-3">
                             <div class="col">
-                                <x-text-box as="input-id-no" placeholder="Employee ID" maxlength="32" aria-autocomplete="none" 
-                                leading-icon-s="fa-user" suggest readonly/>
+                                {{-- <x-text-box as="input-id-no" placeholder="Employee ID" maxlength="32" aria-autocomplete="none" 
+                                leading-icon-s="fa-user" suggest readonly/> --}}
+                                <x-type-ahead as="input-id-no" leading-icon="fa-fingerprint" placeholder="Employee ID" maxlength="32"/>
                             </div>
                             <div class="col">
                                 <x-text-box as="input-employee-name" placeholder="Name" maxlength="64" aria-autocomplete="none" 

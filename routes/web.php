@@ -113,9 +113,9 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
 Route::controller(GenericEmployeeController::class)->middleware(['auth'])
 ->group(function()
 {
-    Route::post('/xhr/employees/list/empno',  'loadEmpNumbers')->name(RouteNames::Employee['list-empno']);
-    Route::post('/xhr/employees/send/qrcode', 'resendQRCode')  ->name(RouteNames::Employee['resendqr']);
-
+    Route::post('/xhr/employees/list/empno',  'loadEmpNumbers') ->name(RouteNames::Employee['list-empno']);
+    Route::post('/xhr/employees/send/qrcode', 'resendQRCode')   ->name(RouteNames::Employee['resendqr']);
+    Route::post('/xhr/employees/list/empnos', 'listEmployeeNos')->name(RouteNames::Employee['get-empnos']);
 });
 
 Route::controller(TeachersController::class)->middleware(['auth'])

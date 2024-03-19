@@ -37,6 +37,7 @@ class LeaveRequestsController extends Controller
             'approveRoute'      => route(RouteNames::Leave['approve']),
             'rejectRoute'       => route(RouteNames::Leave['reject']),
             'insertPostRoute'   => route(RouteNames::Leave['create']),
+            'getEmpNos'         => route(RouteNames::Employee['get-empnos'])
         ];
 
         // Dataset filters will be used for <select> dropdowns
