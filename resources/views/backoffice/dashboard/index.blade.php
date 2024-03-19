@@ -15,6 +15,35 @@
     .chart-title {
         min-height: 32px;
     }
+    .leave-count-wrapper .leave-count-label {
+        font-size: 14px;
+    }
+
+    .leave-count-wrapper .leave-count {
+        min-width: 38px;
+        min-height: 38px;
+        max-height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #021e3d;
+    }
+
+    .leave-count-wrapper {
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+    }
+    .leave-approved {
+        background-color: #69dbc2;
+    }
+    .leave-rejected {
+        background-color: #FF6E80;
+    }
+    .leave-pending {
+        background-color: #F9D385;
+    }
 </style>
 @endpush
 
@@ -53,8 +82,8 @@
                     </h6>
                 </div>
                 <div class="d-flex align-items-center">
-                    <h6 class="me-auto">On Duty: 16</h6>
-                    <h6>On Leave: 4</h6>
+                    <h6 class="me-auto">On Duty: <span id="count-on-duty">0</span></h6>
+                    <h6>On Leave: <span id="count-on-leave">0</span></h6>
                 </div>
             </div>
         </div>
@@ -64,10 +93,33 @@
                     <h6 class="card-title fw-bold text-14 text-uppercase my-1 text-truncate">Leave Requests
                     </h6>
                 </div>
-                <div class="d-flex align-items-center">
+                <div class="row mb-2">
+                    <div class="col">
+                        <div class="leave-count-wrapper leave-approved rounded-5 p-1">
+                            <small class="ms-1 leave-count-label me-auto">Approved</small>
+                            <div class="rounded-5 bg-white p-2 leave-count leave-count-approved">0</div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="leave-count-wrapper leave-rejected rounded-5 p-1">
+                            <small class="ms-1 leave-count-label me-auto">Rejected</small>
+                            <div class="rounded-5 bg-white p-2 leave-count leave-count-rejected">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="leave-count-wrapper leave-pending rounded-5 p-1">
+                            <small class="ms-1 leave-count-label me-auto">Pending</small>
+                            <div class="rounded-5 bg-white p-2 leave-count leave-count-pending">0</div>
+                        </div>
+                    </div>
+                    <div class="col"></div>
+                </div>
+                {{-- <div class="d-flex align-items-center">
                     <h6 class="me-auto">Approved: 4</h6>
                     <h6>Unapproved: 8</h6>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

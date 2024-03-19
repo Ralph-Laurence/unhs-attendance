@@ -80,48 +80,74 @@ let dashboardPage = (function() {
             type: 'post',
             success: function (response) 
             {
-                let roles = [];
-                let count = [];
-                let total = 0;
-   
-                for (let key in response.data) 
-                {
-                    roles.push(key);
-                    count.push(response.data[key]);
-                    total += response.data[key];
-                }
-                
-                $('#employee-count').text(total);
-
-                const employeesDiffCtx = document.getElementById("employees-diff");
-
-                new Chart(employeesDiffCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: roles,
-                        datasets: [{
-                            label: 'Difference',
-                            data: count,
-                            backgroundColor: [
-                                chartColors['primary'],
-                                chartColors['success']
-                            ]
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        },
-                        cutout: '70%'
-                    }
-                });
+                handleEmployeeDiff(response);
+                handleEmpStatusDiff(response);
+                handleLeaveReqDiff(response);
             },
             error: function (xhr, status, error) {  
 
             }
         });
+    }
+
+    function handleEmployeeDiff(response)
+    {
+        let roles = [];
+        let count = [];
+        let total = 0;
+
+        let employeeDifference = response.employeeDifference;
+
+        for (let key in employeeDifference) 
+        {
+            roles.push(key);
+            count.push(employeeDifference[key]);
+            total += employeeDifference[key];
+        }
+        
+        $('#employee-count').text(total);
+
+        const employeesDiffCtx = document.getElementById("employees-diff");
+
+        new Chart(employeesDiffCtx, {
+            type: 'doughnut',
+            data: {
+                labels: roles,
+                datasets: [{
+                    label: 'Difference',
+                    data: count,
+                    backgroundColor: [
+                        chartColors['primary'],
+                        chartColors['success']
+                    ]
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+
+    function handleEmpStatusDiff(response)
+    {
+        let diff = response.empStatusDifference;
+
+        $('#count-on-duty').text(diff['On Duty']);
+        $('#count-on-leave').text(diff['Leave']);
+    }
+
+    function handleLeaveReqDiff(response)
+    {
+        let diff = response.leaveStatusDifference;
+
+        $('.leave-count-wrapper .leave-count-pending') .text(diff['Pending']);
+        $('.leave-count-wrapper .leave-count-approved').text(diff['Approved']);
+        $('.leave-count-wrapper .leave-count-rejected').text(diff['Rejected']);
     }
 
     return {

@@ -115,7 +115,7 @@ var auditsPage = (function ()
         bindTableDataSource();
         
         loadEmployeeNumbers( (data) => {
-            console.warn(formElements.fields.idNo.input)
+            //console.warn(formElements.fields.idNo.input)
             formElements.fields.idNo.input.setAdapter(data)
         });
     };
