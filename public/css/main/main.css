@@ -133,6 +133,10 @@ a.link-primary:hover {
     background-color: var(--primary-color) !important;
 }
 
+.bg-color-warning {
+    background-color: var(--warning-color) !important;
+}
+
 /*
 Checkbox Overrides
 */

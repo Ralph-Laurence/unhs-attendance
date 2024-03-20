@@ -19,7 +19,8 @@
         font-size: 14px;
     }
 
-    .leave-count-wrapper .leave-count {
+    .leave-count-wrapper .leave-count,
+    .emp-status-count {
         min-width: 38px;
         min-height: 38px;
         max-height: 38px;
@@ -30,11 +31,13 @@
         color: #021e3d;
     }
 
-    .leave-count-wrapper {
+    .leave-count-wrapper,
+    .employee-status-wrapper {
         font-size: 14px;
         display: flex;
         align-items: center;
     }
+
     .leave-approved {
         background-color: #69dbc2;
     }
@@ -81,10 +84,24 @@
                     <h6 class="card-title fw-bold text-14 text-uppercase my-1 text-truncate">Employee Status
                     </h6>
                 </div>
-                <div class="d-flex align-items-center">
-                    <h6 class="me-auto">On Duty: <span id="count-on-duty">0</span></h6>
-                    <h6>On Leave: <span id="count-on-leave">0</span></h6>
+                <div class="row">
+                    <div class="col">
+                        <div class="employee-status-wrapper rounded-5 p-1">
+                            <h6 class="my-0 ms-1 me-auto text-14">On Duty</h6>
+                            <div class="rounded-5 bg-color-primary text-white p-2 emp-status-count" id="count-on-duty">0</div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="employee-status-wrapper rounded-5 p-1">
+                            <h6 class="my-0 ms-1 me-auto text-14">On Leave</h6>
+                            <div class="rounded-5 bg-color-warning p-2 emp-status-count" id="count-on-leave">0</div>
+                        </div>
+                    </div>
                 </div>
+                {{-- <div class="d-flex align-items-center">
+                    <h6 class="me-auto">On Duty: <span id="count-on-duty bg-color-primary p-2">0</span></h6>
+                    <h6>On Leave: <span id="">0</span></h6>
+                </div> --}}
             </div>
         </div>
         <div class="card">
