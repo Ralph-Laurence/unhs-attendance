@@ -69,7 +69,42 @@ class EmployeePostRequest extends FormRequest
             ],            
             'role'           => 'required|in:'           . implode(',', array_keys(Employee::RoleToString)),
             'input-position' => 'required|integer',
-            'input-fname'    => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
+            'input-fname'    => [
+                'required',
+                'max:32',
+                'regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
+                function ($attribute, $value, $fail)
+                {
+                    $f_fname = Employee::f_FirstName;
+                    $f_mname = Employee::f_MiddleName;
+                    $f_lname = Employee::f_LastName;
+
+                    $identical = Employee::where($f_fname, $this->input('input-fname'))
+                                 ->where($f_mname, $this->input('input-mname'))
+                                 ->where($f_lname, $this->input('input-lname'))
+                                 ->select([
+                                    Employee::f_EmpNo . ' as empnum',
+                                    $f_fname . ' as fname',
+                                    $f_mname . ' as mname',
+                                    $f_lname . ' as lname',
+                                 ])
+                                 ->first();
+
+                    if ($identical)
+                    {
+                        $name = implode(' ', [
+                            $identical->fname,
+                            $identical->mname,
+                            $identical->lname
+                        ]);
+
+                        $empnum = $identical->empnum;
+
+                        $fail("Name is identical with existing employee: \"$name\" (ID #$empnum)");
+                    }
+                }
+            ],
+            //'input-fname'    => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-mname'    => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-lname'    => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-phone'    => 'nullable|regex:'        . RegexPatterns::MOBILE_NO,
