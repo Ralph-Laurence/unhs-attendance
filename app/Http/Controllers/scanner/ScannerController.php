@@ -269,12 +269,12 @@ class ScannerController extends Controller
         $duration   = $workHours - $lunchHours;
 
         // Calculate undertime based on early dismissal time
-        $earlyDismissal = Carbon::parse(Attendance::$earlyDismissal);
+        $earlyDismissal = Carbon::parse(Attendance::EARLY_DISMISSAL);
         $undertime  = $timeOut->lt($earlyDismissal) ? $earlyDismissal->diffInSeconds($timeOut) / 3600 : 0;
         $overtime   = $workHours > 8 ? $workHours - 8 : 0;
 
         // Check if TimeOut is before dismissal time 4:50 PM
-        // $status = $timeOut->lt(Carbon::parse(Attendance::$earlyDismissal)) ? 
+        // $status = $timeOut->lt(Carbon::parse(Attendance::EARLY_DISMISSAL)) ? 
         //           Attendance::STATUS_UNDERTIME : 
         //           Attendance::STATUS_PRESENT;
 

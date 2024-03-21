@@ -9,6 +9,7 @@ class RouteNames
     public const Dashboard = [
         'index'     => 'backoffice.dashboard.index',
         'countEmp'  => 'backoffice.dashboard.count.emp',
+        'countAttendance' => 'backoffice.dashboard.count.attendance',
     ];
 
     public const DailyTimeRecord = [

@@ -41,10 +41,11 @@ class Attendance extends Model
     public const STATUS_UNDERTIME = 'Undertime';
     public const STATUS_OVERTIME  = 'Overtime';
 
-    public static $workStartTime  = '07:30:00';     // 7:30 AM      -> All attendances must be made before this time
+    public const BEFORE_WORK_TIME = '07:00:00';     // 7:00 AM      -> Work opening time
+    public const WORK_START_TIME  = '07:30:00';     // 7:30 AM      -> All attendances must be made before this time
     public static $lunchOverTime  = '12:10:00';     // 12:10 PM     -> Extra work after this time is added to overtime
-    public static $earlyDismissal = '16:50:00';     // 4:50 PM      -> Will not calculate undertime after this time
-    public static $workExitTime   = '17:30:00';     // 5:30 PM      -> All employees fully dismissed
+    public const EARLY_DISMISSAL  = '16:50:00';     // 4:50 PM      -> Will not calculate undertime after this time
+    public const CURFEW           = '17:30:00';     // 5:30 PM      -> All employees fully dismissed
 
     public const HASH_SALT = 'FA610E'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
@@ -77,9 +78,9 @@ class Attendance extends Model
             self::f_WeekNo      => Extensions::getCurrentWeek()
         ];
 
-        $workStart  = Carbon::parse(Attendance::$workStartTime);
+        $workStart  = Carbon::parse(self::WORK_START_TIME);
 
-        if ($timeIn->gt(Attendance::$workStartTime))
+        if ($timeIn->gt(self::WORK_START_TIME))
         {
             $late = $timeIn->diffInSeconds($workStart) / 3600;
             $data[Attendance::f_Late] = Extensions::durationToTimeString($late);

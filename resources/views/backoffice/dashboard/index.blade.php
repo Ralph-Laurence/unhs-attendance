@@ -73,7 +73,7 @@
                     </h6>
                     <h6 class="my-1 opacity-45">Today</h6>
                 </div>
-                <canvas id="employee-status" class="min-chart-height"></canvas>
+                <canvas id="attendance-statistics" class="min-chart-height" data-src="{{ $routes['attendanceStats'] }}"></canvas>
             </div>
         </div>
     </div>
@@ -146,11 +146,11 @@
         <div class="card">
             <div class="card-body p-2">
                 <div class="d-flex align-items-center mb-2 px-1 chart-title">
-                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">Daily Worked Hours
+                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">Monthly Attendances
                     </h6>
                     <h6 class="my-1 opacity-45">Average</h6>
                 </div>
-                <canvas id="daily-work-hrs" class="min-chart-height-sm"></canvas>
+                <canvas id="monthly-totals" class="min-chart-height-sm xw-100"></canvas>
             </div>
         </div>
     </div>

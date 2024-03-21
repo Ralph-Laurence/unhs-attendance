@@ -10,60 +10,12 @@ const chartColors = {
     'danger_alphabg' : '#FF264125'
 };
 
-const dailyAttendances = document.getElementById("employee-status");
-
-new Chart(dailyAttendances, {
-    type: 'bar',
-    data: {
-        labels: ['Early Entry', 'On Time', 'Late', 'Overtime', 'Undertime',],
-        datasets: [{
-            label: 'No. of Attendances',
-            data: [12, 19, 3, 5, 2],
-            // backgroundColor: [
-            //     chartColors['primary'],
-            //     chartColors['success']
-            // ],
-            backgroundColor : chartColors['warning_alphabg'],
-            borderColor     : chartColors['warning'],
-            barThickness    : 16,
-            borderWidth     : 1
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-});
-
-const dailyWorkHrs = document.getElementById("daily-work-hrs");
-
-new Chart(dailyWorkHrs, {
-    type: 'line',
-    data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri',],
-        datasets: [{
-            label: 'Hours',
-            data: [12, 19, 13, 15, 12],
-            // backgroundColor: [
-            //     chartColors['primary'],
-            //     chartColors['success']
-            // ],
-            backgroundColor : chartColors['primary_alphabg'],
-            borderColor     : chartColors['primary'],
-            fill            : true,
-            tension         : 0.1,
-        }]
-    }
-});
-
 let dashboardPage = (function() {
 
     let init = function() 
     {
         getEmployeeGraphings();
+        getAttendanceGraphings();
     };
 
     let bindEvents = function() {
@@ -128,7 +80,7 @@ let dashboardPage = (function() {
                         position: 'bottom'
                     }
                 },
-                cutout: '70%'
+                cutout: '80%'
             }
         });
     }
@@ -149,6 +101,139 @@ let dashboardPage = (function() {
         $('.leave-count-wrapper .leave-count-approved').text(diff['Approved']);
         $('.leave-count-wrapper .leave-count-rejected').text(diff['Rejected']);
     }
+
+    function getAttendanceGraphings()
+    {
+        $.ajax({
+            url: $("#attendance-statistics").data('src'),
+            data: {
+                '_token' : getCsrfToken()
+            },
+            type: 'post',
+            success: function (response) 
+            {
+               handleAttendanceStatistics(response);
+               handleAttendanceComparison(response);
+            },
+            error: function (xhr, status, error) {  
+
+            }
+        });
+    }
+
+    function handleAttendanceStatistics(response)
+    {
+        const dailyAttendances = document.getElementById("attendance-statistics");
+        let datasetValues = Object.values(response.attendanceStats);
+
+        let maxValue = Math.max(...datasetValues);
+
+        new Chart(dailyAttendances, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(response.attendanceStats),
+                datasets: [{
+                    label: 'No. of Attendances',
+                    data: datasetValues,
+                    backgroundColor: [
+                        chartColors['primary'],
+                        chartColors['success'],
+                        chartColors['primary'],
+                        chartColors['success'],
+                        chartColors['primary'],
+                        chartColors['primary'],
+                    ],
+                    //backgroundColor : chartColors['warning_alphabg'],
+                    //borderColor     : chartColors['warning'],
+                    barThickness    : 16,
+                    //borderWidth     : 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        // add +2 to the highest value in the dataset to
+                        // simulate drawing extra spaces above the bar graph.
+                        suggestedMax: maxValue + 2
+                    }
+                }
+            }
+        });
+    }
+
+    function handleAttendanceComparison(response)
+    {
+        const monthlySummary = document.getElementById("monthly-totals");
+
+        let months = [];
+        let totals = [];
+
+        Object.keys(response.monthlyComparison).forEach(k => {
+            months.push(response.monthlyComparison[k].month);
+            totals.push(response.monthlyComparison[k].total);
+        });
+
+        new Chart(monthlySummary, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Hours',
+                    data: totals,
+                    backgroundColor: chartColors['primary_alphabg'],
+                    borderColor: chartColors['primary'],
+                    fill: true,
+                    tension: 0.1,
+                }]
+            }
+        });
+    }
+
+    // function handleAttendanceComparison(response)
+    // {
+    //     const monthlySummary = document.getElementById("monthly-totals");
+
+    //     let months = [];
+    //     let totals = [];
+
+    //     Object.keys(response.monthlyComparison).forEach(k =>
+    //     {
+    //         months.push(response.monthlyComparison[k].month);
+    //         totals.push(response.monthlyComparison[k].total);
+    //     });
+
+    //     new Chart(monthlySummary, {
+    //         type: 'bar', // Change the chart type to bar
+    //         data: {
+    //             labels: months,
+    //             datasets: [
+    //                 {
+    //                     label: 'Hours',
+    //                     data: totals,
+    //                     backgroundColor: chartColors['primary_alphabg'],
+    //                     borderColor: chartColors['primary'],
+    //                     borderWidth: 1, // Add a border to the bars
+    //                 },
+    //                 {
+    //                     type: 'line', // Add a line dataset
+    //                     label: 'Green Line',
+    //                     data: totals, // Use the same data as the bars
+    //                     borderColor: 'green', // Set the line color to green
+    //                     fill: false, // Don't fill the area under the line
+    //                     tension: 0.1,
+    //                 },
+    //             ],
+    //         },
+    //         options: {
+    //             scales: {
+    //                 y: {
+    //                     beginAtZero: true,
+    //                 },
+    //             },
+    //         },
+    //     });
+    // }
 
     return {
         'init'   : init,

@@ -15,8 +15,18 @@ def seed(month):
         weekday = calendar.weekday(year, month, day)
         if weekday < 5:  # 0 is Monday, 6 is Sunday
             for emp_id in employeeIds:
-                time_in_naive   = datetime.datetime(year, month, day, random.randint(7, 8), random.randint(0, 59), random.randint(0, 59))
-                time_in         = tz.localize(time_in_naive)
+                # time_in_naive   = datetime.datetime(year, month, day, random.randint(7, 8), random.randint(0, 59), random.randint(0, 59))
+                # time_in         = tz.localize(time_in_naive)
+
+                # Generate a random number of minutes from 390 (6:30 AM) to 480 (8:00 AM)
+                minutes = random.randint(390, 480)
+                
+                # Convert minutes to hours and minutes
+                hours, minutes = divmod(minutes, 60)
+                
+                # Create the datetime object
+                time_in_naive = datetime.datetime(year, month, day, hours, minutes, random.randint(0, 59))
+                time_in = tz.localize(time_in_naive)
 
                 lunch_start_naive = datetime.datetime(year, month, day, 12, random.randint(0, 10), random.randint(0, 59))
                 lunch_start     = tz.localize(lunch_start_naive)

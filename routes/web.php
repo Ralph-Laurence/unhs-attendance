@@ -6,7 +6,6 @@ use App\Http\Controllers\backoffice\AuditTrailsController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\backoffice\DailyTimeRecordController;
 use App\Http\Controllers\backoffice\DashboardController;
-use App\Http\Controllers\backoffice\EmployeeControllerBase;
 use App\Http\Controllers\backoffice\GenericEmployeeController;
 use App\Http\Controllers\backoffice\TeachersController;
 use App\Http\Controllers\backoffice\StaffController;
@@ -15,10 +14,6 @@ use App\Http\Controllers\backoffice\LeaveRequestsController;
 use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
-use App\Models\Employee;
-use App\Models\Faculty;
-use App\Models\Staff;
-use Hashids\Hashids;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,7 +36,8 @@ Route::controller(DashboardController::class)->middleware(['auth'])
 {
     Route::get('/backoffice/dashboard', 'index')->name(RouteNames::Dashboard['index']);
 
-    Route::post('/backoffice/dashboard/graphings/employee', 'getEmpGraphings')->name(RouteNames::Dashboard['countEmp']);
+    Route::post('/backoffice/dashboard/graphings/employee',   'getEmpGraphings')->name(RouteNames::Dashboard['countEmp']);
+    Route::post('/backoffice/dashboard/graphings/attendance', 'getAttendanceGraphings')->name(RouteNames::Dashboard['countAttendance']);
 });
 
 Route::controller(DailyTimeRecordController::class)->middleware(['auth'])
