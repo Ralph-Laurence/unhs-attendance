@@ -36,6 +36,11 @@ class DashboardController extends Controller
     {
         $roles = array_flip(Employee::getRoles());
 
+        $pieSegmentRoutes = [
+            Employee::STR_ROLE_TEACHER => route(RouteNames::Faculty['index']),
+            Employee::STR_ROLE_STAFF   => route(RouteNames::Staff['index']),
+        ];
+
         $counts = collect($roles)->mapWithKeys(function ($role, $roleId) 
         {
             $count = DB::table(Employee::getTableName())
@@ -45,7 +50,10 @@ class DashboardController extends Controller
             return [$role => $count];
         })->toArray();
         
-        return $counts;
+        return [
+            'counts'    => $counts,
+            'segments'  => $pieSegmentRoutes
+        ];
     }
 
     private function countEmpStatusDifference()

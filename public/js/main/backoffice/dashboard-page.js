@@ -48,8 +48,9 @@ let dashboardPage = (function() {
         let count = [];
         let total = 0;
 
-        let employeeDifference = response.employeeDifference;
-
+        let employeeDifference = response.employeeDifference.counts;
+        let segmentUrls = response.employeeDifference.segments;
+        
         for (let key in employeeDifference) 
         {
             roles.push(key);
@@ -61,28 +62,49 @@ let dashboardPage = (function() {
 
         const employeesDiffCtx = document.getElementById("employees-diff");
 
+        const _data = {
+            labels: roles,
+            datasets: [{
+                label: 'Difference',
+                data: count,
+                backgroundColor: [
+                    chartColors['primary'],
+                    chartColors['success']
+                ]
+            }]
+        };
+
+        const _options = {
+            onClick: function(event, segments)
+            {
+                if (segments.length > 0)
+                {
+                    const clickedSegment = segments[0];
+                    const label = _data.labels[clickedSegment.index];
+                    const value = _data.datasets[0].data[clickedSegment.index];
+                    console.log(`Clicked: ${label} (${value}%)`);
+    
+                    // Get the URL based on the clicked segment label
+                    const url = segmentUrls[label];
+    
+                    // Redirect to the URL
+                    window.location.href = url;
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            cutout: '80%'
+        };
+
         new Chart(employeesDiffCtx, {
             type: 'doughnut',
-            data: {
-                labels: roles,
-                datasets: [{
-                    label: 'Difference',
-                    data: count,
-                    backgroundColor: [
-                        chartColors['primary'],
-                        chartColors['success']
-                    ]
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                cutout: '80%'
-            }
+            data: _data,
+            options: _options
         });
+
     }
 
     function handleEmpStatusDiff(response)
