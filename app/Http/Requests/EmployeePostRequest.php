@@ -34,6 +34,8 @@ class EmployeePostRequest extends FormRequest
         $email_unique   = Rule::unique($employeeTable, Employee::f_Email);
         $empid_unique   = Rule::unique($employeeTable, Employee::f_EmpNo);
 
+        $phone_unique   = Rule::unique(Employee::getTableName(), Employee::f_Contact);
+
         // We should ignore the same employee during uniqueness check.
         // This is how the unique rule behaves. We must chain the
         // ->ignore($id) to exclude the current record.
@@ -44,6 +46,7 @@ class EmployeePostRequest extends FormRequest
 
             $email_unique->ignore($id);
             $empid_unique->ignore($id);
+            $phone_unique->ignore($id);
         }
 
         // The sometimes rule means that the field under validation must be present and 
@@ -107,7 +110,11 @@ class EmployeePostRequest extends FormRequest
             //'input-fname'    => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-mname'    => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
             'input-lname'    => 'required|max:32|regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
-            'input-phone'    => 'nullable|regex:'        . RegexPatterns::MOBILE_NO,
+            'input-phone'    => [
+                'nullable',
+                'regex:' . RegexPatterns::MOBILE_NO,
+                $phone_unique
+            ],
         ];
     }
 
@@ -147,46 +154,8 @@ class EmployeePostRequest extends FormRequest
 
             'input-position.required'   => ValidationMessages::option('position'),
 
-            'input-phone.regex'         => "Phone number must be 11 digits and should begin with '09'"
+            'input-phone.regex'         => "Phone number must be 11 digits and should begin with '09'",
+            'input-phone.unique'        => ValidationMessages::unique('Phone Number'),
         ];
     }
-
-    /*
-    public function validateFields(Request $request, $ignoreId = null)
-    {
-
-        $updateId      = $this->input('updateKey');
-        //
-        // This will be used to ignore the validation rule during Update
-        //
-        if ($ignoreId && !is_null($ignoreId))
-        {
-            $validationFields['input-email'] = [
-                'required',
-                'email',
-                'max:64',
-                Rule::unique('users', 'email')->ignore($ignoreId),
-                Rule::unique(Employee::getTableName(), Employee::f_Email)->ignore($ignoreId),
-            ];
-
-            $validationFields['input-id-no'] = [
-                'required',
-                'regex:' . RegexPatterns::NUMERIC_DASH,
-                Rule::unique($employeeTable, Employee::f_EmpNo)->ignore($ignoreId)
-            ];
-        }
-
-        // Common validation
-        $validator = Validator::make($request->all(), $validationFields, $validationMessages);
-
-        if ($validator->fails())
-            return ['validation_stat' => Constants::ValidationStat_Failed] + 
-                   ['errors' => $validator->errors()];
-        
-        $inputData = ['validation_stat' => Constants::ValidationStat_Success] + 
-                     ['errors' => $validator->validated()] + $validator->validated();
-
-        return $inputData;
-    }
-    */
 }
