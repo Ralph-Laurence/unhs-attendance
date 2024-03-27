@@ -8,19 +8,24 @@ td.v-stripe-accent-yellow {
     border-radius: 10px;
 }
 
-.status-badge.active {
-    background-color: rgb(31, 201, 164, 0.04);
-    border: 1px solid rgb(31, 201, 164, 0.2);
+.status-badge.active::before {
+    font-family: var(--font-awesome);
+    content: '\f058';
     color: var(--accent-color);
+    /* background-color: rgb(31, 201, 164, 0.04);
+    border: 1px solid rgb(31, 201, 164, 0.2);
+    color: var(--accent-color); */
 }
 
 .status-badge::before {
-    content: '\25cf';
     margin-right: 4px;
 }
 
-.status-badge.inactive {
-    background-color: rgb(246, 190, 72, 0.14);
+.status-badge.inactive::before {
+    font-family: var(--font-awesome);
+    content: '\f057';
+    color: var(--danger-color);
+    /* background-color: rgb(246, 190, 72, 0.14);
     border: 1px solid rgb(246, 190, 72, 0.2);
-    color: var(--special-dark-warning);
+    color: var(--special-dark-warning); */
 }

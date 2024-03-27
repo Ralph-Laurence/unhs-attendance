@@ -1,4 +1,4 @@
-let teachers_datasetTable = '.dataset-table';
+let _datasetTable = '.dataset-table';
 let dataSrcTarget;
 let dataTable;
 let dataTable_isFirstDraw = true;
@@ -19,6 +19,8 @@ const RANGE_TODAY = 'this_day';
 const RANGE_WEEK  = 'this_week';
 const RANGE_MONTH = 'by_month';
 
+let tablePageLen;
+
 $(document).ready(function() 
 {
     initialize();
@@ -31,7 +33,7 @@ function initialize()
 {
     csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-    dataSrcTarget = $(teachers_datasetTable).data('src-default');
+    dataSrcTarget = $(_datasetTable).data('src-default');
     roleFilterEl  = $("#role-filters-dropdown-button");
     roleFilterDropdown = new mdb.Dropdown(roleFilterEl);
 
@@ -288,11 +290,21 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
     if (dataTable != null)
     {
         dataTable.ajax.reload();
+        redrawPageLenControls(dataTable);
         return;
     }
     
     // Initialize datatable if not yet created
-    dataTable = $(teachers_datasetTable).DataTable(options);
+    dataTable = $(_datasetTable).DataTable(options);
+    redrawPageLenControls(dataTable);
+}
+
+function redrawPageLenControls(datatable)
+{
+    if (tablePageLen)
+        tablePageLen = null;
+
+    tablePageLen = to_lengthpager('#table-page-len', datatable);
 }
 
 function deleteRecord(row) 

@@ -1,15 +1,12 @@
 //
 // Uses revealing module pattern:
 //
-var auditsPage = (function ()
+var leaveReqsPage = (function ()
 {
-    // JQuery selectors prefixed with 'jq'
-    const jq_RECORDS_TABLE = "#records-table";
-
     const STATUS_PENDING = 'pending';
 
     let leaveReqModal;
-    let employeeMapping;
+    
     let dataTable;
     let iconStyles;
 
@@ -18,6 +15,7 @@ var auditsPage = (function ()
     let recordFilters = {};
     let filtersContainer;
 
+    let tablePageLen;
     // State Flags
     let dataTable_isFirstDraw = true;
 
@@ -82,15 +80,6 @@ var auditsPage = (function ()
             }
         };
 
-        // Load employee id numbers into autocomplete textbox
-        // var inputIdNo = to_auto_suggest_ajax('#input-id-no',
-        //     {
-        //         'action'   : $(jq_RECORDS_TABLE).data('src-emp-ids'),
-        //         'csrfToken': getCsrfToken(),
-        //     },
-        //     (dataSource) => employeeMapping = dataSource
-        // );
-
         formElements = {
             mainForm : $('#frm-leave-request'),
             isDirty  : false,
@@ -145,20 +134,6 @@ var auditsPage = (function ()
             if (!formElements.fields.idNo.input.getValue())
                 formElements.fields.empName.input.reset()
         };
-        // Reflect the employee's name when an employee id was selected
-        // formElements.fields.idNo.input.getInput().on('valueSelected', function ()
-        // {
-        //     let needle = $(this).val();
-
-        //     if (!(needle in employeeMapping)) 
-        //     {
-        //         formElements.fields.empName.input.reset();
-        //         return;
-        //     }
-            
-        //     formElements.fields.empName.input.setValue(employeeMapping[needle]);
-        // })
-        // .on('valueCleared', () => formElements.fields.empName.input.reset());
 
         // Handle form submission when save button was clicked
         leaveReqModal.getSaveButton().on('click', () => 
@@ -435,12 +410,33 @@ var auditsPage = (function ()
         if (dataTable != null)
         {
             dataTable.ajax.reload();
+            redrawPageLenControls(dataTable);
             return;
         }
 
         // Initialize datatable if not yet created
         dataTable = $('.dataset-table').DataTable(options);
+        redrawPageLenControls(dataTable);
     }
+
+    function redrawPageLenControls(datatable)
+    {
+        if (tablePageLen)
+            tablePageLen = null;
+
+        tablePageLen = to_lengthpager('#table-page-len', datatable);
+    }
+    //     // If an instance of datatable has already been created,
+    //     // reload its data source with given url instead
+    //     if (dataTable != null)
+    //     {
+    //         dataTable.ajax.reload();
+    //         return;
+    //     }
+
+    //     // Initialize datatable if not yet created
+    //     dataTable = $('.dataset-table').DataTable(options);
+    // }
 
     function loadEmployeeNumbers(ready) 
     {
@@ -889,6 +885,6 @@ var auditsPage = (function ()
 
 $(document).ready(function ()
 {
-    auditsPage.init();
-    auditsPage.handle();
+    leaveReqsPage.init();
+    leaveReqsPage.handle();
 });

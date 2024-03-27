@@ -98,7 +98,7 @@
                 <div class="d-flex align-items-center mb-2 px-1 chart-title">
                     <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">Monthly Attendances
                     </h6>
-                    <h6 class="my-1 opacity-45">Average</h6>
+                    <h6 class="my-1 opacity-45">Totals</h6>
                 </div>
                 <canvas id="monthly-totals" class="min-chart-height-sm xw-100"></canvas>
             </div>

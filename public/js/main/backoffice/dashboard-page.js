@@ -202,7 +202,7 @@ let dashboardPage = (function()
         {
             const clickedSegment = segments[0];
             const label = data.labels[clickedSegment.index];
-            const value = data.datasets[0].data[clickedSegment.index];
+            //const value = data.datasets[0].data[clickedSegment.index];
             //console.log(`Clicked: ${label} (${value}%)`);
             // alert(`Clicked: ${label} (${value}%)`);
             // Get the URL based on the clicked segment label
@@ -243,7 +243,7 @@ let dashboardPage = (function()
             data: {
                 labels: months,
                 datasets: [{
-                    label: 'Hours',
+                    label: 'Attendances',
                     data: totals,
                     backgroundColor: chartColors['primary_alphabg'],
                     borderColor: chartColors['primary'],

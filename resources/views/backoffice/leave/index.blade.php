@@ -136,6 +136,10 @@
             </div>
         </div>
 
+        <div class="page-length-controls">
+            <x-table-length-pager as="table-page-len"/>
+        </div>
+        
         {{-- DATASET TABLE --}}
         <div class="w-100 position-relative overflow-hidden">
             <table class="table table-striped table-fixed w-100 table-sm table-hover dataset-table" id="records-table"
@@ -187,7 +191,8 @@
                             </div>
                             <div class="col">
                                 <x-text-box as="input-employee-name" placeholder="Name" maxlength="64" aria-autocomplete="none" 
-                                readonly parent-classes="opacity-75"/>
+                                readonly parent-classes="opacity-75" data-mdb-toggle="tooltip" data-mdb-placement="bottom"
+                                data-mdb-title="This field is read-only. Please enter an ID number from the &quot;Employee ID&quot; field to load the matching employee name."/>
                             </div>
                         </div>
                         <div class="row mb-3">

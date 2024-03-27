@@ -124,6 +124,11 @@
                     <i class="fas fa-caret-right text-sm me-1 opacity-20"></i>
                     <h6 class="d-block text-14 m-0">{{ "#$empIdNo" }}</h6>
                 </div>
+                <div class="col-3 flex-end">
+                    <div class="page-length-controls">
+                        <x-table-length-pager as="table-page-len"/>
+                    </div>
+                </div>
             </div>
         </div>
 

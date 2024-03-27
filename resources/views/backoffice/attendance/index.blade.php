@@ -74,6 +74,10 @@
             </div> --}}
         </div>
 
+        <div class="page-length-controls">
+            <x-table-length-pager as="table-page-len"/>
+        </div>
+
         {{-- DATASET TABLE --}}
         <table class="table table-striped table-sm table-hover table-fixed dataset-table"
             data-src-default="{{ $routes['ajax_get_all'] }}">

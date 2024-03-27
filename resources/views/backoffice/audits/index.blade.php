@@ -124,6 +124,10 @@
                 </div>
             </div>
         </div>
+        
+        <div class="page-length-controls">
+            <x-table-length-pager as="table-page-len"/>
+        </div>
 
         {{-- DATASET TABLE --}}
         <div class="w-100 position-relative overflow-hidden">

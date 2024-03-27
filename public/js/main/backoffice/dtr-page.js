@@ -9,6 +9,7 @@ let employeeKey     = undefined;
 let monthPicker;
 
 let periodDropdowns;
+let tablePageLen;
 
 $(document).ready(function() 
 {
@@ -281,12 +282,33 @@ function bindTableDataSource(newRange, newMonthNumber)
     if (dataTable != null)
     {
         dataTable.ajax.reload();
+        redrawPageLenControls(dataTable);
         return;
     }
     
     // Initialize datatable if not yet created
     dataTable = $(dtr_datasetTable).DataTable(options);
+    redrawPageLenControls(dataTable);
 }
+
+function redrawPageLenControls(datatable)
+{
+    if (tablePageLen)
+        tablePageLen = null;
+
+    tablePageLen = to_lengthpager('#table-page-len', datatable);
+}
+//     // If an instance of datatable has already been created,
+//     // reload its data source with given url instead
+//     if (dataTable != null)
+//     {
+//         dataTable.ajax.reload();
+//         return;
+//     }
+    
+//     // Initialize datatable if not yet created
+//     dataTable = $(dtr_datasetTable).DataTable(options);
+// }
 
 function exportPdf(monthNumber)
 {

@@ -79,3 +79,7 @@
     text-align: center;
     padding: 4px .56rem;
 }
+
+.dataTables_length {
+    display: none !important;
+}

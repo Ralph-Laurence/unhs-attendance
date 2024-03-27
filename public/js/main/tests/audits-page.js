@@ -9,6 +9,7 @@ let filtersContainer;
 var auditsPage = (function ()
 {
     let eventBus;
+    let tablePageLen;
 
     const EV_VIEW_DETAIL_AUDIT_CREATED = 'onViewAuditCreatedEvent';
     const EV_VIEW_DETAIL_AUDIT_UPDATED = 'onViewAuditUpdatedEvent';
@@ -447,18 +448,38 @@ var auditsPage = (function ()
                 }
             }
         };
-
         // If an instance of datatable has already been created,
         // reload its data source with given url instead
         if (dataTable != null)
         {
             dataTable.ajax.reload();
+            redrawPageLenControls(dataTable);
             return;
         }
 
         // Initialize datatable if not yet created
         dataTable = $(DATA_TABLE_SELECTOR).DataTable(options);
+        redrawPageLenControls(dataTable);
     }
+
+    function redrawPageLenControls(datatable)
+    {
+        if (tablePageLen)
+            tablePageLen = null;
+
+        tablePageLen = to_lengthpager('#table-page-len', datatable);
+    }
+    //     // If an instance of datatable has already been created,
+    //     // reload its data source with given url instead
+    //     if (dataTable != null)
+    //     {
+    //         dataTable.ajax.reload();
+    //         return;
+    //     }
+
+    //     // Initialize datatable if not yet created
+    //     dataTable = $(DATA_TABLE_SELECTOR).DataTable(options);
+    // }
     //============================
     // Business Logic
     //============================
