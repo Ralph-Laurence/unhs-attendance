@@ -12,18 +12,20 @@ const chartColors = {
 
 let dashboardPage = (function() 
 {
+    const statsModalSelector = '#statistics-modal';
     let statsModal;
+    let statsTablePageLen;
 
     let init = function() 
     {
         getEmployeeGraphings();
         getAttendanceGraphings();
 
-        statsModal = new mdb.Modal(document.querySelector('#statistics-modal'))
+        statsModal = new mdb.Modal(document.querySelector(statsModalSelector));
     };
 
-    let bindEvents = function() {
-
+    let bindEvents = function() 
+    {
     };
 
     function getEmployeeGraphings()
@@ -201,10 +203,11 @@ let dashboardPage = (function()
             const clickedSegment = segments[0];
             const label = data.labels[clickedSegment.index];
             const value = data.datasets[0].data[clickedSegment.index];
-            console.log(`Clicked: ${label} (${value}%)`);
+            //console.log(`Clicked: ${label} (${value}%)`);
             // alert(`Clicked: ${label} (${value}%)`);
             // Get the URL based on the clicked segment label
-            
+            const segmentColor = data.datasets[0].backgroundColor[clickedSegment.index];
+
             $.ajax({
                 url  : response.segmentAction,
                 type : 'post',
@@ -214,8 +217,7 @@ let dashboardPage = (function()
                 },
                 success: function(response)
                 {
-                    console.warn(response);
-                    bindTableAdapter(response.dataset, response.dynamic);
+                    bindAttendanceStatsAdapter(response, segmentColor);
                 },
                 error: function(xhr, status, error) {
 
@@ -252,9 +254,10 @@ let dashboardPage = (function()
         });
     }
 
-    function bindTableAdapter(dataSource, dynamicCol)
+    function bindAttendanceStatsAdapter(response, segmentColor)
     {
         let tableId = '#stats-table';
+        let pageLengthContainer = $('#stats-table-page-container');
 
         let columnDefinitions = [
             {data: 'empno',   title: 'ID No',    width: '20%', class: 'text-truncate' },
@@ -262,7 +265,7 @@ let dashboardPage = (function()
             {data: 'rank',    title: 'Position', width: '20%', class: 'text-truncate' }
         ];
 
-        if (dynamicCol == 'timein')
+        if (response.dynamic == 'timein')
         {
             let obj = {
                 data: 'timein',
@@ -274,7 +277,7 @@ let dashboardPage = (function()
             columnDefinitions.push(obj);
         }
 
-        if (dynamicCol == 'duration')
+        if (response.dynamic == 'duration')
         {
             let obj = {
                 data: 'duration',
@@ -286,8 +289,6 @@ let dashboardPage = (function()
             columnDefinitions.push(obj);
         }
 
-        console.warn(columnDefinitions);
-
         // Check if the DataTable exists and if so, destroy it
         if ($.fn.DataTable.isDataTable(tableId))
         {
@@ -298,17 +299,31 @@ let dashboardPage = (function()
         $(`${tableId} tbody`).empty();
 
         // Reinitialize the DataTable with new data and columns
-        $(tableId).DataTable({
+        let dt = $(tableId).DataTable({
             'searching': false,
             'ordering': false,
             'autoWidth': true,
             "deferRender": true,
             'columns': columnDefinitions,
-            'drawCallback' : function (settings) {  
+            'drawCallback' : function (settings) 
+            {  
+                $(statsModalSelector).find('.statistic-context')
+                                     .text(response.segment)
+                                     .css('background', segmentColor);
                 statsModal.show();
             },
-            'data' : dataSource
+            'initComplete': function() 
+            {
+                pageLengthContainer.empty();
+                $('#stats-table_wrapper #stats-table_length').detach().prependTo(pageLengthContainer);
+            },
+            'data' : response.dataset
         });
+
+        if (statsTablePageLen)
+            statsTablePageLen = null;
+
+        statsTablePageLen = to_lengthpager('#stats-table-page-len', dt);
     }
 
     return {

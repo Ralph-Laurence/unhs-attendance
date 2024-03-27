@@ -1,0 +1,61 @@
+.min-chart-height {
+    min-height: 235px;
+}
+
+.min-chart-height-sm {
+    min-height: 180px;
+}
+
+.chart-title {
+    min-height: 32px;
+}
+
+.leave-count-wrapper .leave-count-label {
+    font-size: 14px;
+}
+
+.leave-count-wrapper .leave-count,
+.emp-status-count {
+    min-width: 38px;
+    min-height: 38px;
+    max-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #021e3d;
+}
+
+.leave-count-wrapper,
+.employee-status-wrapper {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.leave-approved {
+    background-color: #69dbc2;
+}
+
+.leave-rejected {
+    background-color: #FF6E80;
+}
+
+.leave-pending {
+    background-color: #F9D385;
+}
+
+#statistics-modal .modal-content {
+    height: 580px;
+    min-height: 580px;
+    max-height: 600px;
+}
+
+#statistics-modal #stats-table thead {
+    background-color: var(--primary-100);
+}
+
+#statistics-modal #stats-table_length {
+    width: fit-content !important;
+    display: none;
+}

@@ -5,49 +5,7 @@
 @endsection
 
 @push('styles')
-<style>
-    .min-chart-height {
-        min-height: 235px;
-    }
-    .min-chart-height-sm {
-        min-height: 180px;
-    }
-    .chart-title {
-        min-height: 32px;
-    }
-    .leave-count-wrapper .leave-count-label {
-        font-size: 14px;
-    }
-
-    .leave-count-wrapper .leave-count,
-    .emp-status-count {
-        min-width: 38px;
-        min-height: 38px;
-        max-height: 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        color: #021e3d;
-    }
-
-    .leave-count-wrapper,
-    .employee-status-wrapper {
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-    }
-
-    .leave-approved {
-        background-color: #69dbc2;
-    }
-    .leave-rejected {
-        background-color: #FF6E80;
-    }
-    .leave-pending {
-        background-color: #F9D385;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/main/backoffice/dashboard-page.css') }}">
 @endpush
 
 @section('content')
@@ -159,16 +117,29 @@
             <div class="modal-header py-2">
                 <div class="d-flex align-items-center gap-2">
                     <img src="{{ asset('images/internal/icons/modal_icon_stats.png') }}" width="28" height="28" alt="icon" class="modal-icon" />
-                    <h6 class="modal-title mb-0" id="statistics-modal-title">Statistics</h6>
+                    <h6 class="modal-title mb-0" id="statistics-modal-title">Daily Attendance Statistics</h6>
                 </div>
                 <button type="button" class="btn-close close-button" data-mdb-ripple-init data-mdb-dismiss="modal"
                     aria-label="Close"></button>
             </div>
             <div class="modal-body px-4">
+                <div class="container px-0">
+                    <div class="row mb-2">
+                        <div class="col flex-start">
+                            <h6 class="text-14 mb-0"><i class="fas fa-caret-right"></i> Segment :
+                                <span class="statistic-context rounded-6 text-white px-2">Statistic</span>
+                            </h6>
+                        </div>
+                        <div class="col flex-end">
+                            <x-table-length-pager as="stats-table-page-len"/>
+                            <div id="stats-table-page-container"></div>
+                        </div>
+                    </div>
+                </div>
                 {{-- DATASET TABLE --}}
-                <div class="w-100 position-relative overflow-y-auto" data-simplebar style="max-height: 400px;">
+                <div class="w-100 position-relative overflow-y-auto rounded-3" data-simplebar style="max-height: 400px;">
                     <table class="table table-striped w-100 table-sm table-fixedx dataset-table" id="stats-table">
-                        <thead class="position-sticky top-0 bg-color-primary-200 shadow-3-soft">
+                        <thead class="position-sticky top-0 shadow-3-soft">
                             <tr>
                                 <th style="width: 20%;">ID No</th>
                                 <th style="width: 35%;">Name</th>

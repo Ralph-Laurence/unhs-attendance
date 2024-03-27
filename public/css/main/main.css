@@ -7,7 +7,7 @@
     --primary-bright:   #411AD8;
     --primary-600:      #473AE4;
     --primary-400:      #7D73EC;
-    --primary-200:      #c9c5f1;
+    --primary-100:      #dfdcfd;
     --primary-lighter:  #E9E5FB;
     --secondary-color:  #E7EEF8;
     --light-text:       #B0B0B0;
@@ -138,10 +138,6 @@ a.link-primary:hover {
     background-color: var(--warning-color) !important;
 }
 
-.bg-color-primary-200 {
-    background-color: var(--primary-200) !important;
-}
-
 /*
 Checkbox Overrides
 */
@@ -255,6 +251,10 @@ Dropdown Menu Overrides
 
 .text-xs {
     font-size: 10px;
+}
+
+.text-13 {
+    font-size: 13px;
 }
 
 .text-14 {

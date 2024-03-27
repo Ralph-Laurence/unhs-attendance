@@ -162,7 +162,6 @@ class DashboardController extends Controller
 
         $filters = self::AttendanceStatSegmentFilters;
         $filter  = $request->input('filter');
-        error_log(print_r($filters, true));
 
         $dynamicCol = 'timein';
 
@@ -179,7 +178,11 @@ class DashboardController extends Controller
 
                 $select[] = Extensions::time_format_hip($f_timein, 'timein');
 
-                return $query->whereBetween( $f_timein, [Attendance::BEFORE_WORK_TIME, Attendance::WORK_START_TIME] )
+                return $query->where(function($q) use($f_timein) {
+                        $q->whereRaw("TIME($f_timein) >= ?", [Attendance::BEFORE_WORK_TIME])
+                          ->whereRaw("TIME($f_timein) <= ?", [Attendance::WORK_START_TIME]);
+                      })
+                     //->whereBetween( $f_timein, [Attendance::BEFORE_WORK_TIME, Attendance::WORK_START_TIME] )
                       ->select($select)
                       ->get();
             },
@@ -236,7 +239,7 @@ class DashboardController extends Controller
         return response()->json([
             'message'   => 'OK',
             'dataset'   => $dataset,
-            'filter'    => array_flip($filters)[$filter],
+            'segment'   => array_flip($filters)[$filter],
             'dynamic'   => $dynamicCol
         ]);
     }
