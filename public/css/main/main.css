@@ -7,6 +7,7 @@
     --primary-bright:   #411AD8;
     --primary-600:      #473AE4;
     --primary-400:      #7D73EC;
+    --primary-200:      #c9c5f1;
     --primary-lighter:  #E9E5FB;
     --secondary-color:  #E7EEF8;
     --light-text:       #B0B0B0;
@@ -135,6 +136,10 @@ a.link-primary:hover {
 
 .bg-color-warning {
     background-color: var(--warning-color) !important;
+}
+
+.bg-color-primary-200 {
+    background-color: var(--primary-200) !important;
 }
 
 /*
@@ -298,6 +303,10 @@ Dropdown Menu Overrides
 
 .z-1000 {
     z-index: 1000;
+}
+
+.z-100 {
+    z-index: 100;
 }
 
 /* TABLE UTILITIES */

@@ -78,6 +78,10 @@ var auditsPage = (function ()
             viewAuditDetails(row);
         });
 
+        bindTracingCollapsible('#audit-details-create');
+        bindTracingCollapsible('#audit-details-delete');
+        bindTracingCollapsible('#audit-details-update');
+
         eventBus.subscribe(EV_VIEW_DETAIL_AUDIT_CREATED, (dataset) => {
 
             auditCreateDetailsModal.presentData(dataset);
@@ -117,6 +121,42 @@ var auditsPage = (function ()
         };
 
     };
+
+    function bindTracingCollapsible(parentModal)
+    {
+        let selector = `${parentModal} .tracing-details`;
+        let tracingCollapsible = $(selector);
+        let text = $(`${parentModal} .btn-collapsible .text`);
+        let icon = $(`${parentModal} .btn-collapsible .icon`);
+
+        tracingCollapsible.on('hide.mdb.collapse', () => {
+            text.text('See More');
+
+            if (!icon.hasClass('fa-chevron-down'))
+            {
+                icon.addClass('fa-chevron-down')
+                    .removeClass('fa-chevron-up');
+            }
+        });
+
+        tracingCollapsible.on('shown.mdb.collapse', () => {
+            text.text('See Less');
+
+            if (!icon.hasClass('fa-chevron-up'))
+            {
+                icon.addClass('fa-chevron-up')
+                    .removeClass('fa-chevron-down');
+            }
+        });
+        
+        console.warn(`el -> ${selector}; cnt -> ${tracingCollapsible.length}`);
+
+        let tracingCollapse  = new mdb.Collapse(tracingCollapsible, {
+            toggle: false
+        });
+
+        $(parentModal).on('hidden.mdb.modal', () => tracingCollapse.hide());
+    }
 
     let viewAuditDetails = function(row)
     {

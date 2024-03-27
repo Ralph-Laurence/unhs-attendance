@@ -7,9 +7,12 @@ use App\Models\Employee;
 class RouteNames
 {
     public const Dashboard = [
+        'root'      => 'backoffice.dashboard.root',
+        'home'      => 'backoffice.dashboard.home',
         'index'     => 'backoffice.dashboard.index',
         'countEmp'  => 'backoffice.dashboard.count.emp',
         'countAttendance' => 'backoffice.dashboard.count.attendance',
+        'attendanceStats' => 'backoffice.dashboard.stats.attendance',
     ];
 
     public const DailyTimeRecord = [

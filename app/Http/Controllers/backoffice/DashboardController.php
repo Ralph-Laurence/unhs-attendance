@@ -3,15 +3,29 @@
 namespace App\Http\Controllers\backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Http\Utils\Constants;
+use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
 use App\Models\Attendance;
+use App\Models\Constants\FacultyConstants;
+use App\Models\Constants\StaffConstants;
 use App\Models\Employee;
+use App\Models\Faculty;
 use App\Models\LeaveRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    private const AttendanceStatSegmentFilters = [
+        'Early Entry' => 'e',
+        'On Time'     => 't',
+        'Late'        => 'l',
+        'Overtime'    => 'o',
+        'Undertime'   => 'u',
+    ];
+
     public function index()
     {
         $routes = [
@@ -91,7 +105,9 @@ class DashboardController extends Controller
     {
         return response()->json([
             'attendanceStats'       => $this->getAttendanceStatistics(),
-            'monthlyComparison'     => $this->getMonthlyAttendances()
+            'monthlyComparison'     => $this->getMonthlyAttendances(),
+            'segmentAction'         => route(RouteNames::Dashboard['attendanceStats']),
+            'segmentFilters'        => self::AttendanceStatSegmentFilters
         ]);
     }
 
@@ -103,13 +119,14 @@ class DashboardController extends Controller
         $workStart  = Attendance::WORK_START_TIME; 
         $curfew     = Attendance::CURFEW;
         $earlyExit  = Attendance::EARLY_DISMISSAL;
+        $f_timein   = Attendance::f_TimeIn;
 
         $counts = DB::table(Attendance::getTableName())
         ->select(
             //DB::raw('COUNT(*) as total_records'),
-            DB::raw("SUM(CASE WHEN TIME(created_at) < '$beforeWork' THEN 1 ELSE 0 END) as 'Early Entry'"),
-            DB::raw("SUM(CASE WHEN TIME(created_at) BETWEEN '$beforeWork' AND '$workStart' THEN 1 ELSE 0 END) as 'On Time'"),
-            DB::raw("SUM(CASE WHEN TIME(created_at) > '$workStart' THEN 1 ELSE 0 END) as 'Late'"),
+            DB::raw("SUM(CASE WHEN TIME($f_timein) < '$beforeWork' THEN 1 ELSE 0 END) as 'Early Entry'"),
+            DB::raw("SUM(CASE WHEN TIME($f_timein) BETWEEN '$beforeWork' AND '$workStart' THEN 1 ELSE 0 END) as 'On Time'"),
+            DB::raw("SUM(CASE WHEN TIME($f_timein) > '$workStart' THEN 1 ELSE 0 END) as 'Late'"),
             DB::raw("SUM(CASE WHEN TIME($timeOut)   > '$curfew' THEN 1 ELSE 0 END) as 'Overtime'"),
             DB::raw("SUM(CASE WHEN TIME($timeOut)   < '$earlyExit' THEN 1 ELSE 0 END) as 'Undertime'")
         )
@@ -119,16 +136,113 @@ class DashboardController extends Controller
         return $counts;
     }
 
+    public function findStatistics(Request $request)
+    {
+        $hasFilter = ($request->has('filter') || $request->filled('filter'));
+        $filters   = array_values(self::AttendanceStatSegmentFilters);
+
+        if ( !$hasFilter || ($hasFilter && !in_array($request->input('filter'), $filters)) )
+            return response()->json(['code' => Constants::XHR_STAT_EMPTY]);
+
+        $f_timein = 'a.'. Attendance::f_TimeIn;
+        $f_undtim = 'a.'. Attendance::f_UnderTime;
+        $f_ovrtim = 'a.'. Attendance::f_OverTime;
+
+        $select = [ 
+            'e.'.Employee::f_EmpNo .' as empno',
+            'e.'.Employee::f_Role  .' as role',
+            'e.'.Employee::f_Rank  .' as rank',
+            Employee::getConcatNameDbRaw('e'),
+        ];
+
+        $query = DB::table(Attendance::getTableName(), 'a')
+            ->leftJoin(Employee::getTableName() .' as e', 'e.id', '=', 'a.'. Attendance::f_Emp_FK_ID)
+            ->whereDate('a.created_at', date('Y-m-d'))
+            ->orderBy('a.created_at', 'desc');
+
+        $filters = self::AttendanceStatSegmentFilters;
+        $filter  = $request->input('filter');
+        error_log(print_r($filters, true));
+
+        $dynamicCol = 'timein';
+
+        $cond = [
+            $filters['Early Entry' ] => function() use($query, $f_timein, &$select) {
+
+                $select[] = Extensions::time_format_hip($f_timein, 'timein');
+
+                return $query->whereTime( $f_timein, '<', Attendance::BEFORE_WORK_TIME )
+                      ->select($select)
+                      ->get();
+            },
+            $filters['On Time'] => function() use($query, $f_timein, &$select) {
+
+                $select[] = Extensions::time_format_hip($f_timein, 'timein');
+
+                return $query->whereBetween( $f_timein, [Attendance::BEFORE_WORK_TIME, Attendance::WORK_START_TIME] )
+                      ->select($select)
+                      ->get();
+            },
+            $filters['Late'] => function() use($query, $f_timein, &$select) {
+
+                $select[] = Extensions::time_format_hip($f_timein, 'timein');
+
+                return $query->whereTime( $f_timein, '>', Attendance::WORK_START_TIME )
+                      ->select($select)
+                      ->get();
+            },
+            $filters['Overtime'] => function() use($query, $f_ovrtim, &$select, &$dynamicCol) {
+
+                $select[] = Attendance::timeStringToDurationRaw($f_ovrtim, null, 'duration');
+                $dynamicCol = 'duration';
+
+                return $query->whereTime( $f_ovrtim, '>', '00:00:00')
+                      ->select($select)
+                      ->get();
+            },
+            $filters['Undertime'] => function() use($query, $f_undtim, &$select, &$dynamicCol) {
+
+                $select[] = Attendance::timeStringToDurationRaw($f_undtim, null, 'duration');
+                $dynamicCol = 'duration';
+
+                return $query->whereTime($f_undtim , '>', '00:00:00')
+                    ->select($select)
+                    ->get();
+            },
+        ];
+
+        $dataset      = $cond[ $filter ]();
+        $facultyRanks = FacultyConstants::getRanks();
+        $staffRanks   = StaffConstants::getRanks();
+        
+        foreach ($dataset as $row)
+        {
+            switch ($row->role)
+            {
+                case Employee::RoleTeacher:
+                    $row->rank = $facultyRanks[$row->rank];
+                    $row->role = Employee::STR_ROLE_TEACHER;
+                    break;
+
+                case Employee::RoleStaff:
+                    $row->rank = $staffRanks[$row->rank];
+                    $row->role = Employee::STR_ROLE_STAFF;
+                    break;
+            }
+
+            unset($row->role);
+        }
+
+        return response()->json([
+            'message'   => 'OK',
+            'dataset'   => $dataset,
+            'filter'    => array_flip($filters)[$filter],
+            'dynamic'   => $dynamicCol
+        ]);
+    }
+
     private function getMonthlyAttendances()
     {
-        // $counts = DB::table(Attendance::getTableName())
-        //     ->select(DB::raw('count(*) as total_records, DATE_FORMAT(created_at, "%b") as month'))
-        //     ->groupBy('month')
-        //     ->orderBy('created_at', 'ASC')
-        //     ->get();
-
-        // return $counts;
-
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         $records = DB::table(Attendance::getTableName())

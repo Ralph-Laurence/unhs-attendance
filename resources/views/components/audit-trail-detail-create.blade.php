@@ -1,6 +1,6 @@
 <div class="modal fade audit-details-modal" id="{{ $as }}" tabindex="-1" aria-labelledby="{{ $modalLabel }}"
     aria-hidden="true" data-mdb-backdrop="static" {{--data-src="{{ $datasource }}--}}">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header py-2">
                 <div class="d-flex align-items-center gap-2">
@@ -34,9 +34,17 @@
                     </table>
                 </div>
 
-                <small class="text-sm text-primary-dark">Tracing Details</small>
+                <div class="flex-start">
+                    <small class="text-sm text-primary-dark me-auto">Tracing Details</small>
+                    <a class="btn btn-sm btn-link btn-collapsible" role="button" data-mdb-toggle="collapse"
+                        data-mdb-target="#tracing-details-create" aria-expanded="false" aria-controls="tracing-details-create"
+                        style="max-width: 110px; width: 110px;">
+                        <span class="text me-1 text-capitalize">See More</span> 
+                        <i class="fas fa-chevron-down icon"></i>
+                    </a>
+                </div>
                 <hr class="my-1 opacity-10">
-                <div class="tracing-details container-fluid text-14">
+                <div class="tracing-details container-fluid text-14 collapse" id="tracing-details-create">
                     <div class="row mb-2">
                         <div class="col-3 px-0">
                             <div class="flex-start gap-2 me-auto">

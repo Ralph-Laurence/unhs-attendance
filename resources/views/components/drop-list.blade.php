@@ -1,6 +1,11 @@
 @php
     $buttonClasses = $attributes->has('button-classes') ? $attributes->get('button-classes') : '';
     $disabled = $attributes->has('input-off') ? 'disabled' : '';
+
+    $tabIndex = '';
+
+    if ($attributes->has('taborder'))
+        $tabIndex = $attributes->get('taborder');
 @endphp
 
 @once
@@ -11,7 +16,7 @@
 
 <div class="dropdown droplist">
     <button {{ $disabled }} class="btn btn-secondary flat-button dropdown-toggle shadow-0 d-block text-truncate px-3 {{ $required }} {{ $buttonClasses }}" 
-        id="{{ $as }}-drop-btn" data-mdb-toggle="dropdown" aria-expanded="false">
+        id="{{ $as }}-drop-btn" data-mdb-toggle="dropdown" aria-expanded="false" tabindex="{{ $tabIndex }}">
         <div class="w-100 d-flex align-items-center gap-2">
             <span class="button-text d-inline text-start text-truncate flex-fill me-1">{{ $text }}</span>
             <i class="fas fa-chevron-down droplist-arrow ms-auto"></i>

@@ -1,6 +1,6 @@
 <div class="modal fade employee-details-modal" id="{{ $as }}" tabindex="-1" aria-labelledby="{{ $modalLabel }}"
     aria-hidden="true" data-mdb-backdrop="static" data-src="{{ $datasource }}">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header py-2">
                 <div class="d-flex align-items-center gap-2">

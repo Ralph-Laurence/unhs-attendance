@@ -28,6 +28,7 @@ class Constants
 
     public const XHR_STAT_OK    = 0;
     public const XHR_STAT_FAIL  = -1;
+    public const XHR_STAT_EMPTY = 204; // Http 204 No Content
 
     public const RECORD_FILTER_ALL = 'All';
     public const FILTER_VALUE_ALL  = 0;

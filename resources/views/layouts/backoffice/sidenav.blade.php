@@ -19,7 +19,7 @@ $routeItems =
     //['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-gear',      'text' => 'Settings',       'target' => '',],
 ];
 @endphp
-<div class="col sidenav shadow-4-strong user-select-none d-flex flex-column vh-100 px-0">
+<div class="col sidenav shadow-4-strong user-select-none d-xl-flex d-none flex-column vh-100 px-0">
     <div class="logo-wrapper p-3 shadow-3-strong">
         <div class="logo-background logo-background-sm me-2">
             <img src="http://localhost:8000/images/logo.svg" alt="logo" width="32" height="32">

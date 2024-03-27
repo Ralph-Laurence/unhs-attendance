@@ -1,6 +1,6 @@
 <div class="modal fade" data-mdb-backdrop="static" id="createEmployeeModal" tabindex="-1"
     aria-labelledby="createEmployeeModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header py-2">
                 <div class="d-flex align-items-center gap-2">
@@ -44,25 +44,25 @@
 
                     <div class="row mb-2">
                         <div class="col">
-                            <x-text-field as="input-fname" placeholder="Firstname" maxlength="32" class="alpha-dash-dot"
+                            <x-text-field tabindex="1" as="input-fname" placeholder="Firstname" maxlength="32" class="alpha-dash-dot"
                                 required />
                         </div>
                         <div class="col">
-                            <x-text-field as="input-id-no" placeholder="ID Number" maxlength="32" class="numeric-dash" required />
+                            <x-text-field tabindex="5" as="input-id-no" placeholder="ID Number" maxlength="32" class="numeric-dash" required />
                         </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col-6">
-                            <x-text-field as="input-mname" placeholder="Middlename" maxlength="32" class="alpha-dash-dot"
+                            <x-text-field tabindex="2" as="input-mname" placeholder="Middlename" maxlength="32" class="alpha-dash-dot"
                                 required />
                         </div>
                         <div class="col-6 pt-1">
-                            <x-drop-list as="input-position" button-classes="w-100" text="Position" data-default-text="Position" :items="$positions" required />
+                            <x-drop-list taborder="6" as="input-position" button-classes="w-100" text="Position" data-default-text="Position" :items="$positions" required />
                         </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col">
-                            <x-text-field as="input-lname" placeholder="Lastname" maxlength="32" class="alpha-dash-dot"
+                            <x-text-field tabindex="3" as="input-lname" placeholder="Lastname" maxlength="32" class="alpha-dash-dot"
                                 required />
                         </div>
                         <div class="col flex-start">
@@ -74,15 +74,15 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col">
-                            <x-text-field as="input-phone" placeholder="Contact #" maxlength="11" class="numeric" />
+                            <x-text-field tabindex="4" as="input-phone" placeholder="Contact #" maxlength="11" class="numeric" />
                             <p class="ms-1 py-1 flex-start gap-1">
                                 <img src="{{ asset('images/internal/icons/icn_mobile_ph.png') }}" alt="PH" width="18" height="18"/>
                                 <small class="text-sm">Must begin with "09"</small>
                             </p>
                         </div>
                         <div class="col">
-                            <x-text-field as="input-email" placeholder="Email" maxlength="32" required />
-                            <x-check-box as="option-save-qr" label="Save QR code local copy" />
+                            <x-text-field tabindex="7" as="input-email" placeholder="Email" maxlength="32" required />
+                            <x-check-box tabindex="8" as="option-save-qr" label="Save QR code local copy" />
                         </div>
                     </div>
                 </form>

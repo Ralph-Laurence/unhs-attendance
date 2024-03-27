@@ -10,12 +10,16 @@ const chartColors = {
     'danger_alphabg' : '#FF264125'
 };
 
-let dashboardPage = (function() {
+let dashboardPage = (function() 
+{
+    let statsModal;
 
     let init = function() 
     {
         getEmployeeGraphings();
         getAttendanceGraphings();
+
+        statsModal = new mdb.Modal(document.querySelector('#statistics-modal'))
     };
 
     let bindEvents = function() {
@@ -148,40 +152,76 @@ let dashboardPage = (function() {
         const dailyAttendances = document.getElementById("attendance-statistics");
         let datasetValues = Object.values(response.attendanceStats);
 
+        const _data = {
+            labels: Object.keys(response.attendanceStats),
+            datasets: [{
+                label: 'No. of Attendances',
+                data: datasetValues,
+                backgroundColor: [
+                    chartColors['primary'],
+                    chartColors['success'],
+                    chartColors['primary'],
+                    chartColors['success'],
+                    chartColors['primary'],
+                    chartColors['primary'],
+                ],
+                barThickness    : 16,
+            }]
+        };
+
         let maxValue = Math.max(...datasetValues);
 
-        new Chart(dailyAttendances, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(response.attendanceStats),
-                datasets: [{
-                    label: 'No. of Attendances',
-                    data: datasetValues,
-                    backgroundColor: [
-                        chartColors['primary'],
-                        chartColors['success'],
-                        chartColors['primary'],
-                        chartColors['success'],
-                        chartColors['primary'],
-                        chartColors['primary'],
-                    ],
-                    //backgroundColor : chartColors['warning_alphabg'],
-                    //borderColor     : chartColors['warning'],
-                    barThickness    : 16,
-                    //borderWidth     : 1
-                }]
+        const _options = {
+            onClick: function(event, segments)
+            {
+                onAttendanceStatsSegmentClick(response, _data, segments);
             },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        // add +2 to the highest value in the dataset to
-                        // simulate drawing extra spaces above the bar graph.
-                        suggestedMax: maxValue + 2
-                    }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    // add +2 to the highest value in the dataset to
+                    // simulate drawing extra spaces above the bar graph.
+                    suggestedMax: maxValue + 2
                 }
             }
+        };
+
+        new Chart(dailyAttendances, {
+            type:     'bar',
+            data:     _data,
+            options:  _options
         });
+    }
+
+    function onAttendanceStatsSegmentClick(response, data, segments)
+    {
+        // segmentFilters
+        if (segments.length > 0)
+        {
+            const clickedSegment = segments[0];
+            const label = data.labels[clickedSegment.index];
+            const value = data.datasets[0].data[clickedSegment.index];
+            console.log(`Clicked: ${label} (${value}%)`);
+            // alert(`Clicked: ${label} (${value}%)`);
+            // Get the URL based on the clicked segment label
+            
+            $.ajax({
+                url  : response.segmentAction,
+                type : 'post',
+                data : {
+                    '_token' : getCsrfToken(),
+                    'filter' : response.segmentFilters[label],
+                },
+                success: function(response)
+                {
+                    console.warn(response);
+                    bindTableAdapter(response.dataset, response.dynamic);
+                },
+                error: function(xhr, status, error) {
+
+                }
+            });
+        }
     }
 
     function handleAttendanceComparison(response)
@@ -212,50 +252,64 @@ let dashboardPage = (function() {
         });
     }
 
-    // function handleAttendanceComparison(response)
-    // {
-    //     const monthlySummary = document.getElementById("monthly-totals");
+    function bindTableAdapter(dataSource, dynamicCol)
+    {
+        let tableId = '#stats-table';
 
-    //     let months = [];
-    //     let totals = [];
+        let columnDefinitions = [
+            {data: 'empno',   title: 'ID No',    width: '20%', class: 'text-truncate' },
+            {data: 'empname', title: 'Name',     width: '35%', class: 'text-truncate'},
+            {data: 'rank',    title: 'Position', width: '20%', class: 'text-truncate' }
+        ];
 
-    //     Object.keys(response.monthlyComparison).forEach(k =>
-    //     {
-    //         months.push(response.monthlyComparison[k].month);
-    //         totals.push(response.monthlyComparison[k].total);
-    //     });
+        if (dynamicCol == 'timein')
+        {
+            let obj = {
+                data: 'timein',
+                title: 'Time In',
+                width: '20%', 
+                class: 'text-truncate'
+            };
 
-    //     new Chart(monthlySummary, {
-    //         type: 'bar', // Change the chart type to bar
-    //         data: {
-    //             labels: months,
-    //             datasets: [
-    //                 {
-    //                     label: 'Hours',
-    //                     data: totals,
-    //                     backgroundColor: chartColors['primary_alphabg'],
-    //                     borderColor: chartColors['primary'],
-    //                     borderWidth: 1, // Add a border to the bars
-    //                 },
-    //                 {
-    //                     type: 'line', // Add a line dataset
-    //                     label: 'Green Line',
-    //                     data: totals, // Use the same data as the bars
-    //                     borderColor: 'green', // Set the line color to green
-    //                     fill: false, // Don't fill the area under the line
-    //                     tension: 0.1,
-    //                 },
-    //             ],
-    //         },
-    //         options: {
-    //             scales: {
-    //                 y: {
-    //                     beginAtZero: true,
-    //                 },
-    //             },
-    //         },
-    //     });
-    // }
+            columnDefinitions.push(obj);
+        }
+
+        if (dynamicCol == 'duration')
+        {
+            let obj = {
+                data: 'duration',
+                title: 'Duration',
+                width: '20%',
+                class: 'text-truncate'
+            };
+
+            columnDefinitions.push(obj);
+        }
+
+        console.warn(columnDefinitions);
+
+        // Check if the DataTable exists and if so, destroy it
+        if ($.fn.DataTable.isDataTable(tableId))
+        {
+            $(tableId).DataTable().destroy();
+        }
+
+        // Clear its contents
+        $(`${tableId} tbody`).empty();
+
+        // Reinitialize the DataTable with new data and columns
+        $(tableId).DataTable({
+            'searching': false,
+            'ordering': false,
+            'autoWidth': true,
+            "deferRender": true,
+            'columns': columnDefinitions,
+            'drawCallback' : function (settings) {  
+                statsModal.show();
+            },
+            'data' : dataSource
+        });
+    }
 
     return {
         'init'   : init,

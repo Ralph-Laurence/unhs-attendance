@@ -54,7 +54,7 @@
 
 <div class="row mb-4">
     <div class="col-3">
-        <div class="card">
+        <div class="card" style="min-width: 240px;" >
             <div class="card-body p-2">
                 <div class="d-flex align-items-center mb-2 px-1 chart-title">
                     <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">Total Employees
@@ -98,10 +98,6 @@
                         </div>
                     </div>
                 </div>
-                {{-- <div class="d-flex align-items-center">
-                    <h6 class="me-auto">On Duty: <span id="count-on-duty bg-color-primary p-2">0</span></h6>
-                    <h6>On Leave: <span id="">0</span></h6>
-                </div> --}}
             </div>
         </div>
         <div class="card">
@@ -133,10 +129,6 @@
                     </div>
                     <div class="col"></div>
                 </div>
-                {{-- <div class="d-flex align-items-center">
-                    <h6 class="me-auto">Approved: 4</h6>
-                    <h6>Unapproved: 8</h6>
-                </div> --}}
             </div>
         </div>
     </div>
@@ -158,13 +150,43 @@
         
     </div>
 </div>
-{{-- <div class="card content-card">
-    <div class="card-body">
-
-    </div>
-</div> --}}
-
 @endsection
+
+@push('dialogs')
+<div class="modal fade statistics-modal" id="statistics-modal" tabindex="-1" aria-hidden="true" data-mdb-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="{{ asset('images/internal/icons/modal_icon_stats.png') }}" width="28" height="28" alt="icon" class="modal-icon" />
+                    <h6 class="modal-title mb-0" id="statistics-modal-title">Statistics</h6>
+                </div>
+                <button type="button" class="btn-close close-button" data-mdb-ripple-init data-mdb-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4">
+                {{-- DATASET TABLE --}}
+                <div class="w-100 position-relative overflow-y-auto" data-simplebar style="max-height: 400px;">
+                    <table class="table table-striped w-100 table-sm table-fixedx dataset-table" id="stats-table">
+                        <thead class="position-sticky top-0 bg-color-primary-200 shadow-3-soft">
+                            <tr>
+                                <th style="width: 20%;">ID No</th>
+                                <th style="width: 35%;">Name</th>
+                                <th style="width: 20%;">Position</th>
+                                <th style="width: 20%"></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary flat-button close-button" data-mdb-ripple-init
+                    data-mdb-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endpush
 
 @push('scripts')
 <script src="{{ asset('js/lib/chartjs/chart.umd.js') }}"></script>

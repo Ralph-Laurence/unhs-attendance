@@ -27,15 +27,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Route::controller(DashboardController::class)->middleware(['auth'])
 ->group(function()
 {
+    Route::get('/',     'index')->name(RouteNames::Dashboard['root']);
+    Route::get('/home', 'index')->name(RouteNames::Dashboard['home']);
     Route::get('/backoffice/dashboard', 'index')->name(RouteNames::Dashboard['index']);
 
+    Route::post('/backoffice/dashboard/attendance/stats',     'findStatistics')->name(RouteNames::Dashboard['attendanceStats']);
     Route::post('/backoffice/dashboard/graphings/employee',   'getEmpGraphings')->name(RouteNames::Dashboard['countEmp']);
     Route::post('/backoffice/dashboard/graphings/attendance', 'getAttendanceGraphings')->name(RouteNames::Dashboard['countAttendance']);
 });
@@ -100,10 +99,6 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
     Route::post('/backoffice/leave/approve' , 'approveLeave') ->name(RouteNames::Leave['approve']);
     Route::post('/backoffice/leave/reject'  , 'rejectLeave')  ->name(RouteNames::Leave['reject']);
 });
-
-// Route::get('/home', function() {
-//     return view('home');
-// })->middleware(['auth']);
 
 
 Route::controller(GenericEmployeeController::class)->middleware(['auth'])
