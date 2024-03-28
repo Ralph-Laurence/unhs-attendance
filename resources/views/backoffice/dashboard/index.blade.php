@@ -5,7 +5,8 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/main/backoffice/dashboard-page.css') }}">
+<link rel="stylesheet" href="{{ asset('css/main/backoffice/dashboard-page.css') }}" />
+<link rel="stylesheet" href="{{ asset('css/main/shared/audits-action-icons.css') }}" />
 @endpush
 
 @section('content')
@@ -42,9 +43,16 @@
     <div class="col-4">
         <div class="card mb-3">
             <div class="card-body p-2">
-                <div class="d-flex align-items-center mb-2 px-1 chart-title">
-                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 text-truncate">Employee Status
-                    </h6>
+                <div class="row mb-3">
+                    <div class="col">
+                        <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
+                            Employee Status
+                        </h6>
+                    </div>
+                    <div class="col flex-end">
+                        <i class="fas fa-plus-circle me-1 text-primary-dark"></i>
+                        <h6 class="text-14 fw-bold my-1" id="emp-stat-total">Total : 0</h6>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col">
@@ -103,7 +111,7 @@
                     </div>
                     <div class="col flex-end">
                         <i class="fas fa-plus-circle me-1 text-primary-dark"></i>
-                        <h6 class="text-14 fw-bold total-leave-reqs my-1"></h6>
+                        <h6 class="text-14 fw-bold total-leave-reqs my-1">Total : 0</h6>
                     </div>
                 </div>
             </div>
@@ -157,17 +165,24 @@
                             <table class="table table-sm table-striped table-fixed w-100">
                                 <thead class="position-sticky top-0 bg-light z-100">
                                     <tr>
-                                        <th class="text-primary-dark">User</th>
-                                        <th class="text-primary-dark">Action</th>
-                                        <th class="text-primary-dark">Affected</th>
+                                        <th class="text-primary-dark text-start">User</th>
+                                        <th class="text-primary-dark text-center">Action</th>
+                                        <th class="text-primary-dark text-center">Affected</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($recentActivity as $row)
                                         <tr class="text-13">
-                                            <td>{{ $row->user }}</td>
-                                            <td class="text-capitalize">{{ $row->action }}</td>
-                                            <td>{{ $row->affected }}</td>
+                                            <td class="text-truncate">{{ $row->user }}</td>
+                                            <td class="text-center">
+                                            
+                                                <div class="audit-action action-badge {{ $row->actionIcon }} px-2 py-1 w-100">
+                                                    <i class="fas me-1 fasicon"></i>
+                                                    <span class="label text-capitalize text-sm">{{ $row->action }}</span>
+                                                </div>
+                                            
+                                            </td>
+                                            <td class="text-center text-truncate">{{ $row->affected }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

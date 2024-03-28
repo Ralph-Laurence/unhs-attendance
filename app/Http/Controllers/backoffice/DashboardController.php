@@ -58,6 +58,8 @@ class DashboardController extends Controller
             AuditTrails::f_Model_Type   . ' as affected',
         ];
 
+        $actionIcons = AuditTrails::ActionIcons;
+
         $dataset = DB::table(AuditTrails::getTableName(), 'a')
                     ->leftJoin('users as e', 'e.id', '=', 'a.' . AuditTrails::f_User_FK)
                     ->select($select)
@@ -72,6 +74,8 @@ class DashboardController extends Controller
                 $row->affected = $row->affected::getFriendlyName();
             else
                 $row->affected = 'Unknown';
+            
+            $row->actionIcon = $actionIcons[$row->action];
         }
 
         return $dataset;
@@ -113,16 +117,21 @@ class DashboardController extends Controller
     private function countEmpStatusDifference()
     {
         $statuses = [Employee::ON_STATUS_DUTY, Employee::ON_STATUS_LEAVE];
+        $total    = 0;
 
-        $counts = collect($statuses)->mapWithKeys(function ($status) {
+        $counts = collect($statuses)->mapWithKeys(function ($status) use(&$total) {
             $count = DB::table(Employee::getTableName())
                 ->where(Employee::f_Status, $status)
                 ->count();
 
+            $total += $count;
+
             return [$status => $count];
-        })->toArray();
+        });
         
-        return $counts;
+        $counts['Total'] = $total;
+
+        return $counts->toArray();
     }
 
     private function countLeaveStatusDifference()

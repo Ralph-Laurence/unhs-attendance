@@ -6,6 +6,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/main/backoffice/audits-page.css') }}" />
+<link rel="stylesheet" href="{{ asset('css/main/shared/audits-action-icons.css') }}" />
 @endpush
 
 @section('content')

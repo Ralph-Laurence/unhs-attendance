@@ -128,6 +128,7 @@ let dashboardPage = (function()
 
         $('#count-on-duty').text(diff['On Duty']);
         $('#count-on-leave').text(diff['Leave']);
+        $('#emp-stat-total').text(`Total : ${diff['Total']}`);
     }
 
     function handleLeaveReqDiff(response)
@@ -137,7 +138,7 @@ let dashboardPage = (function()
         $('.leave-count-wrapper .leave-count-pending') .text(diff['Pending']);
         $('.leave-count-wrapper .leave-count-approved').text(diff['Approved']);
         $('.leave-count-wrapper .leave-count-rejected').text(diff['Rejected']);
-        $('.total-leave-reqs').text(`Total: ${diff['Total']}`);
+        $('.total-leave-reqs').text(`Total : ${diff['Total']}`);
     }
 
     function handleAttendanceStatistics(response)
@@ -200,7 +201,6 @@ let dashboardPage = (function()
 
         let highestTotal = Math.max(...totals);
 
-        console.warn('highest total -> ' + highestTotal)
         new Chart(monthlySummary, {
             type: 'line',
             data: {

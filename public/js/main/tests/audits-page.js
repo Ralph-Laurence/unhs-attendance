@@ -305,13 +305,13 @@ var auditsPage = (function ()
             defaultContent: ''
         },
         {
-            className: 'td-action text-truncate',
+            className: 'td-action text-truncate text-center',
             width: '120px',
             data: 'action',
             render: function(data, type, row) {
                 
                 let html =
-                `<div class="action-badge ${row.action_icon} px-2 py-1 w-100">
+                `<div class="audit-action action-badge ${row.action_icon} px-2 py-1 w-100">
                     <i class="fas me-1 fasicon"></i>
                     <span class="label text-capitalize text-sm">${data}</span>
                 </div>`;

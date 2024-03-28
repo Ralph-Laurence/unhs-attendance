@@ -50,7 +50,7 @@ class AuditTrails extends Model
         return Constants::TABLE_AUDIT_TRAILS;
     }
 
-    private array $actionIcons = [
+    public const ActionIcons = [
         Constants::AUDIT_EVENT_CREATE => 'action-create',
         Constants::AUDIT_EVENT_UPDATE => 'action-update',
         Constants::AUDIT_EVENT_DELETE => 'action-delete',
@@ -322,7 +322,7 @@ class AuditTrails extends Model
                    END as `date`,
                    CONCAT(e.firstname,' ',e.lastname) AS adminname"
             )
-            ->selectRaw(Extensions::mapCaseWhen($this->actionIcons, 'a.' . self::f_Event, 'action_icon'))
+            ->selectRaw(Extensions::mapCaseWhen(self::ActionIcons, 'a.' . self::f_Event, 'action_icon'))
             ->selectRaw(Extensions::time_format_hip('a.created_at'))
             ->leftJoin('users as e', 'e.id', '=', 'a.' . self::f_User_FK)
             ->orderBy('a.created_at', 'DESC');

@@ -1,0 +1,38 @@
+.audit-action.action-badge{
+    border-radius: 16px;
+    color: #221D39;
+    font-weight: 600;
+    max-width: 94px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.audit-action.action-badge.action-create {
+    background-color: #1fc9a415;
+}
+
+.audit-action.action-badge.action-delete {
+    background-color: #FF264115;
+}
+
+.audit-action.action-badge.action-update {
+    background-color: #F1C75120;
+}
+
+.audit-action.action-badge.action-create .fasicon::after {
+    font-family: var(--font-awesome);
+    content: '\f055';
+    color: #1FC9A4;
+}
+
+.audit-action.action-badge.action-delete .fasicon::after {
+    font-family: var(--font-awesome);
+    content: '\f057';
+    color: #FF2641;
+}
+
+.audit-action.action-badge.action-update .fasicon::after {
+    font-family: var(--font-awesome);
+    content: '\f021';
+    color: #f8ba35;
+}

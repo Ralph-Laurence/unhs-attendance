@@ -7,7 +7,7 @@
     background-color: var(--primary-dark);
     color: white;
 }
-
+/* 
 #records-table .action-badge{
     border-radius: 16px;
     color: #221D39;
@@ -42,7 +42,7 @@
     font-family: var(--font-awesome);
     content: '\f021';
     color: #f8ba35;
-}
+} */
 
 /* AUDITING DETAILS MODAL */
 .audit-details-table {
