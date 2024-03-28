@@ -1,4 +1,4 @@
-<div class="modal fade statistics-modal" id="statistics-modal" tabindex="-1" aria-hidden="true"
+<div class="modal fade dashboard-stat-modal statistics-modal" id="statistics-modal" tabindex="-1" aria-hidden="true"
     data-mdb-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">

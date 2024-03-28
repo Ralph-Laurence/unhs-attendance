@@ -7,6 +7,7 @@ use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
 use App\Models\Attendance;
+use App\Models\AuditTrails;
 use App\Models\Constants\FacultyConstants;
 use App\Models\Constants\StaffConstants;
 use App\Models\Employee;
@@ -32,6 +33,8 @@ class DashboardController extends Controller
             'employeeCompare' => route(RouteNames::Dashboard['countEmp']),
             'attendanceStats' => route(RouteNames::Dashboard['countAttendance']),
             'leaveReqStats'   => route(RouteNames::Dashboard['leavereqtsStats']),
+            'leaveRequests'   => route(RouteNames::Leave['index']),
+            'allAudits'       => route(RouteNames::AuditTrails['index']),
         ];
 
         $allMonths = array_keys(Extensions::getMonthsAssoc());
@@ -44,7 +47,34 @@ class DashboardController extends Controller
                 'p' => LeaveRequest::LEAVE_STATUS_PENDING,
                 'r' => LeaveRequest::LEAVE_STATUS_REJECTED
             ])
-            ->with('allMonths', $allMonths);
+            ->with('allMonths', $allMonths)
+            ->with('recentActivity', $this->getRecentActivities());
+    }
+
+    private function getRecentActivities()
+    {
+        $select = [
+            AuditTrails::f_Event        . ' as action',
+            AuditTrails::f_Model_Type   . ' as affected',
+        ];
+
+        $dataset = DB::table(AuditTrails::getTableName(), 'a')
+                    ->leftJoin('users as e', 'e.id', '=', 'a.' . AuditTrails::f_User_FK)
+                    ->select($select)
+                    ->selectRaw("CONCAT(e.firstname,' ',e.lastname) AS user")
+                    ->orderBy('a.created_at', 'desc')
+                    ->limit(10)
+                    ->get();
+
+        foreach($dataset as $row)
+        {
+            if (method_exists($row->affected, 'getFriendlyName'))
+                $row->affected = $row->affected::getFriendlyName();
+            else
+                $row->affected = 'Unknown';
+        }
+
+        return $dataset;
     }
 
     public function getEmpGraphings(Request $request)

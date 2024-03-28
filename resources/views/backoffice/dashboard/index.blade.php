@@ -69,7 +69,10 @@
                         <span class="me-2">Leave Requests</span>
                         <i class="fas fa-chart-simple text-primary-dark"></i>
                     </h6>
-                    <h6 class="text-14 fw-bold total-leave-reqs my-1"></h6>
+                    <a class="my-1 text-13 text-primary-dark" href="{{ $routes['leaveRequests']}}">
+                        <span class="me-1">See All</span>
+                        <i class="fas fa-up-right-from-square"></i>
+                    </a>
                 </div>
                 <div class="row mb-2">
                     <div class="col">
@@ -98,7 +101,10 @@
                             <div class="rounded-5 bg-white p-2 leave-count leave-count-pending">0</div>
                         </div>
                     </div>
-                    <div class="col"></div>
+                    <div class="col flex-end">
+                        <i class="fas fa-plus-circle me-1 text-primary-dark"></i>
+                        <h6 class="text-14 fw-bold total-leave-reqs my-1"></h6>
+                    </div>
                 </div>
             </div>
         </div>
@@ -109,8 +115,24 @@
         <div class="card">
             <div class="card-body p-2">
                 <div class="d-flex align-items-center mb-2 px-1 chart-title">
-                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
-                        Total Monthly Attendances
+                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate"
+                    data-mdb-toggle="tooltip" data-mdb-html="true"
+                    data-mdb-title='<ul class="list-unstyled text-start my-2">
+                                        <li class="mb-1">
+                                            <i class="fas fa-circle dp-icn me-1"></i>
+                                            <span class="dp-label">Datapoint Total</span>
+                                        </li>
+                                        <li class="mb-1">
+                                            <i class="fas fa-caret-up dp-icn me-1"></i>
+                                            <span class="dp-label">Highest Datapoint</span>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-xmark dp-icn me-1"></i>
+                                            <span class="dp-label">Lowest Datapoint</span>
+                                        </li>
+                                    </ul>'>
+                        <span class="me-1">Total Monthly Attendances</span>
+                        <i class="fas fa-info-circle monthly-attx-stat-info"></i>
                     </h6>
                     <h6 class="my-1 text-14 opacity-45">{{ $allMonths }}</h6>
                 </div>
@@ -119,7 +141,43 @@
         </div>
     </div>
     <div class="col-4">
-        
+        <div class="card">
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center mb-2 px-1 chart-title">
+                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
+                        Recent Activity
+                    </h6>
+                    <a class="my-1 text-13 text-primary-dark" href="{{ $routes['allAudits']}}">
+                        <span class="me-1">See All</span>
+                        <i class="fas fa-up-right-from-square"></i>
+                    </a>
+                </div>
+                    @if ($recentActivity)
+                        <div class="overflow-y-auto" data-simplebar style="max-height: 350px;">
+                            <table class="table table-sm table-striped table-fixed w-100">
+                                <thead class="position-sticky top-0 bg-light z-100">
+                                    <tr>
+                                        <th class="text-primary-dark">User</th>
+                                        <th class="text-primary-dark">Action</th>
+                                        <th class="text-primary-dark">Affected</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($recentActivity as $row)
+                                        <tr class="text-13">
+                                            <td>{{ $row->user }}</td>
+                                            <td class="text-capitalize">{{ $row->action }}</td>
+                                            <td>{{ $row->affected }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <h6 class="text-14">No activity to display.</h6>
+                    @endif
+            </div>
+        </div>
     </div>
 </div>
 @endsection

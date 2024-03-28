@@ -212,12 +212,37 @@ let dashboardPage = (function()
                     borderColor: chartColors['primary'],
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 4,
-                    pointBorderColor: chartColors['primary'],
+                    pointRadius: 5,
+                    pointBorderColor: totals.map(value => {
+                        if (value < 1)
+                            return 'red';
+        
+                        if (value === highestTotal)
+                            return '#FF840C'; 
+                        
+                        return chartColors['primary'];
+                    }),
                     // Set the point color to 'red' for the highest value and '#00D1A4' for others
-                    pointBackgroundColor: totals.map(value => value === highestTotal ? 'red' : '#00D1A4'),
-                     // Set the point style to 'star' for the highest value and 'circle' for others
-                    pointStyle: totals.map(value => value === highestTotal ? 'triangle' : 'circle')
+                    pointBackgroundColor: totals.map(value => {
+                        if (value < 1)
+                            return 'red';
+        
+                        if (value === highestTotal)
+                            return '#FF840C'; 
+                        
+                        return '#00D1A4';
+                    }),
+                    //pointBackgroundColor: totals.map(value => value === highestTotal ? '#FF840C' : '#00D1A4'),
+                     // Set the point style to 'triangle' for the highest value and 'circle' for others
+                    pointStyle: totals.map(value => {
+                        if (value < 1)
+                            return 'crossRot';
+
+                        if (value === highestTotal)
+                            return 'triangle'; 
+                        
+                        return 'circle';
+                    })
                 }]
             }
         });

@@ -50,7 +50,7 @@
     background-color: #F9D385;
 }
 
-#statistics-modal .modal-content {
+.dashboard-stat-modal .modal-content {
     height: 580px;
     min-height: 580px;
     max-height: 600px;
@@ -89,4 +89,48 @@
 .leave-count-wrapper:hover > .leave-count-label {
     color: white;
     font-family: 'Poppins-Medium';
+}
+
+.dp-icn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+}
+.dp-icn.fa-xmark { color: #FF2641; }
+.dp-icn.fa-caret-up { 
+    color: #FF840C; 
+    font-size: 16px;
+}
+.monthly-attx-stat-info { 
+    color: #FF840C;
+}
+.dp-icn.fa-circle {
+    color: #00D1A4;
+    font-size: 10px;
+}
+.dp-icn + .dp-label {
+    color: #FFFFFF;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-family: 'Poppins-Medium';
+}
+.dp-icn.fa-circle + .dp-label {
+    background-color: #007F6C;
+}
+.dp-icn.fa-caret-up + .dp-label {
+    background-color: #FF840C;
+}
+.dp-icn.fa-xmark + .dp-label {
+    background-color: #FF2641;
+}
+.tooltip-inner {
+    background-color: #110c22ec;
 }
