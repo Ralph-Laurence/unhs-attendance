@@ -175,7 +175,7 @@ class LeaveRequestsController extends Controller
                 return $rowData;
             });
 
-            return Extensions::encodeSuccessMessage('Success', ['rowData' => $dataset]);
+            return Extensions::encodeSuccessMessage('Leave request successfully added.', ['rowData' => $dataset]);
         } 
         catch (ModelNotFoundException $ex){
             error_log($ex->getMessage());

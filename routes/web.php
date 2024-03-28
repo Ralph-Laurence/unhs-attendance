@@ -34,7 +34,9 @@ Route::controller(DashboardController::class)->middleware(['auth'])
     Route::get('/home', 'index')->name(RouteNames::Dashboard['home']);
     Route::get('/backoffice/dashboard', 'index')->name(RouteNames::Dashboard['index']);
 
-    Route::post('/backoffice/dashboard/attendance/stats',     'findStatistics')->name(RouteNames::Dashboard['attendanceStats']);
+    Route::post('/backoffice/dashboard/attendance/stats',     'findAttxStatistics')->name(RouteNames::Dashboard['attendanceStats']);
+    Route::post('/backoffice/dashboard/leavereqts/stats',     'findLeaveStatistics')->name(RouteNames::Dashboard['leavereqtsStats']);
+
     Route::post('/backoffice/dashboard/graphings/employee',   'getEmpGraphings')->name(RouteNames::Dashboard['countEmp']);
     Route::post('/backoffice/dashboard/graphings/attendance', 'getAttendanceGraphings')->name(RouteNames::Dashboard['countAttendance']);
 });

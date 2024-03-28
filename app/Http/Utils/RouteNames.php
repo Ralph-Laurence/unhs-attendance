@@ -13,6 +13,7 @@ class RouteNames
         'countEmp'  => 'backoffice.dashboard.count.emp',
         'countAttendance' => 'backoffice.dashboard.count.attendance',
         'attendanceStats' => 'backoffice.dashboard.stats.attendance',
+        'leavereqtsStats' => 'backoffice.dashboard.stats.leavereqts',
     ];
 
     public const DailyTimeRecord = [

@@ -30,11 +30,21 @@ class DashboardController extends Controller
     {
         $routes = [
             'employeeCompare' => route(RouteNames::Dashboard['countEmp']),
-            'attendanceStats' => route(RouteNames::Dashboard['countAttendance'])
+            'attendanceStats' => route(RouteNames::Dashboard['countAttendance']),
+            'leaveReqStats'   => route(RouteNames::Dashboard['leavereqtsStats']),
         ];
 
+        $allMonths = array_keys(Extensions::getMonthsAssoc());
+        $allMonths = $allMonths[0].' to '.$allMonths[ count($allMonths) - 1 ].', '.date('Y');
+
         return view('backoffice.dashboard.index')
-            ->with('routes', $routes);
+            ->with('routes', $routes)
+            ->with('leaveReqFilters', [
+                'a' => LeaveRequest::LEAVE_STATUS_APPROVED,
+                'p' => LeaveRequest::LEAVE_STATUS_PENDING,
+                'r' => LeaveRequest::LEAVE_STATUS_REJECTED
+            ])
+            ->with('allMonths', $allMonths);
     }
 
     public function getEmpGraphings(Request $request)
@@ -78,7 +88,7 @@ class DashboardController extends Controller
             $count = DB::table(Employee::getTableName())
                 ->where(Employee::f_Status, $status)
                 ->count();
-        
+
             return [$status => $count];
         })->toArray();
         
@@ -88,17 +98,22 @@ class DashboardController extends Controller
     private function countLeaveStatusDifference()
     {
         $statuses = LeaveRequest::getStatuses();
+        $total    = 0;
 
-        $counts = collect($statuses)->mapWithKeys(function ($status, $statusId) 
+        $counts = collect($statuses)->mapWithKeys(function ($status, $statusId) use(&$total) 
         {
             $count = DB::table(LeaveRequest::getTableName())
                 ->where(LeaveRequest::f_LeaveStatus, $statusId)
                 ->count();
         
+            $total += $count;
+
             return [$status => $count];
-        })->toArray();
+        });
         
-        return $counts;
+        $counts['Total'] = $total;
+
+        return $counts->toArray();
     }
 
     public function getAttendanceGraphings(Request $request)
@@ -136,7 +151,30 @@ class DashboardController extends Controller
         return $counts;
     }
 
-    public function findStatistics(Request $request)
+    private function getMonthlyAttendances()
+    {
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        $records = DB::table(Attendance::getTableName())
+        ->select(DB::raw('count(*) as total_records, DATE_FORMAT(created_at, "%b") as month'))
+        ->groupBy('month')
+        ->orderBy('created_at', 'ASC')
+        ->get()
+        ->keyBy('month');
+
+        $result = [];
+
+        foreach ($months as $month) {
+            $result[] = [
+                'month' => $month,
+                'total' => $records->has($month) ? $records[$month]->total_records : 0
+            ];
+        }
+
+        return $result;
+    }
+
+    public function findAttxStatistics(Request $request)
     {
         $hasFilter = ($request->has('filter') || $request->filled('filter'));
         $filters   = array_values(self::AttendanceStatSegmentFilters);
@@ -244,26 +282,45 @@ class DashboardController extends Controller
         ]);
     }
 
-    private function getMonthlyAttendances()
+    public function findLeaveStatistics(Request $request)
     {
-        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $hasFilter = ($request->has('segment') || $request->filled('segment'));
+        $filters   = array_keys(LeaveRequest::getStatuses());
 
-        $records = DB::table(Attendance::getTableName())
-        ->select(DB::raw('count(*) as total_records, DATE_FORMAT(created_at, "%b") as month'))
-        ->groupBy('month')
-        ->orderBy('created_at', 'ASC')
-        ->get()
-        ->keyBy('month');
+        if ( !$hasFilter || ($hasFilter && !in_array($request->input('segment'), $filters)) )
+            return response()->json(['code' => Constants::XHR_STAT_EMPTY]);
 
-        $result = [];
+        $filters = LeaveRequest::getStatuses();
+        $filter  = $request->input('segment');
 
-        foreach ($months as $month) {
-            $result[] = [
-                'month' => $month,
-                'total' => $records->has($month) ? $records[$month]->total_records : 0
-            ];
-        }
+        $f_leaveStatus = 'l.'.LeaveRequest::f_LeaveStatus;
 
-        return $result;
+        $select = [
+            'e.' . Employee::f_EmpNo . ' as empno',
+            Employee::getConcatNameDbRaw('e'),
+            DB::raw( Extensions::mapCaseWhen($filters, $f_leaveStatus, 'status') ),
+            DB::raw( Extensions::mapCaseWhen(LeaveRequest::getTypes(), 'l.'.LeaveRequest::f_LeaveType, 'type') ),
+            LeaveRequest::f_Duration .' as duration'
+        ];
+
+        $dataset = DB::table(LeaveRequest::getTableName(), 'l')
+            ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'l.' . LeaveRequest::f_Emp_FK_ID)
+            ->select($select)
+            ->where($f_leaveStatus, '=', $filter)
+            ->orderBy('l.created_at', 'desc')
+            ->get();
+
+        $segmentColors = [
+            LeaveRequest::LEAVE_STATUS_APPROVED => '#00D1A4',
+            LeaveRequest::LEAVE_STATUS_PENDING  => '#FF840C',
+            LeaveRequest::LEAVE_STATUS_REJECTED => '#FF2641'
+        ];
+
+        return response()->json([
+            'msg' => 'OK',
+            'dataset' => $dataset,
+            'segment' => $filters[$filter],
+            'segmentColor' => $segmentColors[$filter]
+        ]);
     }
 }

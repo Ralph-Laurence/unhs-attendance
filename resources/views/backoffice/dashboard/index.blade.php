@@ -15,7 +15,9 @@
         <div class="card" style="min-width: 240px;" >
             <div class="card-body p-2">
                 <div class="d-flex align-items-center mb-2 px-1 chart-title">
-                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">Total Employees
+                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
+                        <span class="me-2">Total Employees</span>
+                        <i class="fas fa-chart-simple text-primary-dark"></i>
                     </h6>
                     <h5 class="my-1" id="employee-count">0</h5>
                 </div>
@@ -27,7 +29,9 @@
         <div class="card">
             <div class="card-body p-2">
                 <div class="d-flex align-items-center mb-2 px-1 chart-title">
-                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">Attendance Statistics
+                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
+                        <span class="me-2">Attendance Statistics</span>
+                        <i class="fas fa-chart-simple text-primary-dark"></i>
                     </h6>
                     <h6 class="my-1 opacity-45">Today</h6>
                 </div>
@@ -60,19 +64,26 @@
         </div>
         <div class="card">
             <div class="card-body p-2">
-                <div class="d-flex align-items-center mb-2 px-1 chart-title">
-                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 text-truncate">Leave Requests
+                <div class="flex-start mb-2 px-1 chart-title">
+                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
+                        <span class="me-2">Leave Requests</span>
+                        <i class="fas fa-chart-simple text-primary-dark"></i>
                     </h6>
+                    <h6 class="text-14 fw-bold total-leave-reqs my-1"></h6>
                 </div>
                 <div class="row mb-2">
                     <div class="col">
-                        <div class="leave-count-wrapper leave-approved rounded-5 p-1">
+                        <div class="leave-count-wrapper leave-approved rounded-5 p-1" 
+                            data-action="{{ $routes['leaveReqStats'] }}"
+                            data-segment="{{ $leaveReqFilters['a'] }}">
                             <small class="ms-1 leave-count-label me-auto">Approved</small>
                             <div class="rounded-5 bg-white p-2 leave-count leave-count-approved">0</div>
                         </div>
                     </div>
                     <div class="col">
-                        <div class="leave-count-wrapper leave-rejected rounded-5 p-1">
+                        <div class="leave-count-wrapper leave-rejected rounded-5 p-1" 
+                            data-action="{{ $routes['leaveReqStats'] }}"
+                            data-segment="{{ $leaveReqFilters['r'] }}">
                             <small class="ms-1 leave-count-label me-auto">Rejected</small>
                             <div class="rounded-5 bg-white p-2 leave-count leave-count-rejected">0</div>
                         </div>
@@ -80,7 +91,9 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                        <div class="leave-count-wrapper leave-pending rounded-5 p-1">
+                        <div class="leave-count-wrapper leave-pending rounded-5 p-1" 
+                            data-action="{{ $routes['leaveReqStats'] }}"
+                            data-segment="{{ $leaveReqFilters['p'] }}">
                             <small class="ms-1 leave-count-label me-auto">Pending</small>
                             <div class="rounded-5 bg-white p-2 leave-count leave-count-pending">0</div>
                         </div>
@@ -96,9 +109,10 @@
         <div class="card">
             <div class="card-body p-2">
                 <div class="d-flex align-items-center mb-2 px-1 chart-title">
-                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">Monthly Attendances
+                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
+                        Total Monthly Attendances
                     </h6>
-                    <h6 class="my-1 opacity-45">Totals</h6>
+                    <h6 class="my-1 text-14 opacity-45">{{ $allMonths }}</h6>
                 </div>
                 <canvas id="monthly-totals" class="min-chart-height-sm xw-100"></canvas>
             </div>
@@ -111,52 +125,8 @@
 @endsection
 
 @push('dialogs')
-<div class="modal fade statistics-modal" id="statistics-modal" tabindex="-1" aria-hidden="true" data-mdb-backdrop="static">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header py-2">
-                <div class="d-flex align-items-center gap-2">
-                    <img src="{{ asset('images/internal/icons/modal_icon_stats.png') }}" width="28" height="28" alt="icon" class="modal-icon" />
-                    <h6 class="modal-title mb-0" id="statistics-modal-title">Daily Attendance Statistics</h6>
-                </div>
-                <button type="button" class="btn-close close-button" data-mdb-ripple-init data-mdb-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-            <div class="modal-body px-4">
-                <div class="container px-0">
-                    <div class="row mb-2">
-                        <div class="col flex-start">
-                            <h6 class="text-14 mb-0"><i class="fas fa-caret-right"></i> Segment :
-                                <span class="statistic-context rounded-6 text-white px-2">Statistic</span>
-                            </h6>
-                        </div>
-                        <div class="col flex-end">
-                            <x-table-length-pager as="stats-table-page-len"/>
-                            <div id="stats-table-page-container"></div>
-                        </div>
-                    </div>
-                </div>
-                {{-- DATASET TABLE --}}
-                <div class="w-100 position-relative overflow-y-auto rounded-3" data-simplebar style="max-height: 400px;">
-                    <table class="table table-striped w-100 table-sm table-fixedx dataset-table" id="stats-table">
-                        <thead class="position-sticky top-0 shadow-3-soft">
-                            <tr>
-                                <th style="width: 20%;">ID No</th>
-                                <th style="width: 35%;">Name</th>
-                                <th style="width: 20%;">Position</th>
-                                <th style="width: 20%"></th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary flat-button close-button" data-mdb-ripple-init
-                    data-mdb-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+    @include('modals.statistics-modal')
+    @include('modals.statistics-leave-modal')
 @endpush
 
 @push('scripts')

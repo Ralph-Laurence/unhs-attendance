@@ -1,3 +1,8 @@
+@font-face {
+    font-family: 'Poppins-Medium';
+    src: url('../../fonts/Poppins-Medium.ttf');
+}
+
 .min-chart-height {
     min-height: 235px;
 }
@@ -22,8 +27,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    color: #021e3d;
+    font-family: 'Poppins-Medium';
+    color: #08192c;
 }
 
 .leave-count-wrapper,
@@ -51,11 +56,37 @@
     max-height: 600px;
 }
 
-#statistics-modal #stats-table thead {
+.modal-table thead 
+{
     background-color: var(--primary-100);
+    font-family: 'Poppins-Medium';
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--dark-color);
 }
 
 #statistics-modal #stats-table_length {
     width: fit-content !important;
     display: none;
+}
+
+.leave-count-wrapper.leave-approved:hover {
+    background-color: #00D1A4;
+}
+
+.leave-count-wrapper.leave-rejected:hover {
+    background-color: var(--danger-color);
+}
+
+.leave-count-wrapper.leave-pending:hover {
+    background-color: var(--warning-color);
+}
+
+.leave-count-wrapper:hover {
+    cursor: pointer;
+}
+
+.leave-count-wrapper:hover > .leave-count-label {
+    color: white;
+    font-family: 'Poppins-Medium';
 }
