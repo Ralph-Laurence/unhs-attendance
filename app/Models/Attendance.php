@@ -75,7 +75,7 @@ class Attendance extends Model
             self::f_Emp_FK_ID   => $empId,
             self::f_TimeIn      => $timeIn,
             self::f_Status      => self::STATUS_PRESENT,
-            self::f_WeekNo      => Extensions::getCurrentWeek()
+            self::f_WeekNo      => Carbon::now()->weekOfYear
         ];
 
         $workStart  = Carbon::parse(self::WORK_START_TIME);
@@ -166,7 +166,7 @@ class Attendance extends Model
             DB::table($tblAttendance)->insert([
                 Attendance::f_Emp_FK_ID => $employee->id,
                 Attendance::f_Status    => Attendance::STATUS_ABSENT,
-                Attendance::f_WeekNo    => Extensions::getCurrentWeek()
+                Attendance::f_WeekNo    => Carbon::now()->weekOfYear
             ]);
         }
     }
@@ -197,12 +197,13 @@ class Attendance extends Model
 
     public function getWeeklyAttendances(Request $request)
     {
-        $currentWeek = Extensions::getCurrentWeek();
+        $currentWeek = Carbon::now()->weekOfYear;
 
         $dataset = $this->buildAttendanceQuery()
                    ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek);
 
         $this->applyRoleFilter($request, $dataset);
+        error_log(print_r($dataset->toSql(), true));
         $dataset = $dataset->get();
 
         Extensions::hashRowIds($dataset);

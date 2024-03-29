@@ -41,7 +41,7 @@ def seed(month):
                 late            = str(time_in - time_in.replace(hour=7, minute=30)) if time_in.hour > 7 or (time_in.hour == 7 and time_in.minute > 30) else '00:00:00'
                 undertime       = str(time_in.replace(hour=16, minute=50) - time_out) if time_out.hour < 16 or (time_out.hour == 16 and time_out.minute < 50) else '00:00:00'
                 overtime        = str(time_out - time_in.replace(hour=17, minute=30)) if time_out.hour > 17 or (time_out.hour == 17 and time_out.minute > 30) else '00:00:00'
-                week_no         = (day - 1) // 7 + 1
+                week_no         = time_in.isocalendar()[1]  # Get the week number of the year
                 created_at      = updated_at = time_in.strftime('%Y-%m-%d %H:%M:%S')
                 values.append((emp_id, created_at, lunch_start.strftime('%Y-%m-%d %H:%M:%S'), lunch_end.strftime('%Y-%m-%d %H:%M:%S'), time_out.strftime('%Y-%m-%d %H:%M:%S'), 'On Duty', duration, undertime, overtime, late, week_no, created_at, updated_at))
 

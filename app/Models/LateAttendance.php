@@ -45,7 +45,7 @@ class LateAttendance extends Model
 
     public function getWeeklyLates(Request $request)
     {
-        $currentWeek = Extensions::getCurrentWeek();
+        $currentWeek = Carbon::now()->weekOfYear;
 
         $dataset = $this->buildQuery()
                    ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek);

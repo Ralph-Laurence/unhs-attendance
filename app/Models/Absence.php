@@ -55,7 +55,7 @@ class Absence extends Model
 
     public function getWeeklyAbsences(Request $request)
     {
-        $currentWeek = Extensions::getCurrentWeek();
+        $currentWeek = Carbon::now()->weekOfYear;
 
         $dataset = $this->buildAbsenceQuery()
                    ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek);

@@ -17,14 +17,6 @@ class Extensions
         return preg_filter('/^/', $prefix, $array);
     }
 
-    /**
-     * Gets the week number (1 - 52) of current year.
-     */
-    public static function getCurrentWeek()
-    {
-        return Carbon::now()->weekOfYear;
-    }
-
     /** 
      * Takes a date range as input and returns an array of day numbers 
      * that fall on a weekend within that range. 
