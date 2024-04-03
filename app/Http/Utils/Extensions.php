@@ -231,8 +231,8 @@ class Extensions
     public static function durationToTimeString(float $duration)
     {
         // tell if zero duration |> '00:00:00'
-        // if ($duration == 0)
-        //     return null;
+        if (!$duration || $duration == 0)
+            return Constants::ZERO_DURATION;
         
         $hours   = floor($duration);
         $minutes = floor(($duration - $hours) * 60);

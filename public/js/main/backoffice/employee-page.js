@@ -300,11 +300,11 @@ var employeeDatatables = (function()
             total_absents : data.total_absents,
             id            : data.id
         });
-        
+
         // store the new row instance
         dataTable.newRowInstance = newRow;
 
-        goToNewRowPage(newRow);
+        goToNewRowPage(newRow, data);
     }
 
     function __updateRow(response)
@@ -315,7 +315,7 @@ var employeeDatatables = (function()
             (response.row  && Object.keys(response.row).length > 0)
         )
         {
-            let temp_row = dataTable.row(response.data.row);
+            let temp_row = dataTable.row(response.row);
             let temp_rowData = temp_row.data();
 
             temp_rowData.empname = response.data['empname'];
@@ -334,13 +334,17 @@ var employeeDatatables = (function()
         }
     }
 
-    function goToNewRowPage(newRow)
+    function goToNewRowPage(newRow, extraData = null)
     {
         var rowIndex   = newRow.index();
         var pageNumber = Math.ceil((rowIndex + 1) / dataTable.page.len());
 
         // Go to the page
         dataTable.page(pageNumber - 1).draw(false);
+        
+        // add the class to the 'emp_status' cell of the newly added row
+        if (extraData)
+            dataTable.cell(rowIndex, 3).nodes().to$().find('span').addClass(extraData.status_style);
     }
 
     function executeRowActions(row, action)

@@ -10,6 +10,7 @@ use App\Http\Utils\RegexPatterns;
 use App\Http\Utils\RouteNames;
 use App\Http\Utils\ValidationMessages;
 use App\Models\Attendance;
+use App\Models\Constants\StaffConstants;
 use App\Models\Employee;
 use Carbon\Carbon;
 use Hashids\Hashids;
@@ -122,15 +123,12 @@ class ScannerController extends Controller
         if (!$employee)
             return $errMessage;
 
-        $emp = $employee->toArray();
-        $pin = decrypt($emp['pin']);
+        $pin = decrypt($employee->pin);
 
         if ($pin != $inputs['input-pin-no'])
             return $errMessage;
-
-        error_log(print_r($emp, true));
         
-        return $this->handleAttendance($emp['id']);
+        return $this->handleAttendance($employee);
     }
 
     // Process Attendance From Scanner
@@ -147,13 +145,16 @@ class ScannerController extends Controller
 
         // Check first if the employee id exists
         // then begin processing their atendance
-        if (!Employee::where('id', $decode[0])->exists())
+        //if (!Employee::where('id', $decode[0])->exists())
+        $employee = Employee::find($decode[0]);
+
+        if (!$employee)
             return Extensions::encodeFailMessage(Messages::QR_CODE_NOT_RECOGNIZED);
 
-        return $this->handleAttendance($decode[0]);
+        return $this->handleAttendance($employee);
     }
 
-    public function handleAttendance(int $empId)
+    public function handleAttendance(Employee $employee)
     {
         // Handle Attendance Wont Work when the 
         // employee has been marked as Absent
@@ -166,8 +167,10 @@ class ScannerController extends Controller
         $currentDate = Carbon::now();
     
         // Start a transaction to ensure data consistency
-        $data = DB::transaction(function () use ($empId, $currentDate) 
+        $data = DB::transaction(function () use ($employee, $currentDate) 
         {
+            $empId = $employee->id;
+
             // Check if there's an existing attendance record for the employee today
             $attendance = Attendance::whereBetween('created_at', [
                     $currentDate->startOfDay()->format(Constants::TimestampFormat), 
@@ -181,11 +184,38 @@ class ScannerController extends Controller
             {
                 // implement task A1 here ____
 
-                return $this->insertNewAttendance($empId);
+                $ignoreLate = $employee->getAttribute(Employee::f_Rank) == StaffConstants::SECURITY_GUARD;
+
+                return $this->insertNewAttendance($empId, $ignoreLate);
             } 
             // If there's an existing record, update it
             else 
             {
+                // Guards only need time in and time out
+                if ($employee->getAttribute(Employee::f_Rank) == StaffConstants::SECURITY_GUARD) 
+                {
+                    if ($attendance->time_out)
+                        return;
+
+                    $timeOut = Carbon::now();
+
+                    // Then calculate the duration, undertime and so on
+                    $workHours  = Carbon::parse($attendance->time_in)->diffInSeconds($timeOut) / 3600;
+                    $duration   = Extensions::durationToTimeString($workHours);
+
+                    $attendance->update([
+                        Attendance::f_TimeOut    => $timeOut,
+                        Attendance::f_Status     => Attendance::STATUS_PRESENT, //$status,
+                        Attendance::f_Duration   => $duration,
+                        Attendance::f_UnderTime  => Constants::ZERO_DURATION,
+                        Attendance::f_OverTime   => Constants::ZERO_DURATION,
+                        Attendance::f_LunchStart => Constants::ZERO_DURATION,
+                        Attendance::f_LunchEnd   => Constants::ZERO_DURATION
+                    ]);
+
+                    return Extensions::encodeSuccessMessage('Clocked out');
+                }
+
                 // Process Lunch Start only if there is an existing Time In 
                 if ($attendance->time_in && !$attendance->lunch_start) 
                     return $this->updateLunchStart($attendance);
@@ -203,9 +233,9 @@ class ScannerController extends Controller
         return $data;
     }
     
-    private function insertNewAttendance($empId) : string
+    private function insertNewAttendance($empId, bool $ignoreLate = false) : string
     {
-        $insertAttendance = Attendance::createTimeIn($empId);
+        $insertAttendance = Attendance::createTimeIn($empId, $ignoreLate);
 
         if ($insertAttendance)
         {
@@ -286,30 +316,6 @@ class ScannerController extends Controller
             Attendance::f_OverTime  => Extensions::durationToTimeString($overtime), 
         ]);
 
-        return Extensions::encodeSuccessMessage('Good Bye!');//, ['status' => $status]);
+        return Extensions::encodeSuccessMessage('Clocked out');//, ['status' => $status]);
     }
 }
-
-/**
-* The total duration can be calculated by subtracting the time spent on lunch from the 
-* total time spent at work. Here’s how:
-
-timestamp [
-    'clockin'     => '2024-01-21 17:18:16', // 5:18pm
-    'lunch_start' => '2024-01-21 17:19:49', // 5:19pm
-    'lunch_end'   => '2024-01-21 23:32:25', 
-    'clock_out'   => '2024-01-21 23:32:34'
-]
-
-Calculate the total time spent at work: clock_out - clockin
-Calculate the total time spent on lunch: lunch_end - lunch_start
-Subtract the lunch time from the total work time to get the total duration.
-Let’s calculate:
-
-Total time at work: 23:32:34 - 17:18:16 = 6 hours, 14 minutes and 18 seconds
-Total time at lunch: 23:32:25 - 17:19:49 = 6 hours, 12 minutes and 36 seconds
-Total duration: 6 hours, 14 minutes and 18 seconds - 6 hours, 12 minutes and 36 seconds = 1 minute and 42 seconds
-So, the total duration is 1 minute and 42 seconds. Please note that this is a very short duration for a workday, 
-and the timestamps for lunch seem to be incorrect as they indicate that lunch ended after clocking out. 
-Please check the timestamps again.
-*/

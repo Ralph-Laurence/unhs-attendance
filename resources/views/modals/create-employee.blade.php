@@ -57,7 +57,19 @@
                                 required />
                         </div>
                         <div class="col-6 pt-1">
-                            <x-drop-list taborder="6" as="input-position" button-classes="w-100" text="Position" data-default-text="Position" :items="$positions" required />
+                            @if (
+                                isset($modalSetup['usesDefaultPosition']) && 
+                                $modalSetup['usesDefaultPosition'] === true && 
+                                !empty($modalSetup['defaultPosition'])
+                            )
+                                <x-drop-list taborder="6" as="input-position" button-classes="w-100" 
+                                    text="{{ $modalSetup['defaultPosition']['label'] }}" 
+                                    data-default-text="{{ $modalSetup['defaultPosition']['label'] }}" 
+                                    default="{{ $modalSetup['defaultPosition']['value'] }}" 
+                                    :items="$positions" required input-off />
+                            @else
+                                <x-drop-list taborder="6" as="input-position" button-classes="w-100" text="Position" data-default-text="Position" :items="$positions" required />
+                            @endif
                         </div>
                     </div>
                     <div class="row mb-2">

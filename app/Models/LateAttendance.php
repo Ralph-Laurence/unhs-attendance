@@ -141,6 +141,7 @@ class LateAttendance extends Model
                 ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
                 ->whereNotNull('a.' . Attendance::f_Late)
                 ->where('a.' . Attendance::f_Late, '<>', '')
+                ->where('a.' . Attendance::f_Late, '!=', Constants::ZERO_DURATION)
                 ->orderBy('a.created_at', 'desc');
 
         return $query;

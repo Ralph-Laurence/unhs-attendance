@@ -13,24 +13,6 @@ class StaffController extends EmployeeControllerBase
 {
     public function index()
     {
-        // $routes = [
-        //     'defaultDataSource'     => route(RouteNames::Staff['all']),
-        //     'POST_Create_Employee'  => route(RouteNames::Staff['create']),
-        //     'POST_Update_Employee'  => route(RouteNames::Staff['update']),
-        //     'DELETE_Employee'       => route(RouteNames::Staff['destroy']),
-        //     'DETAILS_Employee'      => route(RouteNames::Staff['details'])
-        // ];
-
-        // $role = Employee::RoleToString[Employee::RoleStaff];
-
-        // return view('backoffice.employees.index')
-        //     ->with('requireEmail',      true)           // Require email in registration
-        //     ->with('descriptiveRole',   $role)
-        //     ->with('routes',            $routes)
-        //     ->with('empType',           encrypt($role));
-
-
-
         $routes = [
             'defaultDataSource'     => route(RouteNames::Staff['all']),
             'POST_Create_Employee'  => route(RouteNames::Staff['create']),

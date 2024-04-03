@@ -23,7 +23,7 @@ const tableWrapperSelector  = '.attendance-table-wrapper';
 const attendanceTable       = '.attendance-table';
 const refractoryPeriod      = 10000; //ms
 
-const inactivityTime = 10000; // ms
+const inactivityTime = 30000; // ms
 let inactivityTimer;
 
 $(document).ready(function() 
@@ -128,7 +128,7 @@ function onStartButtonClick(button)
     showScanTable();
     resetTimer();
 
-    pinAuthFab.prop('disabled', false);
+    // pinAuthFab.prop('disabled', false);
     /*
     setTimeout(() =>
     {
@@ -143,7 +143,7 @@ function onStopButtonClick()
     stopTimer();
     hideScanTable();
 
-    pinAuthFab.prop('disabled', true);
+    // pinAuthFab.prop('disabled', true);
 }
 
 function observeRenderboxMutation()
@@ -372,7 +372,7 @@ function bindDatatableData()
 function handleInactivity() {
     hideScanTable();
     btnScannerStop.click();
-    pinAuthFab.prop('disabled', true);
+    // pinAuthFab.prop('disabled', true);
 
     snackbar.showWarn('Scanner has been stopped due to inactivity.');
     // Add your scanner stop code here

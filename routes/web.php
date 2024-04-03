@@ -11,6 +11,7 @@ use App\Http\Controllers\backoffice\TeachersController;
 use App\Http\Controllers\backoffice\StaffController;
 use App\Http\Controllers\backoffice\LateAttendanceController;
 use App\Http\Controllers\backoffice\LeaveRequestsController;
+use App\Http\Controllers\backoffice\SecurityGuardController;
 use App\Http\Controllers\scanner\ScannerController;
 use App\Http\Utils\Extensions;
 use App\Http\Utils\RouteNames;
@@ -135,6 +136,19 @@ Route::controller(StaffController::class)->middleware(['auth'])
     Route::post('/backoffice/employees/staff/details',  'show')         ->name(RouteNames::Staff['show']);
     Route::post('/backoffice/employees/staff/update',   'update')       ->name(RouteNames::Staff['update']);
     Route::post('/backoffice/employees/staff/edit',     'edit')         ->name(RouteNames::Staff['edit']);
+});
+
+Route::controller(SecurityGuardController::class)->middleware(['auth'])
+->group(function()
+{
+    Route::get('/backoffice/employees/guard',           'index')        ->name(RouteNames::Guards['index']);
+    
+    Route::post('/backoffice/employees/guard/get',      'getGuards')    ->name(RouteNames::Guards['all']);
+    Route::post('/backoffice/employees/guard/create',   'store')        ->name(RouteNames::Guards['create']);
+    Route::post('/backoffice/employees/guard/delete',   'destroy')      ->name(RouteNames::Guards['destroy']);
+    Route::post('/backoffice/employees/guard/details',  'show')         ->name(RouteNames::Guards['show']);
+    Route::post('/backoffice/employees/guard/update',   'update')       ->name(RouteNames::Guards['update']);
+    Route::post('/backoffice/employees/guard/edit',     'edit')         ->name(RouteNames::Guards['edit']);
 });
 
 Route::controller(AuditTrailsController::class)->middleware(['auth']) //['only_su']

@@ -97,6 +97,7 @@ class DashboardController extends Controller
         $pieSegmentRoutes = [
             Employee::STR_ROLE_TEACHER => route(RouteNames::Faculty['index']),
             Employee::STR_ROLE_STAFF   => route(RouteNames::Staff['index']),
+            Employee::STR_ROLE_GUARD   => route(RouteNames::Guards['index']),
         ];
 
         $counts = collect($roles)->mapWithKeys(function ($role, $roleId) 
@@ -175,16 +176,18 @@ class DashboardController extends Controller
         $earlyExit  = Attendance::EARLY_DISMISSAL;
         $f_timein   = Attendance::f_TimeIn;
 
-        $counts = DB::table(Attendance::getTableName())
+        $counts = DB::table(Attendance::getTableName(), 'a')
         ->select(
             //DB::raw('COUNT(*) as total_records'),
-            DB::raw("SUM(CASE WHEN TIME($f_timein) < '$beforeWork' THEN 1 ELSE 0 END) as 'Early Entry'"),
-            DB::raw("SUM(CASE WHEN TIME($f_timein) BETWEEN '$beforeWork' AND '$workStart' THEN 1 ELSE 0 END) as 'On Time'"),
-            DB::raw("SUM(CASE WHEN TIME($f_timein) > '$workStart' THEN 1 ELSE 0 END) as 'Late'"),
-            DB::raw("SUM(CASE WHEN TIME($timeOut)   > '$curfew' THEN 1 ELSE 0 END) as 'Overtime'"),
-            DB::raw("SUM(CASE WHEN TIME($timeOut)   < '$earlyExit' THEN 1 ELSE 0 END) as 'Undertime'")
+            DB::raw("SUM(CASE WHEN TIME(a.$f_timein) < '$beforeWork' THEN 1 ELSE 0 END) as 'Early Entry'"),
+            DB::raw("SUM(CASE WHEN TIME(a.$f_timein) BETWEEN '$beforeWork' AND '$workStart' THEN 1 ELSE 0 END) as 'On Time'"),
+            DB::raw("SUM(CASE WHEN TIME(a.$f_timein) > '$workStart' THEN 1 ELSE 0 END) as 'Late'"),
+            DB::raw("SUM(CASE WHEN TIME(a.$timeOut)   > '$curfew' THEN 1 ELSE 0 END) as 'Overtime'"),
+            DB::raw("SUM(CASE WHEN TIME(a.$timeOut)   < '$earlyExit' THEN 1 ELSE 0 END) as 'Undertime'")
         )
-        ->whereDate('created_at', $today)
+        ->leftJoin(Employee::getTableName().' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
+        ->whereDate('a.created_at', $today)
+        ->where('e.'.Employee::f_Role, '!=', Employee::RoleGuard)
         ->first();
 
         return $counts;
@@ -235,6 +238,7 @@ class DashboardController extends Controller
         $query = DB::table(Attendance::getTableName(), 'a')
             ->leftJoin(Employee::getTableName() .' as e', 'e.id', '=', 'a.'. Attendance::f_Emp_FK_ID)
             ->whereDate('a.created_at', date('Y-m-d'))
+            ->where('e.'.Employee::f_Role, '!=', Employee::RoleGuard)
             ->orderBy('a.created_at', 'desc');
 
         $filters = self::AttendanceStatSegmentFilters;

@@ -7,13 +7,10 @@ use App\Http\Requests\EmployeePostRequest;
 use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
-use App\Http\Utils\QRMaker;
 use App\Models\Employee;
-use Exception;
 use Hashids\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 //
 // Abstract Members will be Captilized to prevent confusion

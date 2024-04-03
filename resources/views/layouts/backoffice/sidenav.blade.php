@@ -3,17 +3,18 @@ use \App\Http\Utils\RouteNames;
 
 $routeItems = 
 [
-    ['wildcard' => 'backoffice.dashboard',              'icon' => 'fa-chart-pie',           'text' => 'Dashboard',      'target' => route(RouteNames::Dashboard['index'])],
-    ['wildcard' => 'backoffice.attendance',             'icon' => 'fa-calendar-check',      'text' => 'Attendance',     'target' => route(RouteNames::Attendance['index'])],
-    ['wildcard' => 'backoffice.absence',                'icon' => 'fa-calendar-xmark',      'text' => 'Absence',        'target' => route(RouteNames::Absence['index']),     'menu_type' => 'sub'],
-    ['wildcard' => 'backoffice.late',                   'icon' => 'fa-calendar-minus',      'text' => 'Late',           'target' => route(RouteNames::Late['index']),        'menu_type' => 'sub'],
-    ['wildcard' => 'backoffice.leave',                  'icon' => 'fa-calendar-week',       'text' => 'Leave',          'target' => route(RouteNames::Leave['index']),       'menu_type' => 'sub'],
-    ['wildcard' => '',                                  'icon' => 'fa-qrcode',              'text' => 'Scanner',        'target' => route(RouteNames::Scanner['index']),     'menu_type' => 'sub'],
-    ['wildcard' => 'backoffice.faculty',                'icon' => 'fa-person-chalkboard',   'text' => 'Faculty',        'target' => route(RouteNames::Faculty['index'])],
-    ['wildcard' => 'backoffice.staff',                  'icon' => 'fa-people-carry-box',    'text' => 'Staff',          'target' => route(RouteNames::Staff['index'])],
+    ['wildcard' => 'backoffice.dashboard',              'icon' => 'fa-chart-pie',               'text' => 'Dashboard',      'target' => route(RouteNames::Dashboard['index'])],
+    ['wildcard' => 'backoffice.attendance',             'icon' => 'fa-calendar-check',          'text' => 'Attendance',     'target' => route(RouteNames::Attendance['index'])],
+    ['wildcard' => 'backoffice.absence',                'icon' => 'fa-calendar-xmark',          'text' => 'Absence',        'target' => route(RouteNames::Absence['index']),     'menu_type' => 'sub'],
+    ['wildcard' => 'backoffice.late',                   'icon' => 'fa-calendar-minus',          'text' => 'Late',           'target' => route(RouteNames::Late['index']),        'menu_type' => 'sub'],
+    ['wildcard' => 'backoffice.leave',                  'icon' => 'fa-calendar-week',           'text' => 'Leave',          'target' => route(RouteNames::Leave['index']),       'menu_type' => 'sub'],
+    ['wildcard' => '',                                  'icon' => 'fa-qrcode',                  'text' => 'Scanner',        'target' => route(RouteNames::Scanner['index']),     'menu_type' => 'sub'],
+    ['wildcard' => 'backoffice.faculty',                'icon' => 'fa-person-chalkboard',       'text' => 'Faculty',        'target' => route(RouteNames::Faculty['index'])],
+    ['wildcard' => 'backoffice.staff',                  'icon' => 'fa-people-carry-box',        'text' => 'Staff',          'target' => route(RouteNames::Staff['index'])],
+    ['wildcard' => 'backoffice.guard',                  'icon' => 'fa-person-military-rifle',   'text' => 'Guard',          'target' => route(RouteNames::Guards['index'])],
     ['separator' => true],
-    ['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-shield',              'text' => 'Administrator',  'target' => ''], // route(RouteNames::Staffs['index'])
-    ['wildcard' => 'backoffice.audits',                 'icon' => 'fa-file-signature',      'text' => 'Audit Trails',   'target' => route(RouteNames::AuditTrails['index']), 'menu_type' => 'sub'],
+    ['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-shield',                  'text' => 'Administrator',  'target' => ''], // route(RouteNames::Staffs['index'])
+    ['wildcard' => 'backoffice.audits',                 'icon' => 'fa-file-signature',          'text' => 'Audit Trails',   'target' => route(RouteNames::AuditTrails['index']), 'menu_type' => 'sub'],
     //['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-bolt-lightning',      'text' => 'System Logs',    'target' => '', 'menu_type' => 'sub'],
     ['separator' => true],
     //['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-gear',      'text' => 'Settings',       'target' => '',],

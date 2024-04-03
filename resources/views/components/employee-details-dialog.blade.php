@@ -20,12 +20,12 @@
                     <div class="carousel-inner">
                         <div class="carousel-item profile-slide active">
                             <div class="d-flex">
-                                <div class="d-flex flex-column me-4">
+                                <div class="d-flex align-items-center flex-column me-4">
                                     <div class="photo-frame flex-center mb-2">
                                         <img id="employee-details-photo"
                                             src="{{ asset('images/internal/placeholders/profile.png') }}">
                                     </div>
-                                    <div class="rounded-8 text-center emp-details-position">
+                                    <div class="rounded-8 px-2 w-100 text-center emp-details-position">
                                         {{ $employeeRole }}
                                     </div>
                                 </div>

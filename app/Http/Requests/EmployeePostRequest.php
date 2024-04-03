@@ -33,7 +33,7 @@ class EmployeePostRequest extends FormRequest
         $employeeTable  = Employee::getTableName();
         $email_unique   = Rule::unique($employeeTable, Employee::f_Email);
         $empid_unique   = Rule::unique($employeeTable, Employee::f_EmpNo);
-
+        $update_id      = null;
         $phone_unique   = Rule::unique(Employee::getTableName(), Employee::f_Contact);
 
         // We should ignore the same employee during uniqueness check.
@@ -41,8 +41,9 @@ class EmployeePostRequest extends FormRequest
         // ->ignore($id) to exclude the current record.
         if ($this->has('update-key') && $this->filled('update-key'))
         {
-            $hashids = new Hashids( Employee::HASH_SALT, Employee::MIN_HASH_LENGTH );
-            $id      = $hashids->decode( $this->input('update-key') )[0];
+            $hashids    = new Hashids( Employee::HASH_SALT, Employee::MIN_HASH_LENGTH );
+            $id         = $hashids->decode( $this->input('update-key') )[0];
+            $update_id  = $id;
 
             $email_unique->ignore($id);
             $empid_unique->ignore($id);
@@ -76,13 +77,13 @@ class EmployeePostRequest extends FormRequest
                 'required',
                 'max:32',
                 'regex:' . RegexPatterns::ALPHA_DASH_DOT_SPACE,
-                function ($attribute, $value, $fail)
+                function ($attribute, $value, $fail) use($update_id)
                 {
                     $f_fname = Employee::f_FirstName;
                     $f_mname = Employee::f_MiddleName;
                     $f_lname = Employee::f_LastName;
 
-                    $identical = Employee::where($f_fname, $this->input('input-fname'))
+                    $query = Employee::where($f_fname, $this->input('input-fname'))
                                  ->where($f_mname, $this->input('input-mname'))
                                  ->where($f_lname, $this->input('input-lname'))
                                  ->select([
@@ -90,8 +91,12 @@ class EmployeePostRequest extends FormRequest
                                     $f_fname . ' as fname',
                                     $f_mname . ' as mname',
                                     $f_lname . ' as lname',
-                                 ])
-                                 ->first();
+                                 ]);
+
+                    if ($update_id)
+                        $query->where('id', '!=', $update_id);
+
+                    $identical = $query->first();
 
                     if ($identical)
                     {
@@ -156,6 +161,8 @@ class EmployeePostRequest extends FormRequest
 
             'input-phone.regex'         => "Phone number must be 11 digits and should begin with '09'",
             'input-phone.unique'        => ValidationMessages::unique('Phone Number'),
+
+            'input-email.email'         => ValidationMessages::invalid('Email')
         ];
     }
 }

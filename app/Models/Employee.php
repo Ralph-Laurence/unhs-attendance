@@ -48,16 +48,19 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
 
     public const RoleTeacher    = 1;
     public const RoleStaff      = 2;
+    public const RoleGuard      = 3;
 
     public const STR_ROLE_TEACHER = 'Teacher';
     public const STR_ROLE_STAFF   = 'Staff';
+    public const STR_ROLE_GUARD   = 'Security Guard';
 
     public const STR_COLLECTIVE_ROLE_ALL     = 'Employee';
     public const STR_COLLECTIVE_ROLE_FACULTY = 'Faculty';
     
     public const RoleToString = [
         self::RoleTeacher   => self::STR_ROLE_TEACHER,
-        self::RoleStaff     => self::STR_ROLE_STAFF
+        self::RoleStaff     => self::STR_ROLE_STAFF,
+        self::RoleGuard     => self::STR_ROLE_GUARD
     ];
 
     public const ON_STATUS_LEAVE = 'Leave';
@@ -79,6 +82,8 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
                                                     // -> High   - App
     public const f_PINCode      = 'pin_code';
     public const f_PINFlags     = 'pin_flag';       // -> Enabled | Disabled
+
+    public const f_ShiftFrom    = 'shift_from';
 
     // Need to place this in here, for object relational mapping
     protected $table = Constants::TABLE_EMPLOYEES;
@@ -112,7 +117,8 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
     {
         return [
             self::STR_ROLE_TEACHER  => self::RoleTeacher,
-            self::STR_ROLE_STAFF    => self::RoleStaff
+            self::STR_ROLE_STAFF    => self::RoleStaff,
+            self::STR_ROLE_GUARD    => self::RoleGuard
         ];
     }
 
@@ -140,6 +146,7 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
                     break;
 
                 case Employee::RoleStaff:
+                case Employee::RoleGuard:
                     $dataset['rank'] = StaffConstants::describeRank( $dataset['rank'] );
                     break;
             }
@@ -339,7 +346,8 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
                     $emp_lastname . ',',
                     $emp_firstname,
                     $model->getAttribute( self::f_MiddleName ),
-                ])
+                ]),
+                'status_style'  => Constants::StatusActive
             ];
 
             $qrcode = QRMaker::createAndSend($model, [

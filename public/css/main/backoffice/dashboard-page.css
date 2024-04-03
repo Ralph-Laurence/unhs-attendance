@@ -105,7 +105,8 @@
     color: #FF840C; 
     font-size: 16px;
 }
-.monthly-attx-stat-info { 
+.monthly-attx-stat-info,
+.daily-attx-stat-info { 
     color: #FF840C;
 }
 .dp-icn.fa-circle {

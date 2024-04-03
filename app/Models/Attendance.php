@@ -41,10 +41,10 @@ class Attendance extends Model
     public const STATUS_UNDERTIME = 'Undertime';
     public const STATUS_OVERTIME  = 'Overtime';
 
-    public const BEFORE_WORK_TIME = '07:00:00';     // 7:00 AM      -> Work opening time
-    public const WORK_START_TIME  = '07:30:00';     // 7:30 AM      -> All attendances must be made before this time
+    public const BEFORE_WORK_TIME = '07:15:00';     // 7:15 AM      -> All attendances within this time is "On Time"
+    public const WORK_START_TIME  = '08:00:00';     // 8:00 AM      -> All attendances after this time is "Late"
     public static $lunchOverTime  = '12:10:00';     // 12:10 PM     -> Extra work after this time is added to overtime
-    public const EARLY_DISMISSAL  = '16:50:00';     // 4:50 PM      -> Will not calculate undertime after this time
+    public const EARLY_DISMISSAL  = '16:30:00';     // 4:30 PM      -> Will not calculate undertime after this time
     public const CURFEW           = '17:30:00';     // 5:30 PM      -> All employees fully dismissed
 
     public const HASH_SALT = 'FA610E'; // Just random string, nothing special
@@ -67,7 +67,7 @@ class Attendance extends Model
         return 'Attendances';
     }
 
-    public static function createTimeIn(int $empId) : Attendance
+    public static function createTimeIn(int $empId, bool $ignoreLate = false) : Attendance
     {
         $timeIn = Carbon::now();
 
@@ -82,8 +82,14 @@ class Attendance extends Model
 
         if ($timeIn->gt(self::WORK_START_TIME))
         {
-            $late = $timeIn->diffInSeconds($workStart) / 3600;
-            $data[Attendance::f_Late] = Extensions::durationToTimeString($late);
+            if ($ignoreLate === false)
+            {
+                $late = $timeIn->diffInSeconds($workStart) / 3600;
+                $data[Attendance::f_Late] = Extensions::durationToTimeString($late);
+            }
+            else
+                $data[Attendance::f_Late] = Constants::ZERO_DURATION;
+            
         }
 
         $insert = Attendance::create($data);
@@ -157,6 +163,7 @@ class Attendance extends Model
             })
         ->whereNull('a.id')
         ->where('e.'.Employee::f_Status, '!=', Employee::ON_STATUS_LEAVE)
+        ->where('e.'.Employee::f_Role, '!=', Employee::RoleGuard)
         ->select('e.id')
         ->get();
 
@@ -302,24 +309,3 @@ class Attendance extends Model
         ]);
     }
 }
-
-/**
-    // If time_out is provided, calculate duration, undertime, overtime, and late
-    // if ($attendance->time_out) 
-    // {
-    //     $workHours = Carbon::parse($attendance->time_in)->diffInHours(Carbon::parse($attendance->time_out));
-    //     $lunchHours = Carbon::parse($attendance->lunch_start)->diffInHours(Carbon::parse($attendance->lunch_end));
-    //     $duration = $workHours - $lunchHours;
-
-    //     $undertime = $workHours < 8 ? 8 - $workHours : 0;
-    //     $overtime = $workHours > 8 ? $workHours - 8 : 0;
-    //     $late = Carbon::parse($attendance->time_in)->gt(Carbon::parse('08:00:00')) ? Carbon::parse($attendance->time_in)->diffInSeconds(Carbon::parse('08:00:00')) : 0;
-
-    //     $attendance->update([
-    //         'duration' => $duration,
-    //         'undertime' => $undertime,
-    //         'overtime' => $overtime,
-    //         'late' => $late,
-    //     ]);
-    // }
- */

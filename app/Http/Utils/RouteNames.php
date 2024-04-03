@@ -75,13 +75,6 @@ class RouteNames
     ];
 
     public const Staff = [
-        // 'index'     => 'backoffice.staff',
-        // 'all'       => 'backoffice.staff.all',
-        // 'create'    => 'backoffice.staff.create',
-        // 'update'    => 'backoffice.staff.update',
-        // 'details'   => 'backoffice.staff.details',
-        // 'destroy'   => 'backoffice.staff.destroy',
-
         'index'     => 'backoffice.staff',
         'all'       => 'backoffice.staff.all',
         'edit'      => 'backoffice.staff.edit',
@@ -89,6 +82,16 @@ class RouteNames
         'update'    => 'backoffice.staff.update',
         'show'      => 'backoffice.staff.show',
         'destroy'   => 'backoffice.staff.destroy',
+    ];
+
+    public const Guards = [
+        'index'     => 'backoffice.guard',
+        'all'       => 'backoffice.guard.all',
+        'edit'      => 'backoffice.guard.edit',
+        'create'    => 'backoffice.guard.create',
+        'update'    => 'backoffice.guard.update',
+        'show'      => 'backoffice.guard.show',
+        'destroy'   => 'backoffice.guard.destroy',
     ];
 
     public const Trails = [

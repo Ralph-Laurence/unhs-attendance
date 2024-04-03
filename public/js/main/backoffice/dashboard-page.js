@@ -84,7 +84,8 @@ let dashboardPage = (function()
                 data: count,
                 backgroundColor: [
                     chartColors['primary'],
-                    chartColors['success']
+                    chartColors['success'],
+                    chartColors['warning'],
                 ]
             }]
         };

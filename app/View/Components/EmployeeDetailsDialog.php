@@ -64,6 +64,7 @@ class EmployeeDetailsDialog extends Component
             'default'               => asset('images/internal/icons/modal_icon_employee.png'),
             Employee::RoleTeacher   => asset('images/internal/icons/modal_icon_teacher.png'),
             Employee::RoleStaff     => asset('images/internal/icons/modal_icon_staff.png'),
+            Employee::RoleGuard     => asset('images/internal/icons/modal_icon_security_guard.png'),
         ];
 
         if (!array_key_exists($modalFor, $icons))
@@ -84,7 +85,8 @@ class EmployeeDetailsDialog extends Component
         return [
             'default'               => Employee::STR_COLLECTIVE_ROLE_ALL,
             Employee::RoleTeacher   => Employee::STR_COLLECTIVE_ROLE_FACULTY,
-            Employee::RoleStaff     => Employee::STR_ROLE_STAFF
+            Employee::RoleStaff     => Employee::STR_ROLE_STAFF,
+            Employee::RoleGuard     => Employee::STR_ROLE_GUARD
         ];
     }
 

@@ -33,6 +33,12 @@
                     <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
                         <span class="me-2">Attendance Statistics</span>
                         <i class="fas fa-chart-simple text-primary-dark"></i>
+                        <i class="fas fa-info-circle text-primary-dark ms-2 daily-attx-stat-info"
+                        data-mdb-toggle="tooltip" data-mdb-html="true"
+                        data-mdb-title='<span class="fst-italic text-13">
+                            <i class="fas fa-triangle-exclamation text-warning-light"></i>
+                            Charts or graphs may appear empty on weekends
+                        </span>'></i>
                     </h6>
                     <h6 class="my-1 opacity-45">Today</h6>
                 </div>
@@ -138,7 +144,11 @@
                                             <i class="fas fa-xmark dp-icn me-1"></i>
                                             <span class="dp-label">Lowest Datapoint</span>
                                         </li>
-                                    </ul>'>
+                                    </ul>
+                                    <span class="fst-italic text-13">
+                                        <i class="fas fa-triangle-exclamation text-warning-light"></i>
+                                        Charts or graphs may appear empty on weekends
+                                    </span>'>
                         <span class="me-1">Total Monthly Attendances</span>
                         <i class="fas fa-info-circle monthly-attx-stat-info"></i>
                     </h6>
