@@ -10,6 +10,22 @@ const chartColors = {
     'danger_alphabg' : '#FF264125'
 };
 
+// Mapping of three-letter month abbreviations to full month names
+const monthMappings = {
+    "Jan": {name: "January"   , number: 1},
+    "Feb": {name: "February"  , number: 2},
+    "Mar": {name: "March"     , number: 3},
+    "Apr": {name: "April"     , number: 4},
+    "May": {name: "May"       , number: 5},
+    "Jun": {name: "June"      , number: 6},
+    "Jul": {name: "July"      , number: 7},
+    "Aug": {name: "August"    , number: 8},
+    "Sep": {name: "September" , number: 9},
+    "Oct": {name: "October"   , number: 10},
+    "Nov": {name: "November"  , number: 11},
+    "Dec": {name: "December"  , number: 12}
+};
+
 let dashboardPage = (function() 
 {
     const attxStatsModalSelector = '#statistics-modal';
@@ -20,6 +36,9 @@ let dashboardPage = (function()
     const leaveStatsModalSelector = '.statistics-leave-modal';
     let leaveStatModal;
 
+    const monthlyAttendanceModalSelector = '#statistics-monthly-atx-modal';
+    let monthlyStatModal;
+
     let init = function() 
     {
         getEmployeeGraphings();
@@ -27,6 +46,7 @@ let dashboardPage = (function()
 
         statsModal     = new mdb.Modal($(attxStatsModalSelector));
         leaveStatModal = new mdb.Modal($(leaveStatsModalSelector));
+        monthlyStatModal = new mdb.Modal($(monthlyAttendanceModalSelector));
     };
 
     let bindEvents = function() 
@@ -195,56 +215,83 @@ let dashboardPage = (function()
         let months = [];
         let totals = [];
 
-        Object.keys(response.monthlyComparison).forEach(k => {
-            months.push(response.monthlyComparison[k].month);
-            totals.push(response.monthlyComparison[k].total);
+        let dataSource = response.monthlyComparison.chartDatasource;
+
+        Object.keys(dataSource).forEach(k => {
+            months.push(dataSource[k].month);
+            totals.push(dataSource[k].total);
         });
 
         let highestTotal = Math.max(...totals);
 
+        let _data = {
+            labels: months,
+            datasets: [{
+                label: 'Total Attendances',
+                data: totals,
+                backgroundColor: chartColors['primary_alphabg'],
+                borderColor: chartColors['primary'],
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBorderColor: totals.map(value => {
+                    if (value < 1)
+                        return 'red';
+    
+                    if (value === highestTotal)
+                        return '#FF840C'; 
+                    
+                    return chartColors['primary'];
+                }),
+                // Set the point color to 'red' for the highest value and '#00D1A4' for others
+                pointBackgroundColor: totals.map(value => {
+                    if (value < 1)
+                        return 'red';
+    
+                    if (value === highestTotal)
+                        return '#FF840C'; 
+                    
+                    return '#00D1A4';
+                }),
+                //pointBackgroundColor: totals.map(value => value === highestTotal ? '#FF840C' : '#00D1A4'),
+                 // Set the point style to 'triangle' for the highest value and 'circle' for others
+                pointStyle: totals.map(value => {
+                    if (value < 1)
+                        return 'crossRot';
+
+                    if (value === highestTotal)
+                        return 'triangle'; 
+                    
+                    return 'circle';
+                })
+            }]
+        };
+
         new Chart(monthlySummary, {
             type: 'line',
-            data: {
-                labels: months,
-                datasets: [{
-                    label: 'Total Attendances',
-                    data: totals,
-                    backgroundColor: chartColors['primary_alphabg'],
-                    borderColor: chartColors['primary'],
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 5,
-                    pointBorderColor: totals.map(value => {
-                        if (value < 1)
-                            return 'red';
-        
-                        if (value === highestTotal)
-                            return '#FF840C'; 
-                        
-                        return chartColors['primary'];
-                    }),
-                    // Set the point color to 'red' for the highest value and '#00D1A4' for others
-                    pointBackgroundColor: totals.map(value => {
-                        if (value < 1)
-                            return 'red';
-        
-                        if (value === highestTotal)
-                            return '#FF840C'; 
-                        
-                        return '#00D1A4';
-                    }),
-                    //pointBackgroundColor: totals.map(value => value === highestTotal ? '#FF840C' : '#00D1A4'),
-                     // Set the point style to 'triangle' for the highest value and 'circle' for others
-                    pointStyle: totals.map(value => {
-                        if (value < 1)
-                            return 'crossRot';
+            data: _data,
+            options: {
+                onClick: function (event, segments)
+                {
+                    if (segments.length > 0)
+                    {
+                        const clickedSegment = segments[0];
+                        const label = _data.labels[clickedSegment.index];
+                        const value = _data.datasets[0].data[clickedSegment.index];
 
-                        if (value === highestTotal)
-                            return 'triangle'; 
-                        
-                        return 'circle';
-                    })
-                }]
+                        if (value < 1)
+                        {
+                            alertModal.showWarn(`No records to show from the month of ${monthMappings[label].name}.`);
+                            return;
+                        }
+
+                        onMonthlySegmentsClick({
+                            'monthIndex' : monthMappings[label].number,
+                            'actionUrl'  : response.monthlyComparison.segmentRoute,
+                            'monthName'  : monthMappings[label].name
+                        });
+                    }
+                },
             }
         });
     }
@@ -264,6 +311,33 @@ let dashboardPage = (function()
             },
             error: function (xhr, status, error) {  
 
+            }
+        });
+    }
+
+    function onMonthlySegmentsClick(settings)
+    {
+        $.ajax({
+            url  : settings.actionUrl,
+            type : 'post',
+            data : {
+                '_token' : getCsrfToken(),
+                'monthIndex' : settings.monthIndex
+            },
+            success: function(response)
+            {
+                if (!response)
+                {
+                    alertModal.showWarn("No records to show.");
+                    return;
+                }
+
+                response = JSON.parse(response);
+                bindFindMonthlyAttendanceAdapter(response, settings.monthName);
+            },
+            error: function(xhr, status, error) 
+            {
+                alertModal.showDanger("There was a problem reading the attendances");
             }
         });
     }
@@ -297,6 +371,68 @@ let dashboardPage = (function()
                 }
             });
         }
+    }
+
+    function bindFindMonthlyAttendanceAdapter(response, monthName)
+    {
+        let tableId = '#monthly-atx-table';
+
+        let columnDefinitions = [
+            {data: 'created_at',  title: 'Date',     width: '10%', class: 'text-truncate',
+                render: function(data, type, row)
+                {
+                    if (data == '' || data == undefined)
+                        return '';
+
+                    var date = extractDate(data);
+                    return `${date.month} ${date.day}`;
+                }
+            },
+            {data: 'empname',  title: 'Name',     width: '30%', class: 'text-truncate'},
+            {data: 'timein',   title: 'Time In',  width: '20%', class: 'text-truncate', 
+                render: function(data, type, row) 
+                {
+                    return data ? format12Hour(data) : ''
+                },
+            },
+            {data: 'timeout',  title: 'Time Out', width: '20%', class: 'text-truncate', 
+                render: function(data, type, row) 
+                {
+                    return data ? format12Hour(data) : ''
+                },
+            },
+            {data: 'duration', title: 'Duration', width: '20%', class: 'text-truncate'},
+        ];
+
+        // Check if the DataTable exists and if so, destroy it
+        if ($.fn.DataTable.isDataTable(tableId))
+        {
+            $(tableId).DataTable().destroy();
+        }
+
+        // Clear its contents
+        $(`${tableId} tbody`).empty();
+
+        // Reinitialize the DataTable with new data and columns
+        let dt = $(tableId).DataTable({
+            'searching': false,
+            'ordering': false,
+            'autoWidth': true,
+            "deferRender": true,
+            'columns': columnDefinitions,
+            'drawCallback' : function (settings) 
+            {  
+                $(monthlyAttendanceModalSelector).find('.statistic-context').text(monthName);
+            },
+            'data' : response.data
+        });
+
+        if (statsTablePageLen)
+            statsTablePageLen = null;
+
+        statsTablePageLen = to_lengthpager('#stats-monthly-table-page-len', dt);
+
+        monthlyStatModal.show();
     }
 
     function bindAttendanceStatsAdapter(response, segmentColor)
@@ -450,3 +586,4 @@ $(document).ready(function ()
     dashboardPage.init();
     dashboardPage.handle();
 });
+

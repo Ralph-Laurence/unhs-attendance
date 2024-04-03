@@ -243,7 +243,6 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
             {
                 className: 'td-employee-name text-truncate',
                 // width: '280px',
-                data: null,
                 name: 'empname',
                 data: 'empname',
                 defaultContent: ''

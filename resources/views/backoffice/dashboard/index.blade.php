@@ -210,6 +210,7 @@
 @push('dialogs')
     @include('modals.statistics-modal')
     @include('modals.statistics-leave-modal')
+    @include('modals.statistics-monthly-attendances')
 @endpush
 
 @push('scripts')

@@ -40,6 +40,10 @@ Route::controller(DashboardController::class)->middleware(['auth'])
 
     Route::post('/backoffice/dashboard/graphings/employee',   'getEmpGraphings')->name(RouteNames::Dashboard['countEmp']);
     Route::post('/backoffice/dashboard/graphings/attendance', 'getAttendanceGraphings')->name(RouteNames::Dashboard['countAttendance']);
+    Route::post(
+        '/backoffice/dashboard/graphings/attendance/find/monthly', 
+        'findMonthlyAttendance'
+    )->name(RouteNames::Dashboard['findMonthly']);
 });
 
 Route::controller(DailyTimeRecordController::class)->middleware(['auth'])

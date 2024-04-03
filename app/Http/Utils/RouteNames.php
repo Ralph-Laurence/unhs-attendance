@@ -14,6 +14,7 @@ class RouteNames
         'countAttendance' => 'backoffice.dashboard.count.attendance',
         'attendanceStats' => 'backoffice.dashboard.stats.attendance',
         'leavereqtsStats' => 'backoffice.dashboard.stats.leavereqts',
+        'findMonthly'     => 'backoffice.dashboard.stats.monthly.find',
     ];
 
     public const DailyTimeRecord = [

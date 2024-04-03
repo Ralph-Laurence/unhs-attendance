@@ -201,6 +201,7 @@ class DashboardController extends Controller
         ->select(DB::raw('count(*) as total_records, DATE_FORMAT(created_at, "%b") as month'))
         ->groupBy('month')
         ->orderBy('created_at', 'ASC')
+        ->where(Attendance::f_Status, '=', Attendance::STATUS_PRESENT)
         ->get()
         ->keyBy('month');
 
@@ -213,7 +214,18 @@ class DashboardController extends Controller
             ];
         }
 
-        return $result;
+        return [
+            'chartDatasource' => $result,
+            'segmentRoute' => route(RouteNames::Dashboard['findMonthly'])
+        ];
+    }
+
+    public function findMonthlyAttendance(Request $request)
+    {
+        $attendance = new Attendance();
+        $records = $attendance->getMonthlyAttendances($request);
+
+        return $records;
     }
 
     public function findAttxStatistics(Request $request)
