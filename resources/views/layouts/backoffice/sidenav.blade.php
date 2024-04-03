@@ -13,8 +13,8 @@ $routeItems =
     ['wildcard' => 'backoffice.staff',                  'icon' => 'fa-people-carry-box',        'text' => 'Staff',          'target' => route(RouteNames::Staff['index'])],
     ['wildcard' => 'backoffice.guard',                  'icon' => 'fa-person-military-rifle',   'text' => 'Guard',          'target' => route(RouteNames::Guards['index'])],
     ['separator' => true],
-    ['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-shield',                  'text' => 'Administrator',  'target' => ''], // route(RouteNames::Staffs['index'])
-    ['wildcard' => 'backoffice.audits',                 'icon' => 'fa-file-signature',          'text' => 'Audit Trails',   'target' => route(RouteNames::AuditTrails['index']), 'menu_type' => 'sub'],
+    //['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-shield',                  'text' => 'Administrator',  'target' => ''], // route(RouteNames::Staffs['index'])
+    ['wildcard' => 'backoffice.audits',                 'icon' => 'fa-file-signature',          'text' => 'Audit Trails',   'target' => route(RouteNames::AuditTrails['index']),],// 'menu_type' => 'sub'],
     //['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-bolt-lightning',      'text' => 'System Logs',    'target' => '', 'menu_type' => 'sub'],
     ['separator' => true],
     //['wildcard' => '', /*backoffice.admins*/            'icon' => 'fa-gear',      'text' => 'Settings',       'target' => '',],
