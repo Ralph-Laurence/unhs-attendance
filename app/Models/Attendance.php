@@ -203,7 +203,7 @@ class Attendance extends Model
                    ->where('a.' . Attendance::f_WeekNo, '=', $currentWeek);
 
         $this->applyRoleFilter($request, $dataset);
-        error_log(print_r($dataset->toSql(), true));
+        
         $dataset = $dataset->get();
 
         Extensions::hashRowIds($dataset);
