@@ -95,13 +95,18 @@ function bindTableDataSource(newRange, newMonthNumber)
 
     var onRenderDefaultContent = function(data, type, row) 
     {
+        console.warn(row)
         if (row)
         {
-            if (row.day_number && weekendDays.includes(row.day_number))
+            if (weekendDays.includes(row.day_number))
                 return `<span class="text-sm opacity-65">Rest Day</span>`;
             
             // Dont put 'x' mark on future days but only on past days with no 'am_in'
-            if (!row.am_in && row.day_number < today)
+            // if (!row.am_in && row.day_number < today)
+            //     return `<span class="text-danger">${'\u00d7'}</span>`;
+
+            // put 'x' mark only on status : absent
+            if (row.status == 'x')
                 return `<span class="text-danger">${'\u00d7'}</span>`;
         }
 
@@ -142,7 +147,7 @@ function bindTableDataSource(newRange, newMonthNumber)
                     return
                 }
 
-                if (json.weekendDays && weekendDays.length < 1)
+                if (json.weekendDays)
                     weekendDays = json.weekendDays;
 
                 if (json.statistics)
@@ -187,7 +192,7 @@ function bindTableDataSource(newRange, newMonthNumber)
                 className: 'dayname td-60',
                 data: 'day_name',
                 name: 'day_name',
-                defaultContent: '',
+                //defaultContent: '',
                 render: function(data, type, row) 
                 {
                     let color = 'text-primary-dark';
@@ -207,7 +212,7 @@ function bindTableDataSource(newRange, newMonthNumber)
                 {
                     data = data || '\u00d7';
                     
-                    if(row.day_number && weekendDays.includes(row.day_number))
+                    if(weekendDays.includes(row.day_number))
                         return '<span class="text-special-dark-green text-sm">Rest Day</span>';
 
                     return `<span class="text-special-dark-green">${data}</span>`;
@@ -216,7 +221,7 @@ function bindTableDataSource(newRange, newMonthNumber)
             {
                 className: 'am_out text-center td-80',
                 data: 'am_out', 
-                defaultContent: '',
+                //defaultContent: '',
                 render: onRenderDefaultContent,
             },
             {
@@ -228,7 +233,7 @@ function bindTableDataSource(newRange, newMonthNumber)
             {
                 className: 'pm_out text-center td-80 v-stripe-accent-yellow border-start border-end',
                 data: 'pm_out', 
-                defaultContent: '',
+                //defaultContent: '',
                 render: function(data, type, row) 
                 {
                     data = data || '\u00d7';
@@ -242,31 +247,31 @@ function bindTableDataSource(newRange, newMonthNumber)
             {
                 className: 'duration td-120 text-center',
                 data: 'duration', 
-                defaultContent: '',
+                //defaultContent: '',
                 render: onRenderDefaultContent,
             },
             {
                 className: 'late td-120 v-stripe-accent border-start border-end text-center',
                 data: 'late', 
-                defaultContent: '',
+                //defaultContent: '',
                 render: onRenderDefaultContent,
             },
             {
                 className: 'undertime td-120 text-center',
                 data: 'undertime', 
-                defaultContent: '',
+                //defaultContent: '',
                 render: onRenderDefaultContent,
             },
             {
                 className: 'overtime td-120 v-stripe-accent border-start border-end text-center',
                 data: 'overtime', 
-                defaultContent: '',
+                //defaultContent: '',
                 render: onRenderDefaultContent,
             },
             {
                 className: 'status td-100 text-center',
                 data: 'status', 
-                defaultContent: '',
+                //defaultContent: '',
                 render: function(data, type, row)
                 {
                     if (!statusMap || (statusMap && !statusMap[data]))

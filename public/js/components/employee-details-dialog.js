@@ -133,6 +133,7 @@ function to_employeeDetailsDialog(selector)
         $(`${selector} #emp-details-rank`).text(jsonObj.rank);
         $(`${selector} #emp-details-status`).text(jsonObj.status);
         $(`${selector} #emp-details-contact`).text(jsonObj.phone);
+        $(`${selector} #emp-details-join-date`).text(jsonObj.joinDate);
 
         if (jsonObj.qrCode)
         {

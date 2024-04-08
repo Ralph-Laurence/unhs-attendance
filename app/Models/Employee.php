@@ -133,7 +133,8 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
                     self::f_Email   . ' as email',
                     self::f_Status  . ' as status',
                     self::f_Role    . ' as role',
-                    self::f_Rank    . ' as rank'
+                    self::f_Rank    . ' as rank',
+                    'created_at as joinDate'
                 ])
                 ->selectRaw( self::getConcatNameDbRaw('', 'empname', Constants::NAME_STYLE_EASTERN) )
                 ->firstOrFail()
@@ -166,7 +167,8 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
             }
 
             $dataset['empname'] = ucwords($dataset['empname']);
-
+            $dataset['joinDate'] = date('M d, Y', strtotime($dataset['joinDate']));
+            
             return json_encode([
                 'code'      => Constants::XHR_STAT_OK,
                 'dataset'   => $dataset

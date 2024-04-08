@@ -28,6 +28,9 @@
                                     <div class="rounded-8 px-2 w-100 text-center emp-details-position">
                                         {{ $employeeRole }}
                                     </div>
+                                    <hr class="my-3 opacity-10 w-100">
+                                    <small class="mb-1 opacity-75">Joined on</small>
+                                    <small class="opacity-75 text-13" id="emp-details-join-date">?</small>
                                 </div>
                                 <div class="right-contents flex-fill">
                                     <div class="text-sm text-primary-dark mb-1">

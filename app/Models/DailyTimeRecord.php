@@ -100,6 +100,59 @@ class DailyTimeRecord extends Model
         ];
     }
 
+    private function xbuildSelectQuery(int $employeeId, Carbon $from, Carbon $to) : Builder
+    {
+        $createdAt = 'created_at';
+        $status    = Attendance::f_Status;
+        $present   = Attendance::STATUS_PRESENT;
+        $break     = Attendance::STATUS_BREAK;
+        $absent    = Attendance::STATUS_ABSENT;
+
+        $query = DB::table(Attendance::getTableName())
+            ->where(Attendance::f_Emp_FK_ID, '=', $employeeId)
+            ->select([
+                DB::raw("EXTRACT(DAY FROM $createdAt)      AS day_number"),
+                DB::raw("DATE_FORMAT($createdAt, '%a')     AS day_name"),
+                DB::raw("CASE
+                    WHEN DATE_FORMAT($createdAt, '%w') IN (0, 6) THEN 'r'
+                    WHEN $createdAt.date > CURDATE() THEN NULL
+                    WHEN $status = '$present' THEN 'p'
+                    WHEN $status = '$break'   THEN 'b'
+                    WHEN $status = '$absent'  THEN 'x'
+                    WHEN l.id IS NOT NULL THEN 'l'
+                    ELSE ''                    
+                END AS status"),
+
+                $this->toShortTimeRaw(Attendance::f_TimeIn,     'am_in'),
+                $this->toShortTimeRaw(Attendance::f_LunchStart, 'am_out'),
+                $this->toShortTimeRaw(Attendance::f_LunchEnd,   'pm_in'),
+                $this->toShortTimeRaw(Attendance::f_TimeOut,    'pm_out'),
+
+                // Unformatted duration strings
+                Attendance::f_Duration  . ' as duration_raw',
+                Attendance::f_OverTime  . ' as overtime_raw',
+                Attendance::f_UnderTime . ' as undertime_raw',
+                Attendance::f_Late      . ' as late_raw',
+
+                // Formatted duration strings
+                Attendance::timeStringToDurationRaw(Attendance::f_Duration),
+                Attendance::timeStringToDurationRaw(Attendance::f_Late, null, 'late'),
+                Attendance::timeStringToDurationRaw(Attendance::f_UnderTime, null, 'undertime'),
+                Attendance::timeStringToDurationRaw(Attendance::f_OverTime, null, 'overtime'),
+                'created_at',
+            ])
+            ->whereBetween($createdAt, [$from, $to])
+            // Order the final result by date series in ascending
+            ->orderBy($createdAt, 'asc');
+
+            error_log($query->toSql());
+            error_log(print_r([$from, $to], true));
+        return $query;
+    }
+
+
+
+    // [OBSOLETE]
     private function buildSelectQuery(int $employeeId, Carbon $from, Carbon $to) : Builder
     {
         $seriesAlias    = 'dateseries';
@@ -126,6 +179,11 @@ class DailyTimeRecord extends Model
                 $join->on('l.'.LeaveRequest::f_Emp_FK_ID,      '=',  DB::raw("?"))->addBinding($employeeId);
                 $join->where('l.'.LeaveRequest::f_LeaveStatus, '=',  LeaveRequest::LEAVE_STATUS_APPROVED);
             })
+            // Include the employee's created_at date
+            ->leftJoin(Employee::getTableName().' as e', function ($join) use ($employeeId) {
+                $join->on('e.id', '=', DB::raw("?"))->addBinding($employeeId);
+            })
+
             // Set the default status as Absent ('x') when null
             ->select([
                 DB::raw("EXTRACT(DAY FROM $seriesAlias.date)      AS day_number"),
@@ -133,11 +191,12 @@ class DailyTimeRecord extends Model
                 DB::raw("CASE
                     WHEN DATE_FORMAT($seriesAlias.date, '%w') IN (0, 6) THEN 'r'
                     WHEN $seriesAlias.date > CURDATE() THEN NULL
-                    WHEN $col_status = '$statusPresent' THEN 'p'
-                    WHEN $col_status = '$statusBreak'   THEN 'b'
-                    WHEN $col_status = '$statusAbsent'  THEN 'x'
+                    WHEN DATE($seriesAlias.date) < DATE(e.created_at) THEN NULL
+                    WHEN a.$col_status = '$statusPresent' THEN 'p'
+                    WHEN a.$col_status = '$statusBreak'   THEN 'b'
+                    WHEN a.$col_status = '$statusAbsent'  THEN 'x'
                     WHEN l.id IS NOT NULL THEN 'l'
-                    ELSE COALESCE($col_status, 'x')
+                    ELSE COALESCE(a.$col_status, 'x')                    
                 END AS status"),
 
                 $this->toShortTimeRaw(Attendance::f_TimeIn,     'am_in'),
@@ -161,7 +220,6 @@ class DailyTimeRecord extends Model
             // Order the final result by date series in ascending
             ->orderBy(DB::raw("DATE($seriesAlias.date)"), 'asc');
         
-        error_log($query->toSql());
         return $query;
     }
 
