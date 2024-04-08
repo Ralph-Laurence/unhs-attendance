@@ -1,5 +1,29 @@
-<div class="pb-2 pt-3 d-flex flex-column gap-2 text-center">
-    <h6 class="text-uppercase fw-bold">Daily Time Record</h6>
+<div class="pb-2 pt-2 d-flex flex-column gap-2 text-center">
+    <div class="row">
+        <div class="col-2 g-0">
+            <img src="{{ asset('images/internal/icons/logo-sm.png') }}" alt="logo" width="60" height="60" />
+        </div>
+        <div class="col g-0 text-sm flex-center flex-column">
+            <p class="m-0 text-uppercase">Uddiawan National High School</p>
+            <small>Solano, Nueva Vizcaya</small>
+        </div>
+        <div class="col-2 g-0"></div>
+    </div>
+    {{-- <table class="logo-wrapper w-100 table-fixed">
+        <thead>
+            <tr>
+                <th style="width: 2%; background: orange;">
+                    <img src="{{ asset('images/internal/icons/logo-sm.png') }}" alt="logo" width="60" height="60" />
+                </th>
+                <th class="text-sm text-uppercase opacity-75" style="width: 92%;">
+                    <p class="m-0">Uddiawan National High School</p>
+                    <small>Solano, Nueva Vizcaya</small>
+                </th>
+                <th style="width: 5%; background: orange;"></th>
+            </tr>
+        </thead>
+    </table> --}}
+    <h6 class="text-uppercase fw-bold my-1">Daily Time Record</h6>
     <p class="my-0 text-uppercase text-decoration-underline fw-bold text-14 dtr-empname">Employee Name</p>
     <p class="my-0">
         <i class="doc-bullet-diams"></i>

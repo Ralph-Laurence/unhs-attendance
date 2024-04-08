@@ -171,7 +171,8 @@ class LeaveRequest extends Model implements Auditable
         // Execute the query then expect results
         $dataset = $dataset->get();
 
-        Extensions::hashRowIds($dataset, self::HASH_SALT, self::MIN_HASH_LENGTH);
+        //Extensions::hashRowIds($dataset, self::HASH_SALT, self::MIN_HASH_LENGTH);
+        $this->sanitizeResults($dataset);
 
         $monthName = Carbon::createFromFormat('!m', $monthIndex)->monthName;
 
@@ -456,6 +457,20 @@ class LeaveRequest extends Model implements Auditable
         catch (Exception $ex) {
             error_log($ex->getMessage() . ' at ' . $ex->getLine());
             return $failMessage;
+        }
+    }
+
+    private function sanitizeResults($dataset)
+    {
+        $hashids = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+        
+        foreach ($dataset as $data) 
+        {
+            if ($data->id)
+                $data->id = $hashids->encode($data->id);
+
+            if ($data->empname)
+                $data->empname = ucwords($data->empname);
         }
     }
 

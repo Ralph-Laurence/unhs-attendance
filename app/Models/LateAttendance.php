@@ -6,6 +6,7 @@ use App\Http\Text\Messages;
 use App\Http\Utils\Constants;
 use App\Http\Utils\Extensions;
 use Carbon\Carbon;
+use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ class LateAttendance extends Model
         $this->applyRoleFilter($request, $dataset);
         $dataset = $dataset->get();
 
-        Extensions::hashRowIds($dataset);
+        $this->sanitizeResults($dataset);
         
         return $this->encodeAttendanceData($request, $dataset, 'Today');
     }
@@ -56,7 +57,7 @@ class LateAttendance extends Model
 
         $dataset = $dataset->get();
 
-        Extensions::hashRowIds($dataset);
+        $this->sanitizeResults($dataset);
 
         return $this->encodeAttendanceData($request, $dataset, "This Week (week #$currentWeek)");
     }
@@ -74,7 +75,7 @@ class LateAttendance extends Model
         $this->applyRoleFilter($request, $dataset);
         $dataset = $dataset->get();
 
-        Extensions::hashRowIds($dataset);
+        $this->sanitizeResults($dataset);
 
         $monthName = Carbon::createFromFormat('!m', $monthIndex)->monthName;
 
@@ -167,5 +168,19 @@ class LateAttendance extends Model
             'filters'   => $filters,
             'icon'      => Attendance::getIconClasses()
         ]);
+    }
+
+    private function sanitizeResults($dataset)
+    {
+        $hashids = new Hashids();
+        
+        foreach ($dataset as $data) 
+        {
+            if ($data->id)
+                $data->id = $hashids->encode($data->id);
+
+            if ($data->empname)
+                $data->empname = ucwords($data->empname);
+        }
     }
 }

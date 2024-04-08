@@ -106,7 +106,7 @@
                 </div>
                 <div class="col d-flex align-items-center">
                     <i class="fas fa-caret-right text-sm me-1 opacity-20"></i>
-                    <h6 class="m-0">
+                    <h6 class="m-0 text-capitalize">
                         {{ $empName }} <small class="opacity-65 fst-italic">{{ "($empRole)" }}</small>
                     </h6>
                 </div>
@@ -193,7 +193,7 @@
 
     <div class="a4-page container-fluid">
         
-        <div class="printable-content row">
+        <div class="printable-content row" data-export-filename="{{ $print_filename }}">
             <div class="col ps-3 pe-2">
                @include('reports.dtr-template')
             </div>

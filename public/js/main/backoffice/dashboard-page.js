@@ -388,7 +388,7 @@ let dashboardPage = (function()
                     return `${date.month} ${date.day}`;
                 }
             },
-            {data: 'empname',  title: 'Name',     width: '30%', class: 'text-truncate'},
+            {data: 'empname',  title: 'Name',     width: '30%', class: 'text-truncate text-capitalize'},
             {data: 'timein',   title: 'Time In',  width: '20%', class: 'text-truncate', 
                 render: function(data, type, row) 
                 {
@@ -442,7 +442,7 @@ let dashboardPage = (function()
 
         let columnDefinitions = [
             {data: 'empno',   title: 'ID No',    width: '20%', class: 'text-truncate' },
-            {data: 'empname', title: 'Name',     width: '35%', class: 'text-truncate'},
+            {data: 'empname', title: 'Name',     width: '35%', class: 'text-truncate text-capitalize'},
             {data: 'rank',    title: 'Position', width: '20%', class: 'text-truncate' }
         ];
 
@@ -536,7 +536,7 @@ let dashboardPage = (function()
 
         let columnDefinitions = [
             {data: 'empno',    title: 'ID No',      width: '20%', class: 'text-truncate' },
-            {data: 'empname',  title: 'Name',       width: '30%', class: 'text-truncate' },
+            {data: 'empname',  title: 'Name',       width: '30%', class: 'text-truncate text-capitalize' },
             {data: 'type',     title: 'Leave Type', width: '25%', class: 'text-truncate' },
             {data: 'duration', title: 'Duration',   width: '20%', class: 'text-truncate' },
             {data: 'status',   title: 'Status',     width: '20%', class: 'text-truncate' },

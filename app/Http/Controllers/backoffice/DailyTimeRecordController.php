@@ -47,14 +47,17 @@ class DailyTimeRecordController extends Controller
             'ajax_export_pdf'   => route(RouteNames::DailyTimeRecord['exportPdf']),
         ];
 
+        $printFilename = $empDetails->mname .'_'. $empDetails->fname . "_dtr";
+
         return view('backoffice.daily-time-record.index')
-            ->with('routes',        $routes)
-            ->with('empKey',        $key)
-            ->with('empName',       implode(' ', [ $empDetails->lname, ',', $empDetails->fname, $empDetails->mname, ]))
-            ->with('empIdNo',       $empDetails->idNo)
-            ->with('empRole',       Employee::RoleToString[$empDetails->role])
-            ->with('dtrPeriods',    DailyTimeRecord::MONTH_PERIODS)
-            ->with('rangeOther',    DailyTimeRecord::PERIOD_OTHER_MONTH)
+            ->with('print_filename', $printFilename)
+            ->with('routes',         $routes)
+            ->with('empKey',         $key)
+            ->with('empName',        implode(' ', [ $empDetails->lname, ',', $empDetails->fname, $empDetails->mname, ]))
+            ->with('empIdNo',        $empDetails->idNo)
+            ->with('empRole',        Employee::RoleToString[$empDetails->role])
+            ->with('dtrPeriods',     DailyTimeRecord::MONTH_PERIODS)
+            ->with('rangeOther',     DailyTimeRecord::PERIOD_OTHER_MONTH)
             
             ->with('defaultRange_Label', DailyTimeRecord::STR_PERIOD_CURRENT)
             ->with('defaultRange_Value', DailyTimeRecord::PERIOD_CURRENT);

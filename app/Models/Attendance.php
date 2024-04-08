@@ -178,6 +178,20 @@ class Attendance extends Model
         }
     }
 
+    private function sanitizeResults($dataset)
+    {
+        $hashids = new Hashids(); //(self::HASH_SALT, self::MIN_HASH_LENGTH);
+        
+        foreach ($dataset as $data) 
+        {
+            if ($data->id)
+                $data->id = $hashids->encode($data->id);
+
+            if ($data->empname)
+                $data->empname = ucwords($data->empname);
+        }
+    }
+
     /**
      * Retrieve all attendances that were made today
      */
@@ -197,7 +211,7 @@ class Attendance extends Model
         $this->applyRoleFilter($request, $dataset);
         $dataset = $dataset->get();
 
-        Extensions::hashRowIds($dataset);
+        $this->sanitizeResults($dataset);
         
         return $this->encodeAttendanceData($request, $dataset, 'Today');
     }
@@ -213,7 +227,7 @@ class Attendance extends Model
         
         $dataset = $dataset->get();
 
-        Extensions::hashRowIds($dataset);
+        $this->sanitizeResults($dataset);
 
         return $this->encodeAttendanceData($request, $dataset, "This Week (week #$currentWeek)");
     }
@@ -231,7 +245,7 @@ class Attendance extends Model
         $this->applyRoleFilter($request, $dataset);
         $dataset = $dataset->get();
 
-        Extensions::hashRowIds($dataset);
+        $this->sanitizeResults($dataset);
 
         $monthName = Carbon::createFromFormat('!m', $monthIndex)->monthName;
 

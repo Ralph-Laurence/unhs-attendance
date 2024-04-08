@@ -11,11 +11,14 @@ let monthPicker;
 let periodDropdowns;
 let tablePageLen;
 
+const pageDefaultTitle = document.title;
+
 $(document).ready(function() 
 {
     initialize();
     handleEvents();
 });
+
 //
 // Use this for initialization
 //
@@ -394,8 +397,12 @@ function onPrintResponse(response)
 
             $('.printable-content').show().printThis({
 
-                afterPrint: () =>
+                beforePrint: () => {
+                    document.title = $('.printable-content').data('export-filename');
+                },
+                afterPrint : () =>
                 {
+                    document.title = pageDefaultTitle;
                     clearExportStatus();
                     $('.printable-content').hide();
                     enableControlButtons();

@@ -217,6 +217,8 @@ class LeaveRequestsController extends Controller
                             ->get()
                             ->firstOrFail();
 
+            $leaveRequest->empname = ucwords($leaveRequest->empname);
+
             return Extensions::encodeSuccessMessage('Record information loaded for edit', [
                 'data' => $leaveRequest
             ]);
@@ -225,6 +227,7 @@ class LeaveRequestsController extends Controller
             return Extensions::encodeFailMessage(Messages::READ_FAIL_INEXISTENT);
         }
         catch (Exception $ex) {
+            error_log($ex->getMessage());
             return Extensions::encodeFailMessage(Messages::PROCESS_REQUEST_FAILED);
         }
     }

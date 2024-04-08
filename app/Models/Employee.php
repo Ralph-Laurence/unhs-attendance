@@ -165,6 +165,8 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
                 $dataset['qrFile'] = 'qr-code-'.$dataset['idNo'].'-'.$dataset['empname'].'.png';
             }
 
+            $dataset['empname'] = ucwords($dataset['empname']);
+
             return json_encode([
                 'code'      => Constants::XHR_STAT_OK,
                 'dataset'   => $dataset
@@ -185,8 +187,18 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
     public function getEmployees(int $role)
     {
         $dataset = $this->buildSelectQuery($role)->get();
+        //Extensions::hashRowIds($dataset, self::HASH_SALT);
 
-        Extensions::hashRowIds($dataset, self::HASH_SALT);
+        $hashids = new Hashids(self::HASH_SALT, self::MIN_HASH_LENGTH);
+        
+        foreach ($dataset as $data) 
+        {
+            if ($data->id)
+                $data->id = $hashids->encode($data->id);
+
+            if ($data->empname)
+                $data->empname = ucwords($data->empname);
+        }
 
         return json_encode([
             'data' => $dataset->toArray(),

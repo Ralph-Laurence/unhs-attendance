@@ -114,7 +114,6 @@
 .agreement {
     font-size: 12px;
     line-height: 1.25;
-    font-weight: 600;
     text-align: justify;
     text-justify: inter-word;
 }
@@ -142,3 +141,4 @@
     font-family: var(--font-awesome);
     margin-left: 12px;
 }
+
