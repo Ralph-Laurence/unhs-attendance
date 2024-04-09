@@ -1,3 +1,10 @@
 8LC5KwWABgbsp
 if0_36249084
 unhs-ams.free.nf
+
+
+Migrating a single migration:
+
+php artisan migrate:rollback --path=/database/migrations/2014_10_12_000000_create_users_table.php
+php artisan migrate --path=/database/migrations/2014_10_12_000000_create_users_table.php
+php artisan db:seed --class UsersSeeder

@@ -19,9 +19,9 @@ class UsersSeeder extends Seeder
             [
                 'firstname'     => 'Admin',
                 'lastname'      => 'Test',
-                'username'      => 'admin',
+                'username'      => 'sudo',
                 'email'         => 'ptlangsakalam@gmail.com',
-                'password'      => Hash::make('1234'),
+                'password'      => Hash::make('root'),
             ],
             [
                 'firstname'     => 'Mark',
