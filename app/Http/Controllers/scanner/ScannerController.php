@@ -276,18 +276,56 @@ class ScannerController extends Controller
         return Extensions::encodeSuccessMessage('Out for lunch...', ['status'  => $status]);
     }
 
+    // private function updateLunchEnd(Attendance $attendance)
+    // {
+    //     $status = Attendance::STATUS_PRESENT;
+
+    //     $attendance->update([
+    //         Attendance::f_LunchEnd  => Carbon::now(),
+    //         Attendance::f_Status    => $status,
+    //     ]);
+
+    //     return Extensions::encodeSuccessMessage('Welcome Back!', ['status'  => $status]);
+    // }
+
     private function updateLunchEnd(Attendance $attendance)
     {
         $status = Attendance::STATUS_PRESENT;
+        $now = Carbon::now();
+        $late = $attendance->late ?? Constants::ZERO_DURATION; // Use '00:00:00' if 'late' is null
+
+        // Check if LunchEnd is later than 1pm
+        if ($now->hour >= 13) 
+        {
+            // Calculate the difference in seconds
+            $lateSeconds = $now->diffInSeconds(Carbon::createFromTime(13, 0, 0));
+
+            // Convert the 'late' field to seconds
+            list($hours, $minutes, $seconds) = explode(':', $late);
+            $lateSecondsExisting = $hours * 3600 + $minutes * 60 + $seconds;
+
+            // Add the new late time to the existing one
+            $totalLateSeconds = $lateSeconds + $lateSecondsExisting;
+
+            // Convert the total seconds to a time string
+            $hours   = floor($totalLateSeconds  / 3600);
+            $minutes = floor(($totalLateSeconds / 60) % 60);
+            $seconds = $totalLateSeconds % 60;
+
+            // Update the 'late' field
+            $late = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+        }
 
         $attendance->update([
-            Attendance::f_LunchEnd  => Carbon::now(),
+            Attendance::f_LunchEnd  => $now,
             Attendance::f_Status    => $status,
+            Attendance::f_Late      => $late,
         ]);
 
         return Extensions::encodeSuccessMessage('Welcome Back!', ['status'  => $status]);
     }
-    
+
+
     private function updateTimeOut(Attendance $attendance)
     {
         // Set time_out first

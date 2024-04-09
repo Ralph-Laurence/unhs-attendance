@@ -69,8 +69,11 @@ Route::controller(AttendanceController::class)->middleware(['auth'])
 {
     Route::get('/backoffice/attendance', 'index')->name(RouteNames::Attendance['index']);
 
-    // This will be exectued by CRON JOB
+    // This will be exectued by WINDOWS TASK SCHEDULER
     Route::get('/backoffice/attendance/auto-absent', 'autoAbsentEmployees')->name(RouteNames::Attendance['autoAbsent']);
+
+    // This will be exectued by CRON JOB .ORG
+    Route::get('/backoffice/cron/auto-absent', 'autoAbsentEmployees')->name('cron.autoAbsent');
 
     Route::post('/backoffice/attendance/get',        'getAttendances')->name(RouteNames::Attendance['get']);
     Route::post('/backoffice/attendance/delete',     'destroy')       ->name(RouteNames::Attendance['delete']);
@@ -105,6 +108,9 @@ Route::controller(LeaveRequestsController::class)->middleware(['auth'])
     Route::post('/backoffice/leave/edit'    , 'edit')         ->name(RouteNames::Leave['edit']);
     Route::post('/backoffice/leave/approve' , 'approveLeave') ->name(RouteNames::Leave['approve']);
     Route::post('/backoffice/leave/reject'  , 'rejectLeave')  ->name(RouteNames::Leave['reject']);
+
+    // This will be executed by CRON JOB .ORG
+    Route::get('/backoffice/cron/leave', 'autoUpdateEmployeeLeaveStatus')->name('cron.autoUpdateLeave');
 });
 
 

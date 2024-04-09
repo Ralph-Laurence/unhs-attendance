@@ -12,3 +12,13 @@ laravel env params:
 mail_password: dhctcgcucmlveovt
 mail_host: smtp.gmail.com
 mail_port: 587
+
+https://console.cron-job.org/
+firstname: Laravel
+lastname: Test
+email: laramailer.dev@gmail.com
+Password: laravel-smtp01
+
+scheduled jobs:
+http://unhs-ams.free.nf/backoffice/cron/auto-absent
+http://unhs-ams.free.nf/backoffice/cron/leave
