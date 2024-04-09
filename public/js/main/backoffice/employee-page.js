@@ -52,7 +52,7 @@ var employeeDatatables = (function()
         },
         // Third Column -> Name
         {
-            className: 'td-employee-name text-truncate',
+            className: 'td-employee-name text-truncate text-capitalize',
             width: '250px',
             data: 'empname',
             name: 'empname',
