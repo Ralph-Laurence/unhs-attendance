@@ -215,9 +215,13 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
         $l_empfk  = LeaveRequest::f_Emp_FK_ID;
         $e_status = 'e.' . self::f_Status;
         $e_idNo   = 'e.' . self::f_EmpNo;
+        $e_role   = 'e.' . self::f_Role;
+        
+        $role_guard = self::RoleGuard;
 
         $e_status_active    = self::ON_STATUS_DUTY;
         $e_status_inactive  = self::ON_STATUS_LEAVE;
+        $zeroTime = Constants::ZERO_DURATION;
 
         $group    = array_merge(Extensions::prefixArray('e.', [
             self::f_EmpNo,
@@ -229,7 +233,7 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
         ]), [
             'l.total_leave'
         ]);
-
+                // COUNT(a.$a_late) AS total_lates,
         $query = DB::table(self::getTableName() . ' AS e')
             ->where('e.' . self::f_Role, '=', $role)
             ->select(
@@ -239,7 +243,16 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
                 "e.id,
                 $e_status AS emp_status,
                 $e_idNo AS emp_num,
-                COUNT(a.$a_late) AS total_lates,
+
+                SUM(
+                    CASE 
+                        WHEN $e_role <> $role_guard 
+                            AND a.$a_late IS NOT NULL
+                            AND a.$a_late <> '$zeroTime'
+                        THEN 1 ELSE 0 
+                    END
+                ) AS total_lates,
+
                 SUM(CASE WHEN a.$a_status = '$v_absent' THEN 1 ELSE 0 END) AS total_absents,
                 CASE 
                     WHEN $e_status = '$e_status_active' THEN 'active'

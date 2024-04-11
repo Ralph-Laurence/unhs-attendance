@@ -7,6 +7,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/main/shared/attendance-common-styles.css') }}" />
 <link rel="stylesheet" href="{{ asset('css/main/backoffice/attendance-page.css') }}" />
+{{-- <link rel="stylesheet" href="{{ asset('css/lib/datatables/responsive.dataTables.css') }}"> --}}
 @endpush
 
 @section('content')
@@ -110,6 +111,9 @@
 </script>
 <script src="{{ asset('js/main/utils.js') }}"></script>
 <script src="{{ asset('js/lib/datatables/datatables.min.js') }}"></script>
+{{-- <script src="{{ asset('js/lib/datatables/dataTables2.js') }}"></script>
+<script src="{{ asset('js/lib/datatables/responsive.dataTables.js') }}"></script>
+<script src="{{ asset('js/lib/datatables/dataTables.responsive.js') }}"></script> --}}
 <script src="{{ asset('js/main/shared/record-utils.js') }}"></script>
 <script src="{{ asset('js/main/backoffice/attendance-page.js') }}"></script>
 @endpush

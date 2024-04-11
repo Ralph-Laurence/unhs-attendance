@@ -108,7 +108,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
         'searching'    : false,
         'ordering'     : false,
         'bAutoWidth'   : false,
-
+        // 'responsive'   : true,
         'drawCallback' : function() 
         {   
             // dataTable_isFirstDraw is when the "Loading..." was first shown.
@@ -268,7 +268,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
             // Seventh Column -> Work Hours (Duration)
             {
                 data: 'duration', 
-                width: '180px',
+                width: '120px',
                 defaultContent: ''
             },
 

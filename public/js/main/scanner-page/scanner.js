@@ -325,7 +325,7 @@ function bindDatatableData()
         columns: [
             {
                 className: 'text-truncate',
-                width: '250px',
+                //width: '250px',
                 data: null,
                 render: function (data, type, row) 
                 {  
@@ -352,7 +352,7 @@ function bindDatatableData()
                     return data ? `<span class="text-darker">${format12Hour(data)}</span>` : ''
                 }
             },
-            {data: 'duration', defaultContent: ''},
+            {data: 'duration', defaultContent: '', width: '140px',},
             {
                 width: '120px',
                 data: 'status', 
