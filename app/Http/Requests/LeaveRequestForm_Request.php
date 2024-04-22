@@ -54,7 +54,7 @@ class LeaveRequestForm_Request extends FormRequest
             ],
             'startDate'     => $dateRule,
             'leaveType'     => 'required|integer|in:' . implode(',', LeaveRequest::getLeaveTypes(true)),
-            'leaveStatus'   => 'required|integer|in:' . implode(',', LeaveRequest::getLeaveStatuses(true)),
+            //'leaveStatus'   => 'required|integer|in:' . implode(',', LeaveRequest::getLeaveStatuses(true)),
             'endDate' => array_merge($dateRule, [
                 new DateRangeCompare($startDate, $endDate),
                 //new LeaveRequestOverlapCheck($empId, $startDate, $endDate, $updateId)
@@ -126,8 +126,8 @@ class LeaveRequestForm_Request extends FormRequest
             'leaveType.required'    => ValidationMessages::required('Leave Type'),
             'leaveType.integer'     => ValidationMessages::invalid('Leave Type'),
 
-            'leaveStatus.required'  => ValidationMessages::required('Leave Status'),
-            'leaveStatus.integer'   => ValidationMessages::invalid('Leave Status'),
+            // 'leaveStatus.required'  => ValidationMessages::required('Leave Status'),
+            // 'leaveStatus.integer'   => ValidationMessages::invalid('Leave Status'),
 
             'startDate.required'    => ValidationMessages::required('Start Date'),
             'endDate.required'      => ValidationMessages::required('End Date'),

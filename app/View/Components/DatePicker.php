@@ -18,7 +18,7 @@ class DatePicker extends Component
     public function __construct($as = null, $default = null)
     {
         $this->as       = !is_null($as)      ? $as      : 'date-picker-' . Str::random(6);
-        $this->default  = !is_null($default) ? $default : date('F d, Y');
+        $this->default  = !is_null($default) ? $default : date('Y-m-d');//date('F d, Y');
     }
 
     /**

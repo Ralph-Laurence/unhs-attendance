@@ -85,14 +85,18 @@ var leaveReqsPage = (function ()
             isDirty  : false,
             fields   : {
                 'idNo'          : { label: 'ID Number'      , input: to_typeahead('#input-id-no') }, // inputIdNo },
-                'empName'       : { label: null             , input: to_textbox('#input-employee-name'), nullable: true },
-                'updateKey'     : { label: null             , input: to_textbox('#input-update-key')   , nullable: true },
-                'startDate'     : { label: 'Start Date'     , input: to_date_picker("#input-leave-start")   },
-                'endDate'       : { label: 'End Date'       , input: to_date_picker("#input-leave-end")     },
-                'leaveType'     : { label: 'Leave Type'     , input: to_droplist('#input-leave-type')       },
-                'leaveStatus'   : { label: 'Leave Status'   , input: to_droplist('#input-leave-status')     },
+                'empName'       : { label: null             , input: to_textfield('#input-employee-name'), nullable: true },
+                'updateKey'     : { label: null             , input: to_textfield('#input-update-key')   , nullable: true },
+                'startDate'     : { label: 'Start Date'     , input: to_datepicker("#input-leave-start", false, true)   },
+                'endDate'       : { label: 'End Date'       , input: to_datepicker("#input-leave-end"  , false, true)   },
+                'leaveType'     : { label: 'Leave Type'     , input: to_droplist('#input-leave-type')   },
             }
         };
+        
+        // formElements.fields.endDate.input.setFormat(
+        //     getCustomFormats('moment')
+        // )
+        //formElements.fields.endDate.input.setEditable(true);
 
         recordFilters = {
             'month' : to_droplist('#input-month-filter'),
@@ -146,11 +150,8 @@ var leaveReqsPage = (function ()
                 {
                     let field = validation.errorFields[k];
                     let msg   = `${field.label} must be filled out`;
-                    let elem  = field.input.getInput();
 
-                    (field.input.getType() === 'droplist') ?
-                        showDroplistError(elem, msg) :
-                        showTextboxError(elem, msg);
+                    field.input.showError(msg);
                 });
                 return;
             }
@@ -616,16 +617,12 @@ var leaveReqsPage = (function ()
                 // Success
                 if (response.code === 0)
                 {
-                    let startDate = extractDateInt(response.data.start);
-                    let endDate   = extractDateInt(response.data.end);
-
-                    formElements.fields['idNo'       ].input.setText( response.data.idNo );
+                    formElements.fields['idNo'       ].input.setText(  response.data.idNo    );
                     formElements.fields['empName'    ].input.setValue( response.data.empname );
-                    formElements.fields['startDate'  ].input.setValue( startDate.year, (startDate.month - 1), startDate.day );
-                    formElements.fields['endDate'    ].input.setValue( endDate.year, (endDate.month - 1), endDate.day );
-                    formElements.fields['leaveType'  ].input.setValue( response.data.type   );
-                    formElements.fields['leaveStatus'].input.setValue( response.data.status );
-                    formElements.fields['updateKey'  ].input.setValue( process.getRowKey() );
+                    formElements.fields['startDate'  ].input.setValue( response.data.start   );
+                    formElements.fields['endDate'    ].input.setValue( response.data.end     );
+                    formElements.fields['leaveType'  ].input.setValue( response.data.type    );
+                    formElements.fields['updateKey'  ].input.setValue( process.getRowKey()   );
 
                     leaveReqModal.show();
                 }
@@ -824,10 +821,12 @@ var leaveReqsPage = (function ()
                         let target  = formElements.fields[field];
                         let element = target.input.getInput();
 
-                        if (target.input.getType() == 'droplist')
-                            showDroplistError(element, message);
-                        else
-                            showTextboxError(element, message);
+                        target.input.showError(message);
+
+                        // if (target.input.getType() == 'droplist')
+                        //     showDroplistError(element, message);
+                        // else
+                        //     showTextboxError(element, message);
                     }
 
                     return;

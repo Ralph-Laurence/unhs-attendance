@@ -8,11 +8,11 @@
 
 <div class="datetimepicker-textbox datepicker-textbox {{ $parentClasses }} {{ $errors->has($as) ? ' has-error' : '' }} {{ $attributes->has('required') ? 'required' : '' }}">
 
-    <div class="input-wrapper">
+    <div class="input-wrapper ps-0">
 
-        <i class="fas fa-calendar-days leading-icon text-sm ms-2 opacity-80"></i>
+        <i class="fas p-2 fa-calendar-days leading-icon text-sm ms-2 opacity-80"></i>
 
-        <input type="text" {{ $attributes->merge(['class' => "datepicker main-control"]) }} readonly
+        <input type="text" {{ $attributes->merge(['class' => "datepicker main-control numeric-dash"]) }} readonly
             id="{{ $as }}" 
             name="{{ $as }}" 
             value="{{ old($as, $default) }}" />

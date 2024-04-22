@@ -81,3 +81,22 @@
     font-size: 9px;
     color: var(--primary-dark);
 }
+
+.datetimepicker-textbox .input-wrapper .leading-icon {
+    background: none;
+}
+
+.datetimepicker-textbox .input-wrapper .leading-icon.hoverable-toggler {
+    border-radius: 50%;
+    background: #b6bcf3;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.datetimepicker-textbox .input-wrapper .leading-icon.hoverable-toggler:hover {
+    background-color: var(--primary-dark);
+    color: white;
+}

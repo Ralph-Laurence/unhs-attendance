@@ -124,19 +124,6 @@
                     <i class="fas fa-plus"></i>
                     <span class="ms-1">Add</span>
                 </button>
-                {{-- <div class="dropdown">
-                    <button class="btn btn-primary flat-button dropdown-toggle shadow-0" id="add-record-dropdown-button"
-                        data-mdb-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-plus"></i>
-                        <span class="ms-1">Add</span>
-                    </button>
-                    <ul class="dropdown-menu shadow shadow-4-strong" aria-labelledby="options-dropdown-button">
-                        <li>
-                            <a class="dropdown-item" id="opt-add-leave-request" role="button">Create Manually</a>
-                        </li>
-                        {{- - <li><a class="dropdown-item" href="#">Import Sheet</a></li> - -}}
-                    </ul>
-                </div> --}}
             </div>
         </div>
 
@@ -185,16 +172,14 @@
                 <div class="alert alert-danger text-center py-2 text-14 error-box d-hidden"></div>
                 <form data-post-target="{{ $routes['insertPostRoute'] }}" method="post"
                       id="frm-leave-request">
-                      <x-text-box as="input-update-key" readonly parent-classes="d-none"/>
+                      <x-text-field as="input-update-key" readonly parent-classes="d-none"/>
                     <div class="container">
                         <div class="row mb-3">
                             <div class="col">
-                                {{-- <x-text-box as="input-id-no" placeholder="Employee ID" maxlength="32" aria-autocomplete="none" 
-                                leading-icon-s="fa-user" suggest readonly/> --}}
-                                <x-type-ahead as="input-id-no" leading-icon="fa-fingerprint" placeholder="Employee ID" maxlength="32"/>
+                                <x-type-ahead as="input-id-no" leading-icon="fa-fingerprint" placeholder="Employee ID" maxlength="32" required/>
                             </div>
                             <div class="col">
-                                <x-text-box as="input-employee-name" placeholder="Name" maxlength="64" aria-autocomplete="none" 
+                                <x-text-field as="input-employee-name" placeholder="Name" maxlength="64" aria-autocomplete="none" 
                                 readonly parent-classes="opacity-75" data-mdb-toggle="tooltip" data-mdb-placement="bottom"
                                 data-mdb-title="This field is read-only. Please enter an ID number from the &quot;Employee ID&quot; field to load the matching employee name."/>
                             </div>
@@ -202,11 +187,11 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <h6 class="text-14">Start Date</h6>
-                                <x-moment-picker as="input-leave-start"/>
+                                <x-date-picker as="input-leave-start" required/>
                             </div>
                             <div class="col">
                                 <h6 class="text-14">End Date</h6>
-                                <x-moment-picker as="input-leave-end"/>
+                                <x-date-picker as="input-leave-end" required/>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -215,10 +200,10 @@
                                 <x-drop-list as="input-leave-type" :items="$leaveTypes" button-classes="w-100"/>
                             </div>
                             <div class="col-6">
-                                <h6 class="text-14">Leave Status</h6>
+                                {{-- <h6 class="text-14">Leave Status</h6>
                                 <x-drop-list as="input-leave-status" :items="$leaveStatuses" button-classes="w-100"
                                 text="{{ $defaultLeaveStatus['label'] }}"
-                                default="{{ $defaultLeaveStatus['value'] }}" />
+                                default="{{ $defaultLeaveStatus['value'] }}" /> --}}
                             </div>
                         </div>
                     </div>
@@ -234,6 +219,8 @@
     </div>
 </div>
 @endpush
+
+<x-gijgo-driver type="date" />
 
 @push('scripts')
 <script>

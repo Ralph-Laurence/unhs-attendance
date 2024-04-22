@@ -101,6 +101,8 @@ class LeaveRequestsController extends Controller
                 // such as Create or Update, which is necessary for displaying table rows
                 $transaction = null;
 
+                // If an update leave id was present on the inputs,
+                // we can assume that this operation is update
                 if ($leaveId)
                 {
                     $result = $this->update($inputs, $leaveId);
@@ -146,10 +148,14 @@ class LeaveRequestsController extends Controller
 
                     // Update employee status to on leave upon creating the record.
                     // Only if the current date is within the range of the leave.
+                    // And only if the employee's current status is not yet On Leave.
                     // And only if the leave request was approved.
-                    if ( $result[LeaveRequest::f_LeaveStatus] == LeaveRequest::LEAVE_STATUS_APPROVED && 
-                         now()->startOfDay()->between($startDate, $endDate) && 
-                         $currentEmpStatus != Employee::ON_STATUS_LEAVE) 
+
+                    // if ( $result[LeaveRequest::f_LeaveStatus] == LeaveRequest::LEAVE_STATUS_APPROVED && 
+                    //      now()->startOfDay()->between($startDate, $endDate) && 
+                    //      $currentEmpStatus != Employee::ON_STATUS_LEAVE) 
+                    if (now()->startOfDay()->between($startDate, $endDate) &&
+                        $currentEmpStatus != Employee::ON_STATUS_LEAVE) 
                     {
                         $empStatus = DB::table(Employee::getTableName())
                             ->where('id', $empId)
@@ -199,7 +205,6 @@ class LeaveRequestsController extends Controller
             $leaveRequestFields = Extensions::prefixArray('l.', [
                 LeaveRequest::f_StartDate   . ' as start',
                 LeaveRequest::f_EndDate     . ' as end',
-                LeaveRequest::f_LeaveStatus . ' as status',
                 LeaveRequest::f_LeaveType   . ' as type'
             ]);
 
@@ -241,8 +246,7 @@ class LeaveRequestsController extends Controller
             LeaveRequest::f_StartDate   => $inputs['startDate'],
             LeaveRequest::f_EndDate     => $inputs['endDate'],
             LeaveRequest::f_LeaveType   => $inputs['leaveType'],
-            LeaveRequest::f_Duration    => $leaveDuration,
-            LeaveRequest::f_LeaveStatus => $inputs['leaveStatus']
+            LeaveRequest::f_Duration    => $leaveDuration
         ]);
     
         return $model;
@@ -258,7 +262,7 @@ class LeaveRequestsController extends Controller
             LeaveRequest::f_EndDate     => $inputs['endDate'],
             LeaveRequest::f_LeaveType   => $inputs['leaveType'],
             LeaveRequest::f_Duration    => $leaveDuration,
-            LeaveRequest::f_LeaveStatus => $inputs['leaveStatus']
+            LeaveRequest::f_LeaveStatus => LeaveRequest::LEAVE_STATUS_APPROVED, // $inputs['leaveStatus']
         ]);
     }
 

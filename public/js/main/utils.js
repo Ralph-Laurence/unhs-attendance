@@ -147,3 +147,26 @@ let GenericMessages = (function()
         ROW_REDRAW_FAIL     : 'Your changes to the record were saved successfully. However, we encountered an issue displaying the updated record. Please refresh the page to see the changes.',
     }
 })();
+
+let getCustomFormats = function (formatType = 'gijgo') {
+
+    const defaultFormats  = {
+        'ISO_8601'       : 'yyyy-mm-dd',
+        'RFC_5322_Short' : 'mmm dd, yyyy',
+        'RFC_5322_Full'  : 'mmmm dd, yyyy'
+    };
+
+    const momentCompatible = {
+        'ISO_8601'       : 'YYYY-MM-DD',
+        'RFC_5322_Short' : 'MMM DD, YYYY',
+        'RFC_5322_Full'  : 'MMMM DD, YYYY'
+    };
+
+    if (formatType === 'moment')
+        return momentCompatible;
+
+    if (formatType === 'gijgo')
+        return defaultFormats;
+
+    return defaultFormats;
+};
