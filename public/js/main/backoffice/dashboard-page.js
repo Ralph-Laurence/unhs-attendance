@@ -646,7 +646,7 @@ let dashboardPage = (function()
             {data: 'rank',      title: 'Position',      width: '30%', class: 'text-truncate text-capitalize' },            
         ];
 
-        if (response.dynamic == 'timein')
+        if ('dynamic' in response && response.dynamic === 'timein')
         {
             let obj = {
                 data: 'timein',
@@ -658,7 +658,7 @@ let dashboardPage = (function()
             columnDefinitions.push(obj);
         }
 
-        if (response.dynamic == 'timeout')
+        if ('dynamic' in response && response.dynamic === 'timeout')
         {
             let obj = {
                 data: 'timeout',
@@ -678,6 +678,7 @@ let dashboardPage = (function()
 
         // Clear its contents
         $(`${tableId} tbody`).empty();
+        $(`${tableId} thead`).empty();
 
         // Reinitialize the DataTable with new data and columns
         let dt = $(tableId).DataTable({
