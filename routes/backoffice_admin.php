@@ -35,6 +35,8 @@ Route::middleware(['auth'])->group(function()
             '/backoffice/dashboard/graphings/attendance/find/monthly', 
             'findMonthlyAttendance'
         )->name(RouteNames::Dashboard['findMonthly']);
+
+        Route::post('/backoffice/dashboard/stats/employees', 'findEmpStatus')->name(RouteNames::Dashboard['empStats']);
     });
     
     Route::controller(DailyTimeRecordController::class)

@@ -39,14 +39,19 @@ let dashboardPage = (function()
     const monthlyAttendanceModalSelector = '#statistics-monthly-atx-modal';
     let monthlyStatModal;
 
+    const empStatsModalSelector = '#statistics-emp-status-modal';
+    let empStatsModal;
+    let empStatsTablePageLen;
+
     let init = function() 
     {
         getEmployeeGraphings();
         getAttendanceGraphings();
 
-        statsModal     = new mdb.Modal($(attxStatsModalSelector));
-        leaveStatModal = new mdb.Modal($(leaveStatsModalSelector));
+        statsModal       = new mdb.Modal($(attxStatsModalSelector));
+        leaveStatModal   = new mdb.Modal($(leaveStatsModalSelector));
         monthlyStatModal = new mdb.Modal($(monthlyAttendanceModalSelector));
+        empStatsModal    = new mdb.Modal($(empStatsModalSelector));
     };
 
     let bindEvents = function() 
@@ -55,6 +60,12 @@ let dashboardPage = (function()
         {
             $(this).css('pointer-events', 'none');
             handleLeaveStatsAdapter( $(this) );
+        });
+
+        $('.emp-stat-count').on('click', function()
+        {
+            $(this).css('pointer-events', 'none');
+            handleEmpStatsAdapter( $(this) );
         });
     };
 
@@ -589,7 +600,108 @@ let dashboardPage = (function()
 
         statsTableLeavePageLen = to_lengthpager('#stats-leave-table-page-len', dt);
     }
+    //=================================
+    // Employee Status Modal
+    //=================================
+    function handleEmpStatsAdapter(sender) 
+    {
+        $.ajax({
+            url: sender.data('action'),
+            type: 'POST',
+            data: {
+                '_token'  : getCsrfToken(),
+                'status'  : sender.data('segment') 
+            },
+            success : (response) => bindEmpStatsAdapter(response, sender),
+            error   : function (xhr, error, status) 
+            {  
+                alertModal.showDanger(GenericMessages.XHR_FAIL_ERROR);
+            },
+            complete: () => sender.css('pointer-events', 'auto')
+        });
+    }
 
+    function bindEmpStatsAdapter(response, sender)
+    {
+        if (typeof response.dataset === 'object' && response.dataset.length < 1)
+        {
+            alertModal.showInfo("No records to show.");
+            return;
+        }
+
+        let tableId = `${empStatsModalSelector} #emp-stats-table`;
+
+        let columnDefinitions = [
+            // First Column -> Record Counter
+            {
+                width: '15%',
+                className: 'record-counter text-truncate',
+                data: null,
+                render: function(data, type, row, meta) {
+                    return meta.row + 1;
+                }
+            },
+            {data: 'empno',     title: 'ID No',         width: '20%', class: 'text-truncate' },
+            {data: 'empname',   title: 'Name',          width: '40%', class: 'text-truncate text-capitalize' },
+            {data: 'rank',      title: 'Position',      width: '30%', class: 'text-truncate text-capitalize' },            
+        ];
+
+        if (response.dynamic == 'timein')
+        {
+            let obj = {
+                data: 'timein',
+                title: 'Time In',
+                width: '20%', 
+                class: 'text-truncate'
+            };
+
+            columnDefinitions.push(obj);
+        }
+
+        if (response.dynamic == 'timeout')
+        {
+            let obj = {
+                data: 'timeout',
+                title: 'Time Out',
+                width: '20%', 
+                class: 'text-truncate'
+            };
+
+            columnDefinitions.push(obj);
+        }
+
+        // Check if the DataTable exists and if so, destroy it
+        if ($.fn.DataTable.isDataTable(tableId))
+        {
+            $(tableId).DataTable().destroy();
+        }
+
+        // Clear its contents
+        $(`${tableId} tbody`).empty();
+
+        // Reinitialize the DataTable with new data and columns
+        let dt = $(tableId).DataTable({
+            'searching': false,
+            'ordering': false,
+            'autoWidth': true,
+            "deferRender": true,
+            'columns': columnDefinitions,
+            'drawCallback' : function (settings) 
+            {  
+                $(empStatsModalSelector).find('#statistic-context')
+                                     .text(response.segment)
+                                     .css('background', sender.data('segment-color'));
+
+                empStatsModal.show();
+            },
+            'data' : response.dataset
+        });
+
+        if (empStatsTablePageLen)
+            empStatsTablePageLen = null;
+
+        empStatsTablePageLen = to_lengthpager('#emp-stats-table-page-len', dt);
+    }
     return {
         'init'   : init,
         'handle' : bindEvents

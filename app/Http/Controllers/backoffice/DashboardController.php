@@ -27,6 +27,13 @@ class DashboardController extends Controller
         'Undertime'   => 'u',
     ];
 
+    private const EmpStatusFilters = [
+        'active' => 1,
+        'leave'  => 2,
+        'onduty' => 3,
+        'out'    => 4
+    ];
+
     public function index()
     {
         $routes = [
@@ -34,6 +41,7 @@ class DashboardController extends Controller
             'attendanceStats' => route(RouteNames::Dashboard['countAttendance']),
             'leaveReqStats'   => route(RouteNames::Dashboard['leavereqtsStats']),
             'leaveRequests'   => route(RouteNames::Leave['index']),
+            'empStats'        => route(RouteNames::Dashboard['empStats']),
             'allAudits'       => route(RouteNames::AuditTrails['index']),
         ];
 
@@ -47,8 +55,9 @@ class DashboardController extends Controller
                 'p' => LeaveRequest::LEAVE_STATUS_PENDING,
                 'r' => LeaveRequest::LEAVE_STATUS_REJECTED
             ])
-            ->with('allMonths', $allMonths)
-            ->with('recentActivity', $this->getRecentActivities());
+            ->with('allMonths'          , $allMonths)
+            ->with('recentActivity'     , $this->getRecentActivities())
+            ->with('empStatusFilters'   , self::EmpStatusFilters);
     }
 
     private function getRecentActivities()
@@ -352,19 +361,43 @@ class DashboardController extends Controller
         $dataset      = $cond[ $filter ]();
         $facultyRanks = FacultyConstants::getRanks();
         $staffRanks   = StaffConstants::getRanks();
-        
-        foreach ($dataset as $row)
+
+        // foreach ($dataset as $row)
+        // {
+        //     switch ($row->role)
+        //     {
+        //         case Employee::RoleTeacher:
+        //             $row->rank = $facultyRanks[$row->rank];
+        //             $row->role = Employee::STR_ROLE_TEACHER;
+        //             break;
+
+        //         case Employee::RoleStaff:
+        //             $row->rank = $staffRanks[$row->rank];
+        //             $row->role = Employee::STR_ROLE_STAFF;
+        //             break;
+
+        //         case Employee::RoleGuard:
+        //             $row->role = Employee::STR_ROLE_GUARD;
+        //             break;
+        //     }
+
+        //     unset($row->role);
+        // }
+
+        foreach ($dataset as $row) 
         {
-            switch ($row->role)
+            switch ($row->role) 
             {
                 case Employee::RoleTeacher:
                     $row->rank = $facultyRanks[$row->rank];
-                    $row->role = Employee::STR_ROLE_TEACHER;
                     break;
 
                 case Employee::RoleStaff:
                     $row->rank = $staffRanks[$row->rank];
-                    $row->role = Employee::STR_ROLE_STAFF;
+                    break;
+
+                case Employee::RoleGuard:
+                    $row->rank = Employee::STR_ROLE_GUARD;
                     break;
             }
 
@@ -421,5 +454,117 @@ class DashboardController extends Controller
             'segment' => $filters[$filter],
             'segmentColor' => $segmentColors[$filter]
         ]);
+    }
+
+    public function findEmpStatus(Request $request)
+    {
+        if ($request->has('status'))
+        {
+            $filter  = $request->input('status'); //self::EmpStatusFilters[];
+            $dataset = $this->_getEmpStatDiff($filter);
+
+            return response()->json([
+                'msg' => 'OK',
+                'dataset' => $dataset['data'],
+                'segment' => $dataset['segment'],
+                'dynamic' => $dataset['dynamic']
+            ]);
+        }
+    }
+
+    private function _getEmpStatDiff($status)
+    {
+        // Query for getting the difference between Employee active status
+        $employeeSelect = [
+            Employee::f_EmpNo .' as empno',
+            Employee::f_Role  .' as role',
+            Employee::f_Rank  .' as rank',
+            DB::raw(Employee::getConcatNameDbRaw('', 'empname', Constants::NAME_STYLE_EASTERN))
+        ];
+
+        $queryEmpActiveStat = Employee::select($employeeSelect)->orderBy(Employee::f_LastName);
+        
+        // Query to retrieve the employees who are in-office vs out of office
+        $queryEmpAttendanceStat = DB::table(Attendance::getTableName().' as a')
+            ->leftJoin(Employee::getTableName().' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
+            ->whereDate('a.created_at', '=', date('Y-m-d'));
+        
+        $segment = '';  // This will be a segment title that will be shown into the modal 'segment context'
+        $dynamic = '';  // This tells jquery datatables that this column may be added or not.
+
+        $dataset = [
+            self::EmpStatusFilters['active'] => function() use($queryEmpActiveStat, &$segment) 
+            {   
+                $segment = 'Active Employees';
+
+                return $queryEmpActiveStat
+                        ->where(Employee::f_Status, '=', Employee::ON_STATUS_ACTIVE)
+                        ->get();
+            },
+            self::EmpStatusFilters['leave' ] => function() use($queryEmpActiveStat, &$segment)
+            {
+                $segment = 'Employees On Leave';
+
+                return $queryEmpActiveStat
+                        ->where(Employee::f_Status, '=', Employee::ON_STATUS_LEAVE)
+                        ->get();
+            },
+            self::EmpStatusFilters['onduty'] => function() use ($queryEmpAttendanceStat, $employeeSelect, &$segment, &$dynamic) 
+            {
+                $segment = 'Employees On Duty';
+                $dynamic = 'timein';
+
+                return $queryEmpAttendanceStat->select(array_merge($employeeSelect, [
+                           DB::raw(Extensions::time_format_hip('a.'.Attendance::f_TimeIn, 'timein')),
+                           'a.id',
+                       ]))
+                       ->where('a.'.Attendance::f_TimeIn, '!=', '')
+                       ->where('a.'.Attendance::f_TimeOut, '=', NULL)
+                       ->get();
+            },
+            self::EmpStatusFilters['out'   ] => function() use ($queryEmpAttendanceStat, $employeeSelect, &$segment, &$dynamic) 
+            {
+                $segment = 'Clocked Out Employees';
+                $dynamic = 'timeout';
+
+                return $queryEmpAttendanceStat->select(array_merge($employeeSelect, [
+                           DB::raw(Extensions::time_format_hip('a.'.Attendance::f_TimeOut, 'timeout')),
+                           'a.id',
+                       ]))
+                       ->where('a.'.Attendance::f_TimeOut, '!=', '')
+                       ->get();
+            },
+        ];
+
+        $dataset = $dataset[$status]();
+
+        $facultyRanks = FacultyConstants::getRanks();
+        $staffRanks   = StaffConstants::getRanks();
+
+        foreach ($dataset as $row) 
+        {
+            switch ($row->role) 
+            {
+                case Employee::RoleTeacher:
+                    $row->rank = $facultyRanks[$row->rank];
+                    break;
+
+                case Employee::RoleStaff:
+                    $row->rank = $staffRanks[$row->rank];
+                    break;
+
+                case Employee::RoleGuard:
+                    $row->rank = Employee::STR_ROLE_GUARD;
+                    break;
+            }
+
+            unset($row->role);
+        }
+
+        return [
+            'data'      => $dataset,
+            'segment'   => $segment,
+            'dynamic'   => $dynamic
+        ];
     }
 }

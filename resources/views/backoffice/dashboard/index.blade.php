@@ -58,25 +58,37 @@
                 <div class="row mb-2">
                     <div class="col text-center">
                         <div class="emp-stat-count-indicator pt-2 pb-1 d-flex flex-column align-items-center emp-stat-active">
-                            <div class="emp-stat-count stat-active" id="count-active-stat">0</div>
+                            <div class="emp-stat-count stat-active" id="count-active-stat"
+                            data-action="{{ $routes['empStats'] }}"
+                            data-segment="{{ $empStatusFilters['active'] }}"
+                            data-segment-color="#3c2ee3">0</div>
                             <small class="d-block">Active</small>
                         </div>
                     </div>
                     <div class="col text-center">
                         <div class="emp-stat-count-indicator pt-2 pb-1 d-flex flex-column align-items-center emp-stat-leave">
-                            <div class="emp-stat-count stat-leave" id="count-on-leave">0</div>
+                            <div class="emp-stat-count stat-leave" id="count-on-leave"
+                            data-action="{{ $routes['empStats'] }}"
+                            data-segment="{{ $empStatusFilters['leave'] }}"
+                            data-segment-color="#ffac34">0</div>
                             <small>Leave</small>
                         </div>
                     </div>
                     <div class="col text-center">
                         <div class="emp-stat-count-indicator pt-2 pb-1 d-flex flex-column align-items-center emp-stat-onduty">
-                            <div class="emp-stat-count stat-on-duty" id="count-on-duty">0</div>
+                            <div class="emp-stat-count stat-on-duty" id="count-on-duty"
+                            data-action="{{ $routes['empStats'] }}"
+                            data-segment="{{ $empStatusFilters['onduty'] }}"
+                            data-segment-color="#1fc9a4">0</div>
                             <small>On Duty</small>
                         </div>
                     </div>
                     <div class="col text-center">
                         <div class="emp-stat-count-indicator pt-2 pb-1 d-flex flex-column align-items-center emp-stat-out">
-                            <div class="emp-stat-count stat-out" id="count-out">0</div>
+                            <div class="emp-stat-count stat-out" id="count-out"
+                            data-action="{{ $routes['empStats'] }}"
+                            data-segment="{{ $empStatusFilters['out'] }}"
+                            data-segment-color="#ff2641">0</div>
                             <small>Out</small>
                         </div>
                     </div>
