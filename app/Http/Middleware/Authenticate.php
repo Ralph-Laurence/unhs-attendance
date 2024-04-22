@@ -2,7 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Utils\AuthGuardNames;
+use App\Http\Utils\PortalRouteNames;
+use Exception;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class Authenticate extends Middleware
 {
@@ -14,7 +19,17 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request)
     {
-        if (! $request->expectsJson()) {
+        // if (! $request->expectsJson()) {
+        //     return route('login');
+        // }
+
+        if (! $request->expectsJson()) 
+        {
+            if ($request->routeIs(PortalRouteNames::Employee_Prefix . '.*')) 
+            {
+                return route( PortalRouteNames::Employee_Login );
+            }
+
             return route('login');
         }
     }

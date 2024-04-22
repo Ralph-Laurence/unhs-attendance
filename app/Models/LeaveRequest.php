@@ -337,9 +337,9 @@ class LeaveRequest extends Model implements Auditable
                 $employee->setAttribute(Employee::f_Status, Employee::ON_STATUS_LEAVE);
                 $employee->saveOrFail();
             }
-            else if (!$leaveExists && $empStatus != Employee::ON_STATUS_DUTY)
+            else if (!$leaveExists && $empStatus != Employee::ON_STATUS_ACTIVE)
             {
-                $employee->setAttribute(Employee::f_Status, Employee::ON_STATUS_DUTY);
+                $employee->setAttribute(Employee::f_Status, Employee::ON_STATUS_ACTIVE);
                 $employee->saveOrFail();
             }
 
@@ -420,7 +420,7 @@ class LeaveRequest extends Model implements Auditable
                 $empId = $leave[self::f_Emp_FK_ID];
 
                 $currentEmpStatus = Employee::where('id', $empId)->value(Employee::f_Status);
-                $newEmpStatus     = Employee::ON_STATUS_DUTY;
+                $newEmpStatus     = Employee::ON_STATUS_ACTIVE;
 
                 if ( $leave[self::f_LeaveStatus] == self::LEAVE_STATUS_APPROVED &&
                      now()->startOfDay()->between($startDate, $endDate)) 

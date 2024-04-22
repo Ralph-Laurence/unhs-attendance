@@ -49,28 +49,35 @@
     <div class="col-4">
         <div class="card mb-3">
             <div class="card-body p-2">
-                <div class="row mb-3">
-                    <div class="col">
-                        <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
-                            Employee Status
-                        </h6>
-                    </div>
-                    <div class="col flex-end">
-                        <i class="fas fa-plus-circle me-1 text-primary-dark"></i>
-                        <h6 class="text-14 fw-bold my-1" id="emp-stat-total">Total : 0</h6>
-                    </div>
+                <div class="flex-start mb-2 px-1 chart-title">
+                    <h6 class="card-title fw-bold text-14 text-uppercase my-1 me-auto text-truncate">
+                        <span class="me-2">Employee Status</span>
+                        <i class="fas fa-chart-simple text-primary-dark"></i>
+                    </h6>
                 </div>
-                <div class="row">
-                    <div class="col">
-                        <div class="employee-status-wrapper rounded-5 p-1">
-                            <h6 class="my-0 ms-1 me-auto text-14">On Duty</h6>
-                            <div class="rounded-5 bg-color-primary text-white p-2 emp-status-count" id="count-on-duty">0</div>
+                <div class="row mb-2">
+                    <div class="col text-center">
+                        <div class="emp-stat-count-indicator pt-2 pb-1 d-flex flex-column align-items-center emp-stat-active">
+                            <div class="emp-stat-count stat-active" id="count-active-stat">0</div>
+                            <small class="d-block">Active</small>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="employee-status-wrapper rounded-5 p-1">
-                            <h6 class="my-0 ms-1 me-auto text-14">On Leave</h6>
-                            <div class="rounded-5 bg-color-warning p-2 emp-status-count" id="count-on-leave">0</div>
+                    <div class="col text-center">
+                        <div class="emp-stat-count-indicator pt-2 pb-1 d-flex flex-column align-items-center emp-stat-leave">
+                            <div class="emp-stat-count stat-leave" id="count-on-leave">0</div>
+                            <small>Leave</small>
+                        </div>
+                    </div>
+                    <div class="col text-center">
+                        <div class="emp-stat-count-indicator pt-2 pb-1 d-flex flex-column align-items-center emp-stat-onduty">
+                            <div class="emp-stat-count stat-on-duty" id="count-on-duty">0</div>
+                            <small>On Duty</small>
+                        </div>
+                    </div>
+                    <div class="col text-center">
+                        <div class="emp-stat-count-indicator pt-2 pb-1 d-flex flex-column align-items-center emp-stat-out">
+                            <div class="emp-stat-count stat-out" id="count-out">0</div>
+                            <small>Out</small>
                         </div>
                     </div>
                 </div>
@@ -89,35 +96,29 @@
                     </a>
                 </div>
                 <div class="row mb-2">
-                    <div class="col">
-                        <div class="leave-count-wrapper leave-approved rounded-5 p-1" 
-                            data-action="{{ $routes['leaveReqStats'] }}"
-                            data-segment="{{ $leaveReqFilters['a'] }}">
-                            <small class="ms-1 leave-count-label me-auto">Approved</small>
-                            <div class="rounded-5 bg-white p-2 leave-count leave-count-approved">0</div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="leave-count-wrapper leave-rejected rounded-5 p-1" 
-                            data-action="{{ $routes['leaveReqStats'] }}"
-                            data-segment="{{ $leaveReqFilters['r'] }}">
-                            <small class="ms-1 leave-count-label me-auto">Rejected</small>
-                            <div class="rounded-5 bg-white p-2 leave-count leave-count-rejected">0</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <div class="leave-count-wrapper leave-pending rounded-5 p-1" 
+                    <div class="col text-center">
+                        <div class="leave-count-indicator d-flex flex-column align-items-center"
                             data-action="{{ $routes['leaveReqStats'] }}"
                             data-segment="{{ $leaveReqFilters['p'] }}">
-                            <small class="ms-1 leave-count-label me-auto">Pending</small>
-                            <div class="rounded-5 bg-white p-2 leave-count leave-count-pending">0</div>
+                            <div class="leave-count leave-count-pending">0</div>
+                            <small class="d-block">Pending</small>
                         </div>
                     </div>
-                    <div class="col flex-end">
-                        <i class="fas fa-plus-circle me-1 text-primary-dark"></i>
-                        <h6 class="text-14 fw-bold total-leave-reqs my-1">Total : 0</h6>
+                    <div class="col text-center">
+                        <div class="leave-count-indicator d-flex flex-column align-items-center"
+                            data-action="{{ $routes['leaveReqStats'] }}"
+                            data-segment="{{ $leaveReqFilters['a'] }}">
+                            <div class="leave-count leave-count-approved">0</div>
+                            <small>Approved</small>
+                        </div>
+                    </div>
+                    <div class="col text-center">
+                        <div class="leave-count-indicator d-flex flex-column align-items-center"
+                            data-action="{{ $routes['leaveReqStats'] }}"
+                            data-segment="{{ $leaveReqFilters['r'] }}">
+                            <div class="leave-count leave-count-rejected">0</div>
+                            <small>Rejected</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -210,6 +211,7 @@
 @push('dialogs')
     @include('modals.statistics-modal')
     @include('modals.statistics-leave-modal')
+    @include('modals.statistics-empstat-modal')
     @include('modals.statistics-monthly-attendances')
 @endpush
 

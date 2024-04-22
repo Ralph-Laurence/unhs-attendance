@@ -1,12 +1,12 @@
-<div class="modal fade dashboard-stat-modal statistics-leave-modal" id="statistics-leave-modal" tabindex="-1" aria-hidden="true"
+<div class="modal fade dashboard-stat-modal statistics-emp-status-modal" id="statistics-emp-status-modal" tabindex="-1" aria-hidden="true"
     data-mdb-backdrop="static">
-    <div class="modal-dialog modal-dialog-wide-1024 modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-wide modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header py-2">
                 <div class="d-flex align-items-center gap-2">
                     <img src="{{ asset('images/internal/icons/modal_icon_leave.png') }}" width="28" height="28"
                         alt="icon" class="modal-icon" />
-                    <h6 class="modal-title mb-0" id="statistics-leave-modal-title">Leave Requests</h6>
+                    <h6 class="modal-title mb-0" id="statistics-emp-status-modal-title">Leave Requests</h6>
                 </div>
                 <button type="button" class="btn-close close-button" data-mdb-ripple-init data-mdb-dismiss="modal"
                     aria-label="Close"></button>
@@ -31,14 +31,11 @@
                     <table class="table table-striped w-100 table-sm modal-table" id="leave-stats-table">
                         <thead class="position-sticky top-0 shadow-3-soft">
                             <tr>
-                                <th style="width: 10%;">#</th>
                                 <th style="width: 20%;">ID No</th>
                                 <th style="width: 30%;">Name</th>
                                 <th style="width: 25%;">Leave Type</th>
-                                <th style="width: 20%">From</th>
-                                <th style="width: 20%">To</th>
                                 <th style="width: 20%">Duration</th>
-                                {{-- <th style="width: 20%">Status</th> --}}
+                                <th style="width: 20%">Status</th>
                             </tr>
                         </thead>
                     </table>

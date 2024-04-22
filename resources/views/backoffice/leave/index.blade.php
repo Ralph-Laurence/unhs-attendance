@@ -120,7 +120,11 @@
                 </div>
     
                 {{-- ADD BUTTON --}}
-                <div class="dropdown">
+                <button class="btn btn-primary flat-button shadow-0" id="btn-add-leave-record">
+                    <i class="fas fa-plus"></i>
+                    <span class="ms-1">Add</span>
+                </button>
+                {{-- <div class="dropdown">
                     <button class="btn btn-primary flat-button dropdown-toggle shadow-0" id="add-record-dropdown-button"
                         data-mdb-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-plus"></i>
@@ -130,9 +134,9 @@
                         <li>
                             <a class="dropdown-item" id="opt-add-leave-request" role="button">Create Manually</a>
                         </li>
-                        {{-- <li><a class="dropdown-item" href="#">Import Sheet</a></li> --}}
+                        {{- - <li><a class="dropdown-item" href="#">Import Sheet</a></li> - -}}
                     </ul>
-                </div>
+                </div> --}}
             </div>
         </div>
 

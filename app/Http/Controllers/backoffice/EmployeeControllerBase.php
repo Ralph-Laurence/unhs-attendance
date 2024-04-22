@@ -66,7 +66,7 @@ abstract class EmployeeControllerBase extends Controller
                 Employee::f_Contact     => $inputs['input-phone'],
                 Employee::f_Role        => $inputs['role'],
                 Employee::f_Rank        => $inputs['input-position'],
-                Employee::f_Status      => Employee::ON_STATUS_DUTY,
+                Employee::f_Status      => Employee::ON_STATUS_ACTIVE,
                 Employee::f_PINCode     => encrypt($rawPin)
             ],
             'extraData' => [

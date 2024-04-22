@@ -22,19 +22,10 @@
             </div>
             <div class="col-4 flex-end gap-2">
                 {{-- ADD BUTTON --}}
-                <div class="dropdown">
-                    <button class="btn btn-primary flat-button dropdown-toggle shadow-0" id="drop-btn-add"
-                        data-mdb-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-plus"></i>
-                        <span class="ms-1">Add</span>
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="drop-btn-add">
-                        <li>
-                            <a class="dropdown-item btn-add-employee" role="button">Create Manually</a>
-                        </li>
-                        {{-- <li><a class="dropdown-item" href="#">Import Sheet</a></li> --}}
-                    </ul>
-                </div>
+                <button class="btn btn-primary flat-button shadow-0" id="btn-add-employee">
+                    <i class="fas fa-plus"></i>
+                    <span class="ms-1">Add</span>
+                </button>
             </div>
         </div>
 

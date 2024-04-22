@@ -15,41 +15,50 @@
     min-height: 32px;
 }
 
-.leave-count-wrapper .leave-count-label {
-    font-size: 14px;
-}
-
-.leave-count-wrapper .leave-count,
-.emp-status-count {
-    min-width: 38px;
-    min-height: 38px;
-    max-height: 38px;
+.leave-count-indicator .leave-count,
+.emp-stat-count {
+    width: 34px;
+    height: 34px;
+    max-width: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    max-height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Poppins-Medium';
     color: #08192c;
-}
-
-.leave-count-wrapper,
-.employee-status-wrapper {
+    border-radius: .5rem;
     font-size: 14px;
-    display: flex;
-    align-items: center;
+    margin-bottom: .5rem;
 }
 
-.leave-approved {
-    background-color: #69dbc2;
+.emp-stat-count-indicator {
+    border-radius: 0.5rem;
+    font-size: 13px;
+    font-family: 'Poppins-Medium';
 }
 
-.leave-rejected {
-    background-color: #FF6E80;
-}
+.emp-stat-active { background-color: #e1e2f3; }
+.emp-stat-leave  { background-color: #ffefd1; }
+.emp-stat-onduty { background-color: #EDFBF8; }
+.emp-stat-out    { background-color: #FFEDEF; }
 
-.leave-pending {
-    background-color: #F9D385;
+.emp-stat-active .emp-stat-count {
+    background-color: var(--primary-color);
+    color: white;
 }
-
+.emp-stat-leave .emp-stat-count {
+    background-color: var(--warning-color);
+}
+.emp-stat-onduty .emp-stat-count {
+    background-color: #1FC9A4;
+    color: white;
+}
+.emp-stat-out .emp-stat-count {
+    background-color: var(--danger-color);
+    color: white;
+}
 .dashboard-stat-modal .modal-content {
     height: 580px;
     min-height: 580px;
@@ -68,27 +77,6 @@
 #statistics-modal #stats-table_length {
     width: fit-content !important;
     display: none;
-}
-
-.leave-count-wrapper.leave-approved:hover {
-    background-color: #00D1A4;
-}
-
-.leave-count-wrapper.leave-rejected:hover {
-    background-color: var(--danger-color);
-}
-
-.leave-count-wrapper.leave-pending:hover {
-    background-color: var(--warning-color);
-}
-
-.leave-count-wrapper:hover {
-    cursor: pointer;
-}
-
-.leave-count-wrapper:hover > .leave-count-label {
-    color: white;
-    font-family: 'Poppins-Medium';
 }
 
 .dp-icn {
@@ -134,4 +122,24 @@
 }
 .tooltip-inner {
     background-color: #110c22ec;
+}
+
+.leave-count-indicator .leave-count-pending       { background-color: var(--warning-color); }
+.leave-count-indicator .leave-count-pending:hover { background-color: #FFCA3A; }
+
+.leave-count-indicator .leave-count-rejected {
+    background-color: var(--danger-color);
+    color: white;
+}
+.leave-count-indicator .leave-count-rejected:hover { background-color: #ff4070; }
+
+.leave-count-indicator .leave-count-approved {
+    background-color: #00D1A4;
+    color: white;
+}
+.leave-count-indicator .leave-count-approved:hover { background-color: #19ebbd; }
+
+.modal-dialog-wide-1024 {
+    width: 1024px;
+    min-width: 1024px;
 }

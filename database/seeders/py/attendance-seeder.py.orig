@@ -41,7 +41,7 @@ def seed(month):
                 overtime        = str(time_out - time_in.replace(hour=17, minute=30)) if time_out.hour > 17 or (time_out.hour == 17 and time_out.minute > 30) else '00:00:00'
                 week_no         = time_in.isocalendar()[1]  # Get the week number of the year
                 created_at      = updated_at = time_in.strftime('%Y-%m-%d %H:%M:%S')
-                values.append((emp_id, created_at, am_out.strftime('%Y-%m-%d %H:%M:%S'), pm_in.strftime('%Y-%m-%d %H:%M:%S'), time_out.strftime('%Y-%m-%d %H:%M:%S'), 'On Duty', duration, undertime, overtime, late, week_no, created_at, updated_at))
+                values.append((emp_id, created_at, am_out.strftime('%Y-%m-%d %H:%M:%S'), pm_in.strftime('%Y-%m-%d %H:%M:%S'), time_out.strftime('%Y-%m-%d %H:%M:%S'), 'Active', duration, undertime, overtime, late, week_no, created_at, updated_at))
 
     sql = f"INSERT INTO {attendanceTable} ({', '.join(attendanceFields)}) VALUES {', '.join(str(value) for value in values)}"
    

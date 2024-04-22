@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use App\Http\Utils\PortalRouteNames;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Auth\AuthenticationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,5 +39,23 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        // $routeName = $request->route()->getName();
+        // error_log("THE ROUTE ------> $routeName");
+        // error_log("ROUTE IS: " . $request->routeIs(PortalRouteNames::Employee_Prefix . '.*') ? 'yeah' : 'nope');
+
+        if ($request->routeIs(PortalRouteNames::Employee_Prefix . '.*')) 
+        {
+            return redirect()->guest(route( PortalRouteNames::Employee_Login ));
+        }
+        
+        return redirect()->guest(route('login'));
     }
 }

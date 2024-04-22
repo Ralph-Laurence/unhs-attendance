@@ -20,8 +20,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class Employee extends Model implements Auditable//, IDescriptiveAudit
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Auth\Authenticatable;
+
+class Employee extends Model implements Auditable, AuthenticatableContract//, IDescriptiveAudit
 {
+    use Authenticatable;
+
     use HasFactory;
     use EmployeesAudit;
     use \OwenIt\Auditing\Auditable;
@@ -63,8 +68,8 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
         self::RoleGuard     => self::STR_ROLE_GUARD
     ];
 
-    public const ON_STATUS_LEAVE = 'Leave';
-    public const ON_STATUS_DUTY  = 'On Duty';
+    public const ON_STATUS_LEAVE   = 'Leave';
+    public const ON_STATUS_ACTIVE  = 'Active';
 
     public const f_EmpNo        = 'emp_no';         // -> Employee Number
     public const f_FirstName    = 'firstname';
@@ -75,7 +80,7 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
     public const f_Email        = 'email';
     public const f_Contact      = 'contact';
     public const f_Photo        = 'photo';
-    public const f_Status       = 'status';         // -> Status: On Duty | Leave
+    public const f_Status       = 'status';         // -> Status: Active | Leave
     public const f_QrSecLevel   = 'qr_sec_level';   // -> Security Levels: None, Medium, High
                                                     // -> None   - No security
                                                     // -> Medium - PIN Code
@@ -219,7 +224,7 @@ class Employee extends Model implements Auditable//, IDescriptiveAudit
         
         $role_guard = self::RoleGuard;
 
-        $e_status_active    = self::ON_STATUS_DUTY;
+        $e_status_active    = self::ON_STATUS_ACTIVE;
         $e_status_inactive  = self::ON_STATUS_LEAVE;
         $zeroTime = Constants::ZERO_DURATION;
 

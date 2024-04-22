@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Utils\AuthGuardNames;
+
 return [
 
     /*
@@ -40,6 +42,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        AuthGuardNames::Employee => [
+            'driver' => 'session',
+            'provider' => 'employees',
+        ],
     ],
 
     /*
@@ -65,6 +72,10 @@ return [
             'model' => App\Models\User::class,
         ],
 
+        'employees' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Employee::class,
+        ],
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',

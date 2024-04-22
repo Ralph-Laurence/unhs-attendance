@@ -117,20 +117,48 @@ class DashboardController extends Controller
 
     private function countEmpStatusDifference()
     {
-        $statuses = [Employee::ON_STATUS_DUTY, Employee::ON_STATUS_LEAVE];
-        $total    = 0;
+        // 1. Count Status Differences
+        $statuses = [Employee::ON_STATUS_ACTIVE, Employee::ON_STATUS_LEAVE];
 
         $counts = collect($statuses)->mapWithKeys(function ($status) use(&$total) {
             $count = DB::table(Employee::getTableName())
                 ->where(Employee::f_Status, $status)
                 ->count();
 
-            $total += $count;
-
             return [$status => $count];
         });
         
-        $counts['Total'] = $total;
+        $counts['ClockedIn']  = 0;
+        $counts['ClockedOut'] = 0;
+
+        
+        // 2. Count On Duty vs Out
+        $dataset_total = DB::table(Attendance::getTableName(), 'a')
+            ->leftJoin(Employee::getTableName().' as e', 'e.id', '=', 'a.'.Attendance::f_Emp_FK_ID)
+            ->select([
+                'a.'.Attendance::f_TimeIn .' as ClockedIn',
+                'a.'.Attendance::f_TimeOut.' as ClockedOut'
+            ])
+            ->whereDate('a.created_at', '=', date('Y-m-d'))
+            ->get();
+
+        foreach ($dataset_total as $totals)
+        {
+            // Those who have a clockout time, are identified
+            // as out of office
+            if (!empty($totals->ClockedOut))
+            {
+                $counts['ClockedOut'] += 1;
+                continue;
+            }
+
+            // Those clocked in and have not clockedout yet,
+            // are identified as On-Duty (In-Office)
+            if (!empty($totals->ClockedIn) && empty($totals->ClockedOut))
+                $counts['ClockedIn'] += 1;
+        }
+
+        // error_log(print_r($counts, true));
 
         return $counts->toArray();
     }
@@ -367,7 +395,9 @@ class DashboardController extends Controller
         $select = [
             'e.' . Employee::f_EmpNo . ' as empno',
             Employee::getConcatNameDbRaw('e'),
-            DB::raw( Extensions::mapCaseWhen($filters, $f_leaveStatus, 'status') ),
+            //DB::raw( Extensions::mapCaseWhen($filters, $f_leaveStatus, 'status') ),
+            Extensions::date_format_bdY(LeaveRequest::f_StartDate, 'date_from'),
+            Extensions::date_format_bdY(LeaveRequest::f_EndDate, 'date_to'),
             DB::raw( Extensions::mapCaseWhen(LeaveRequest::getTypes(), 'l.'.LeaveRequest::f_LeaveType, 'type') ),
             LeaveRequest::f_Duration .' as duration'
         ];

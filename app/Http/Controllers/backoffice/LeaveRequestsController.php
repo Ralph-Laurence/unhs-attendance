@@ -108,7 +108,7 @@ class LeaveRequestsController extends Controller
 
                     $startDate = Carbon::parse($result[LeaveRequest::f_StartDate]);
                     $endDate   = Carbon::parse($result[LeaveRequest::f_EndDate]);
-                    $newStatus = Employee::ON_STATUS_DUTY;
+                    $newStatus = Employee::ON_STATUS_ACTIVE;
 
                     $currentEmpStatus = Employee::where('id', $empId)->value(Employee::f_Status);
                     
@@ -286,7 +286,7 @@ class LeaveRequestsController extends Controller
         $leaveTable  = LeaveRequest::getTableName();
 
         $employees_forOnLeave = [];
-        $employees_forOnDuty  = [];
+        $employees_active     = [];
 
         // Get all employees with an approved leave request
         $employees = Employee::whereHas($leaveTable, function ($query) use ($currentDate) 
@@ -312,13 +312,13 @@ class LeaveRequestsController extends Controller
 
         foreach ($employees as $employee) 
         {
-            // If the employee is not already on duty, update their status
-            if ($employee->getAttribute(Employee::f_Status) != Employee::ON_STATUS_DUTY)
-                $employees_forOnDuty[] = $employee->id;
+            // If the employee is not already active, update their status
+            if ($employee->getAttribute(Employee::f_Status) != Employee::ON_STATUS_ACTIVE)
+                $employees_active[] = $employee->id;
         }
 
         Employee::whereIn('id', $employees_forOnLeave)->update([Employee::f_Status => Employee::ON_STATUS_LEAVE]);
-        Employee::whereIn('id', $employees_forOnDuty )->update([Employee::f_Status => Employee::ON_STATUS_DUTY]);
+        Employee::whereIn('id', $employees_active )->update([Employee::f_Status => Employee::ON_STATUS_ACTIVE]);
     }
 
     private function calculateLeaveDuration($leaveStart, $leaveEnd) : string

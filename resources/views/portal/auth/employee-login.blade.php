@@ -21,23 +21,26 @@
                 <h6 class="text-sm ms-3 opacity-50 mb-1">{{ $system }}</h6>
             </div>
         </div>
-        <h6 class="text-center my-4 text-primary-dark">Administrator Login</h6>
-        <form method="POST" action="{{ route('login') }}" autocomplete="new-password">
+        <h6 class="text-center my-4 text-primary-dark">Employee Login</h6>
+        <form method="POST" action="{{ $postAction }}" autocomplete="new-password">
             @csrf
-            <input type="hidden" name="type" value="0">
-            <x-text-box as="email" placeholder="Email or Username" maxlength="32" parent-classes="mb-3"
-                leading-icon-s="fa-user" aria-autocomplete="none" />
+            {{-- @if ($errors->any())
+                @dd($errors)
+            @endif --}}
+            <input type="hidden" name="type" value="1">
+            <x-text-box as="idno" placeholder="ID Number" maxlength="32" parent-classes="mb-3"
+                leading-icon-s="fa-fingerprint" aria-autocomplete="none" />
 
-            <x-text-box as="password" of="password" placeholder="Password" maxlength="32" parent-classes="mb-3"
+            <x-text-box as="pin" of="password" placeholder="Pin Code" maxlength="32" parent-classes="mb-3"
                 leading-icon-s="fa-key" aria-autocomplete="none" />
 
             <div class="d-flex flex-row align-items-center">
-                <p class="opacity-60 m-0">
-                    <small>Forgot Password?</small>
+                {{-- <p class="opacity-60 m-0">
+                    <small>Forgot Pin?</small>
                 </p>
                 <a href="{{ route('password.request') }}" class="mx-2 link-primary">
                     <small>Reset</small>
-                </a>
+                </a> --}}
                 <button name="login" class="btn btn-primary flat-button login-btn shadow-0 ms-auto">Login</button>
             </div>
         </form>

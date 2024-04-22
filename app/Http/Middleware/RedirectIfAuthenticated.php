@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Utils\AuthGuardNames;
+use App\Http\Utils\PortalRouteNames;
 use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
@@ -21,10 +23,30 @@ class RedirectIfAuthenticated
     {
         $guards = empty($guards) ? [null] : $guards;
 
-        foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+        foreach ($guards as $guard) 
+        {
+            if (Auth::guard($guard)->check()) 
+            {
+                switch ($guard)
+                {
+                    case AuthGuardNames::Employee:
+                        error_log('auth emp');
+                        return redirect( route(PortalRouteNames::Employee_Home) );
+                        break;
+
+                    case AuthGuardNames::Admin:
+                    //default:
+                        error_log('auth adm');
+                        return redirect(RouteServiceProvider::HOME);
+                        break;
+                }
             }
+
+            // Original
+            // if (Auth::guard($guard)->check()) 
+            // {
+            //     return redirect(RouteServiceProvider::HOME);
+            // }
         }
 
         return $next($request);

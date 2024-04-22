@@ -492,7 +492,7 @@ var employeePage = (function()
 
     var handleEvents = function()
     {
-        $('.btn-add-employee').on('click', () => crudModal.open( crudModal.MODE_CREATE ));
+        $('#btn-add-employee').on('click', () => crudModal.open( crudModal.MODE_CREATE ));
 
         eventBus.subscribe(EV_CREATED_EMP, (response) => {
 

@@ -51,8 +51,9 @@ let dashboardPage = (function()
 
     let bindEvents = function() 
     {
-        $('.leave-count-wrapper').on('click', function()
+        $('.leave-count-indicator').on('click', function()
         {
+            $(this).css('pointer-events', 'none');
             handleLeaveStatsAdapter( $(this) );
         });
     };
@@ -147,19 +148,21 @@ let dashboardPage = (function()
     {
         let diff = response.empStatusDifference;
 
-        $('#count-on-duty').text(diff['On Duty']);
+        $('#count-active-stat').text(diff['Active']);
         $('#count-on-leave').text(diff['Leave']);
-        $('#emp-stat-total').text(`Total : ${diff['Total']}`);
+
+        $('#count-on-duty').text(diff['ClockedIn']);
+        $('#count-out').text(diff['ClockedOut']);
     }
 
     function handleLeaveReqDiff(response)
     {
         let diff = response.leaveStatusDifference;
 
-        $('.leave-count-wrapper .leave-count-pending') .text(diff['Pending']);
-        $('.leave-count-wrapper .leave-count-approved').text(diff['Approved']);
-        $('.leave-count-wrapper .leave-count-rejected').text(diff['Rejected']);
-        $('.total-leave-reqs').text(`Total : ${diff['Total']}`);
+        $('.leave-count-indicator .leave-count-pending') .text(diff['Pending']);
+        $('.leave-count-indicator .leave-count-approved').text(diff['Approved']);
+        $('.leave-count-indicator .leave-count-rejected').text(diff['Rejected']);
+        // $('.total-leave-reqs').text(`Total : ${diff['Total']}`);
     }
 
     function handleAttendanceStatistics(response)
@@ -508,7 +511,7 @@ let dashboardPage = (function()
     }
 
     function handleLeaveStatsAdapter(sender) 
-    {  
+    {
         $.ajax({
             url: sender.data('action'),
             type: 'POST',
@@ -520,7 +523,8 @@ let dashboardPage = (function()
             error : function (xhr, error, status) 
             {  
                 alertModal.showDanger(GenericMessages.XHR_FAIL_ERROR);
-            }
+            },
+            complete: () => sender.css('pointer-events', 'auto')
         });
     }
 
@@ -535,11 +539,22 @@ let dashboardPage = (function()
         let tableId = `${leaveStatsModalSelector} #leave-stats-table`;
 
         let columnDefinitions = [
-            {data: 'empno',    title: 'ID No',      width: '20%', class: 'text-truncate' },
-            {data: 'empname',  title: 'Name',       width: '30%', class: 'text-truncate text-capitalize' },
-            {data: 'type',     title: 'Leave Type', width: '25%', class: 'text-truncate' },
-            {data: 'duration', title: 'Duration',   width: '20%', class: 'text-truncate' },
-            {data: 'status',   title: 'Status',     width: '20%', class: 'text-truncate' },
+            // First Column -> Record Counter
+            {
+                width: '50px',
+                className: 'record-counter text-truncate',
+                data: null,
+                render: function(data, type, row, meta) {
+                    return meta.row + 1;
+                }
+            },
+            {data: 'empno',     title: 'ID No',         width: '20%', class: 'text-truncate' },
+            {data: 'empname',   title: 'Name',          width: '40%', class: 'text-truncate text-capitalize' },
+            {data: 'type',      title: 'Leave Type',    width: '15%', class: 'text-truncate' },
+            {data: 'date_from', title: 'Date From',     width: '20%', class: 'text-truncate' },
+            {data: 'date_to',   title: 'Date To',       width: '20%', class: 'text-truncate' },
+            {data: 'duration',  title: 'Duration',      width: '20%', class: 'text-truncate' },
+            // {data: 'status',   title: 'Status',     width: '20%', class: 'text-truncate' },
         ];
 
         // Check if the DataTable exists and if so, destroy it

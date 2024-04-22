@@ -26,7 +26,7 @@ class CreateEmployeesTable extends Migration
             $table->string(Employee::f_Email,       64)->nullable();
             $table->tinyInteger(Employee::f_Role);
             $table->integer(Employee::f_Rank          )->default(0);
-            $table->string(Employee::f_Status,      16)->default(Employee::ON_STATUS_DUTY);
+            $table->string(Employee::f_Status,      16)->default(Employee::ON_STATUS_ACTIVE);
             $table->string(Employee::f_Photo          )->nullable();
 
             // Ideal PIN code length is between 4-12

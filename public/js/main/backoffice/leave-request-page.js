@@ -177,7 +177,7 @@ var leaveReqsPage = (function ()
         });
 
         // Dropdown option "Create Leave Request"
-        $('#opt-add-leave-request').on('click', () => {
+        $('#btn-add-leave-record').on('click', () => {
 
             leaveReqModal.setMode( leaveReqModal.MODE_CREATE );
             leaveReqModal.show();
