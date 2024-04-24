@@ -239,7 +239,7 @@ class LeaveRequestsController extends Controller
     
     public function update($inputs, $updateId)
     {
-        $leaveDuration = $this->calculateLeaveDuration($inputs['startDate'], $inputs['endDate']);
+        $leaveDuration = self::calculateLeaveDuration($inputs['startDate'], $inputs['endDate']);
     
         $model = LeaveRequest::findOrFail($updateId);
         $model->update([
@@ -254,7 +254,7 @@ class LeaveRequestsController extends Controller
     
     private function insert($inputs, $empId)
     {
-        $leaveDuration = $this->calculateLeaveDuration($inputs['startDate'], $inputs['endDate']);
+        $leaveDuration = self::calculateLeaveDuration($inputs['startDate'], $inputs['endDate']);
     
         return LeaveRequest::create([
             LeaveRequest::f_Emp_FK_ID   => $empId,
@@ -291,6 +291,7 @@ class LeaveRequestsController extends Controller
 
         $employees_forOnLeave = [];
         $employees_active     = [];
+        $unnoticed_leaves     = [];
 
         // Get all employees with an approved leave request
         $employees = Employee::whereHas($leaveTable, function ($query) use ($currentDate) 
@@ -321,11 +322,28 @@ class LeaveRequestsController extends Controller
                 $employees_active[] = $employee->id;
         }
 
+        // Get the date for one day ago
+        $oneDayAgo = date('Y-m-d', strtotime('-1 day'));
+        
+        // Get all leave requests with status 'pending' and 'created_at' date is more than 1 day ago
+        $leaveRequests = LeaveRequest::where(LeaveRequest::f_LeaveStatus, '=', LeaveRequest::LEAVE_STATUS_PENDING)
+            ->whereDate('created_at', '<=', $oneDayAgo)
+            ->get();
+
+        // Update the status of these leave requests to 'unnoticed'
+        foreach ($leaveRequests as $leaveRequest) {
+            $unnoticed_leaves[] = $leaveRequest->id;
+            //$leaveRequest->update([LeaveRequest::f_LeaveStatus => LeaveRequest::LEAVE_STATUS_UNNOTICED]);
+        }
+
         Employee::whereIn('id', $employees_forOnLeave)->update([Employee::f_Status => Employee::ON_STATUS_LEAVE]);
-        Employee::whereIn('id', $employees_active )->update([Employee::f_Status => Employee::ON_STATUS_ACTIVE]);
+        Employee::whereIn('id', $employees_active    )->update([Employee::f_Status => Employee::ON_STATUS_ACTIVE]);
+        LeaveRequest::whereIn('id', $unnoticed_leaves)->update([
+            LeaveRequest::f_LeaveStatus => LeaveRequest::LEAVE_STATUS_UNNOTICED
+        ]);
     }
 
-    private function calculateLeaveDuration($leaveStart, $leaveEnd) : string
+    public static function calculateLeaveDuration($leaveStart, $leaveEnd) : string
     {
         $duration = $leaveStart == $leaveEnd 
                   ? 1 

@@ -30,13 +30,13 @@ class RedirectIfAuthenticated
                 switch ($guard)
                 {
                     case AuthGuardNames::Employee:
-                        error_log('auth emp');
+                        error_log('auth emp @RedirectIfAuthenticated.php');
                         return redirect( route(PortalRouteNames::Employee_Home) );
                         break;
 
                     case AuthGuardNames::Admin:
                     //default:
-                        error_log('auth adm');
+                        error_log('auth adm @RedirectIfAuthenticated.php');
                         return redirect(RouteServiceProvider::HOME);
                         break;
                 }

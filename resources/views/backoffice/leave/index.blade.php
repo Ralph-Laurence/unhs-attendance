@@ -70,7 +70,7 @@
                                 <div class="col-6">
                                     {{-- RECORD MONTH RANGE FILTERS --}}
                                     <small> 
-                                        <i class="fas fa-calendar-days me-1"></i> Month
+                                        <i class="fas fa-calendar-days me-1"></i> Requested On
                                     </small>
                                     <x-drop-list as="input-month-filter" :items="$monthOptions" text="{{ date('F') }}" 
                                     default="{{ date('n') }}" button-classes="w-100"/>

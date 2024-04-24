@@ -207,6 +207,11 @@ class Extensions
         return DB::raw("DATE_FORMAT($field, '%b %d, %Y') as $alias");
     }
 
+    public static function date_format_bdY_join($col_alias, $field = 'created_at', $alias = 'date')
+    {
+        return DB::raw("DATE_FORMAT($col_alias.$field, '%b %d, %Y') as $alias");
+    }
+
     /**
      * Formats a sql date into "%h %i, %p"
      * which means 12-hour time with AM/PM
@@ -300,5 +305,10 @@ class Extensions
             return Constants::CTYPE_CONSONANT;
 
         return 0;
+    }
+
+    public static function Ymd_to_MdY($dateString)
+    {
+        return date('M d, Y', strtotime($dateString));
     }
 }

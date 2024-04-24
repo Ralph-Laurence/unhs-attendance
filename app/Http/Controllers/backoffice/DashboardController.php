@@ -53,7 +53,8 @@ class DashboardController extends Controller
             ->with('leaveReqFilters', [
                 'a' => LeaveRequest::LEAVE_STATUS_APPROVED,
                 'p' => LeaveRequest::LEAVE_STATUS_PENDING,
-                'r' => LeaveRequest::LEAVE_STATUS_REJECTED
+                'r' => LeaveRequest::LEAVE_STATUS_REJECTED,
+                'u' => LeaveRequest::LEAVE_STATUS_UNNOTICED
             ])
             ->with('allMonths'          , $allMonths)
             ->with('recentActivity'     , $this->getRecentActivities())
@@ -443,9 +444,10 @@ class DashboardController extends Controller
             ->get();
 
         $segmentColors = [
-            LeaveRequest::LEAVE_STATUS_APPROVED => '#00D1A4',
-            LeaveRequest::LEAVE_STATUS_PENDING  => '#FF840C',
-            LeaveRequest::LEAVE_STATUS_REJECTED => '#FF2641'
+            LeaveRequest::LEAVE_STATUS_APPROVED     => '#00D1A4',
+            LeaveRequest::LEAVE_STATUS_PENDING      => '#FF840C',
+            LeaveRequest::LEAVE_STATUS_REJECTED     => '#FF2641',
+            LeaveRequest::LEAVE_STATUS_UNNOTICED    => '#FF8620' 
         ];
 
         return response()->json([

@@ -41,9 +41,10 @@ class LeaveRequest extends Model implements Auditable
     public const f_LeaveType    = 'leave_type';
     public const f_LeaveStatus  = 'leave_status';
 
-    public const LEAVE_STATUS_PENDING  = 1;
-    public const LEAVE_STATUS_APPROVED = 2;
-    public const LEAVE_STATUS_REJECTED = 3;
+    public const LEAVE_STATUS_PENDING   = 1;
+    public const LEAVE_STATUS_APPROVED  = 2;
+    public const LEAVE_STATUS_REJECTED  = 3;
+    public const LEAVE_STATUS_UNNOTICED = 4;
 
     public const LEAVE_TYPE_SERVICE_INCENTIVE = 1;
     public const LEAVE_TYPE_SICK              = 2;
@@ -66,6 +67,7 @@ class LeaveRequest extends Model implements Auditable
     public const LEAVE_PENDING     = 'Pending';
     public const LEAVE_APPROVED    = 'Approved';
     public const LEAVE_REJECTED    = 'Rejected';
+    public const LEAVE_UNNOTICED   = 'Unnoticed';
 
     public const HASH_SALT = 'FCD61F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;
@@ -129,9 +131,10 @@ class LeaveRequest extends Model implements Auditable
     public static function getLeaveStatuses($onlyValues = false) : array
     {
         $leaveStatuses = [
-            self::LEAVE_PENDING  => self::LEAVE_STATUS_PENDING,
-            self::LEAVE_APPROVED => self::LEAVE_STATUS_APPROVED,
-            self::LEAVE_REJECTED => self::LEAVE_STATUS_REJECTED,
+            self::LEAVE_PENDING     => self::LEAVE_STATUS_PENDING,
+            self::LEAVE_APPROVED    => self::LEAVE_STATUS_APPROVED,
+            self::LEAVE_REJECTED    => self::LEAVE_STATUS_REJECTED,
+            self::LEAVE_UNNOTICED   => self::LEAVE_STATUS_UNNOTICED
         ];
 
         if ($onlyValues)
@@ -143,9 +146,10 @@ class LeaveRequest extends Model implements Auditable
     public static function getStatuses($onlyValues = false) : array
     {
         $leaveStatuses = [
-            self::LEAVE_STATUS_PENDING  => self::LEAVE_PENDING,
-            self::LEAVE_STATUS_APPROVED => self::LEAVE_APPROVED,
-            self::LEAVE_STATUS_REJECTED => self::LEAVE_REJECTED,
+            self::LEAVE_STATUS_PENDING      => self::LEAVE_PENDING,
+            self::LEAVE_STATUS_APPROVED     => self::LEAVE_APPROVED,
+            self::LEAVE_STATUS_REJECTED     => self::LEAVE_REJECTED,
+            self::LEAVE_STATUS_UNNOTICED    => self::LEAVE_UNNOTICED
         ];
 
         if ($onlyValues)
@@ -167,7 +171,7 @@ class LeaveRequest extends Model implements Auditable
         $this->applyRoleFilter($request, $dataset);
         $this->applyStatusFilter($request, $dataset);
         $this->applyLeaveFilter($request, $dataset);
-
+        error_log($dataset->toSql());
         // Execute the query then expect results
         $dataset = $dataset->get();
 

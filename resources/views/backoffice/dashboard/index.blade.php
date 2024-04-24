@@ -108,28 +108,36 @@
                     </a>
                 </div>
                 <div class="row mb-2">
-                    <div class="col text-center">
+                    <div class="col-3 text-center">
                         <div class="leave-count-indicator d-flex flex-column align-items-center"
                             data-action="{{ $routes['leaveReqStats'] }}"
                             data-segment="{{ $leaveReqFilters['p'] }}">
                             <div class="leave-count leave-count-pending">0</div>
-                            <small class="d-block">Pending</small>
+                            <small class="text-sm">Pending</small>
                         </div>
                     </div>
-                    <div class="col text-center">
+                    <div class="col-3 text-center">
                         <div class="leave-count-indicator d-flex flex-column align-items-center"
                             data-action="{{ $routes['leaveReqStats'] }}"
                             data-segment="{{ $leaveReqFilters['a'] }}">
                             <div class="leave-count leave-count-approved">0</div>
-                            <small>Approved</small>
+                            <small class="text-sm">Approved</small>
                         </div>
                     </div>
-                    <div class="col text-center">
+                    <div class="col-3 text-center">
                         <div class="leave-count-indicator d-flex flex-column align-items-center"
                             data-action="{{ $routes['leaveReqStats'] }}"
                             data-segment="{{ $leaveReqFilters['r'] }}">
                             <div class="leave-count leave-count-rejected">0</div>
-                            <small>Rejected</small>
+                            <small class="text-sm">Rejected</small>
+                        </div>
+                    </div>
+                    <div class="col-3 text-center">
+                        <div class="leave-count-indicator d-flex flex-column align-items-center"
+                            data-action="{{ $routes['leaveReqStats'] }}"
+                            data-segment="{{ $leaveReqFilters['u'] }}">
+                            <div class="leave-count leave-count-unnoticed">0</div>
+                            <small class="text-sm">Unnoticed</small>
                         </div>
                     </div>
                 </div>

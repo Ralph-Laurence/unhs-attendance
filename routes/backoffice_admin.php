@@ -22,7 +22,7 @@ Route::middleware(['auth'])->group(function()
     Route::controller(DashboardController::class)
     ->group(function()
     {
-        Route::get('/',     'index')->name(RouteNames::Dashboard['root']);
+        //Route::get('/',     'index')->name(RouteNames::Dashboard['root']);
         Route::get('/home', 'index')->name(RouteNames::Dashboard['home']);
         Route::get('/backoffice/dashboard', 'index')->name(RouteNames::Dashboard['index']);
     

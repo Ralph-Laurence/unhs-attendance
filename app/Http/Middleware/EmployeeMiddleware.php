@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Utils\AuthGuardNames;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,7 @@ class EmployeeMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::guard('employee')->check())
+        if (!Auth::guard( AuthGuardNames::Employee )->check())
             return redirect( route('employee.login') );
         
         return $next($request);

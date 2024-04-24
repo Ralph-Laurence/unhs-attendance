@@ -2,12 +2,13 @@
 
 use App\Http\Controllers\portal\EmployeeAttendanceController;
 use App\Http\Controllers\portal\EmployeeHomeController;
+use App\Http\Controllers\portal\EmployeeLeaveController;
 use App\Http\Controllers\portal\EmployeeLoginController;
 use App\Http\Utils\PortalRouteNames;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:employee')
-->prefix('/portal/employee')
+->prefix( PortalRouteNames::Employee_Route_Prefix )
 ->group(function()
 {
     Route::controller(EmployeeLoginController::class)->group(function() 
@@ -24,10 +25,18 @@ Route::middleware('auth:employee')
     {
         Route::get("/home",       'index')->name( PortalRouteNames::Employee_Home );
     });
+
+    Route::controller(EmployeeLeaveController::class)->group(function()
+    {
+        Route::get('/leave',                'index')->name( PortalRouteNames::Employee_Leave );
+        Route::post('/xhr/leaves/getall',   'getLeaves')->name( PortalRouteNames::Employee_Leaves_Xhr_Get );
+        Route::post('/xhr/leaves/request',  'requestLeave')->name( PortalRouteNames::Employee_Leaves_Xhr_Request );
+        Route::post('/xhr/leaves/cancel',   'cancelLeave')->name( PortalRouteNames::Employee_Leaves_Xhr_Cancel );
+    });
 });
 
 Route::middleware('guest:employee')
-->prefix('/portal/employee')
+->prefix( PortalRouteNames::Employee_Route_Prefix )
 ->controller(EmployeeLoginController::class)
 ->group(function() 
 {

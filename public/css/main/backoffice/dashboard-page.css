@@ -139,6 +139,12 @@
 }
 .leave-count-indicator .leave-count-approved:hover { background-color: #19ebbd; }
 
+.leave-count-indicator .leave-count-unnoticed {
+    background-color: #FF8620;
+    color: white;
+}
+.leave-count-indicator .leave-count-unnoticed:hover { background-color: #ff9844; }
+
 .modal-dialog-wide-1024 {
     width: 1024px;
     min-width: 1024px;

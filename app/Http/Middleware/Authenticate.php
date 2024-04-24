@@ -22,14 +22,17 @@ class Authenticate extends Middleware
         // if (! $request->expectsJson()) {
         //     return route('login');
         // }
+        $routePrefix = $request->route()->getPrefix();
 
-        if (! $request->expectsJson()) 
+        if (!$request->expectsJson()) 
         {
-            if ($request->routeIs(PortalRouteNames::Employee_Prefix . '.*')) 
+            if (Str::contains(PortalRouteNames::Employee_Route_Prefix, $routePrefix))
             {
+                error_log('Redirect Employee Login');
                 return route( PortalRouteNames::Employee_Login );
             }
 
+            error_log('Redirect Admin Login, Authenticate.php');
             return route('login');
         }
     }
