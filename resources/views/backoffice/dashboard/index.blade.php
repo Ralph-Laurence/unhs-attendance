@@ -137,7 +137,7 @@
                             data-action="{{ $routes['leaveReqStats'] }}"
                             data-segment="{{ $leaveReqFilters['u'] }}">
                             <div class="leave-count leave-count-unnoticed">0</div>
-                            <small class="text-sm">Unnoticed</small>
+                            <small class="text-sm">Expired</small>
                         </div>
                     </div>
                 </div>

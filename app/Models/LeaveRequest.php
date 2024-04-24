@@ -67,7 +67,7 @@ class LeaveRequest extends Model implements Auditable
     public const LEAVE_PENDING     = 'Pending';
     public const LEAVE_APPROVED    = 'Approved';
     public const LEAVE_REJECTED    = 'Rejected';
-    public const LEAVE_UNNOTICED   = 'Unnoticed';
+    public const LEAVE_UNNOTICED   = 'Expired';
 
     public const HASH_SALT = 'FCD61F'; // Just random string, nothing special
     public const MIN_HASH_LENGTH = 10;

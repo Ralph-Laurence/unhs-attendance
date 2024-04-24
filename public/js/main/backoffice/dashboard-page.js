@@ -173,7 +173,7 @@ let dashboardPage = (function()
         $('.leave-count-indicator .leave-count-pending') .text(diff['Pending']);
         $('.leave-count-indicator .leave-count-approved').text(diff['Approved']);
         $('.leave-count-indicator .leave-count-rejected').text(diff['Rejected']);
-        $('.leave-count-indicator .leave-count-unnoticed').text(diff['Unnoticed']);
+        $('.leave-count-indicator .leave-count-unnoticed').text(diff['Expired']);
         // $('.total-leave-reqs').text(`Total : ${diff['Total']}`);
     }
 
