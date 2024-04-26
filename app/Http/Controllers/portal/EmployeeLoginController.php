@@ -31,7 +31,8 @@ class EmployeeLoginController extends Controller
         if ($user && decrypt($user->getAttribute(Employee::f_PINCode)) === $credentials['pin']) 
         {
             Auth::guard( AuthGuardNames::Employee )->login($user);
-            return redirect()->intended( route(PortalRouteNames::Employee_Home) );
+            //return redirect()->intended( route(PortalRouteNames::Employee_Home) );
+            return redirect()->intended( route(PortalRouteNames::Employee_Attendance) );
         }
         else 
         {

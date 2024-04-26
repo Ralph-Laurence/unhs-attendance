@@ -1,0 +1,102 @@
+tr.odd .td-am-in {
+    background-color: #d9ead3;
+}
+
+tr.even .td-am-in {
+    background-color: #f1ffeb;
+}
+
+tr.odd .td-pm-out {
+    background-color: #fff2cc;
+}
+
+tr.even .td-pm-out {
+    background-color: #fff9eb;
+}
+
+tr.even .td-am-in,
+tr.odd  .td-am-in {
+    color: #2a5816 !important;
+}
+
+tr.even .td-pm-out,
+tr.odd  .td-pm-out {
+    color: #5a3e01 !important;
+}
+
+.td-remarks,
+.remark-styles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remark-styles {
+    border-radius: 4px;
+    color: white;
+    width: fit-content;
+    padding: 2px 8px;
+}
+
+.remark-styles.rem-r {
+    background-color: var(--primary-dark);
+}
+
+.remark-styles.rem-r .icon::before {
+    content: '\f015';
+}
+
+.remark-styles.rem-x {
+    background-color: var(--danger-color);
+}
+
+.remark-styles.rem-x .icon::before {
+    content: '\f00d';
+}
+
+.remark-styles.rem-p {
+    background-color: var(--accent-color);
+}
+
+.remark-styles.rem-p .icon::before {
+    content: '\f00c';
+}
+
+.remark-styles.rem-b {
+    background-color: var(--warning-color);
+}
+
+.remark-styles.rem-b .icon::before {
+    content: '\f2e7';
+}
+
+.remark-styles .label {
+    display: inline;
+    color: white;
+    font-size: 14px;
+}
+
+.remark-styles .icon {
+    display: none;
+    font-size: 13px;
+    color: white;
+    font-family: var(--font-awesome);
+}
+
+@media only screen and (max-width: 600px) {
+    .remark-styles {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        padding: 0;
+    }
+
+    .remark-styles .icon {
+        display: inline;
+        font-size: 10px;
+    }
+
+    .remark-styles .label {
+        display: none;
+    }
+}

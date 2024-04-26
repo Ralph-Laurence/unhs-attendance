@@ -17,4 +17,6 @@ class PortalRouteNames
     public const Employee_Leaves_Xhr_Get        = 'xhr.portal.employee.leaves';
     public const Employee_Leaves_Xhr_Request    = 'xhr.portal.employee.leaves.request';
     public const Employee_Leaves_Xhr_Cancel     = 'xhr.portal.employee.leaves.cancel';
+
+    public const Employee_Attendance_Xhr_Get    = 'xhr.portal.employee.attendance';
 }

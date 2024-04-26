@@ -100,59 +100,58 @@ class DailyTimeRecord extends Model
         ];
     }
 
-    private function xbuildSelectQuery(int $employeeId, Carbon $from, Carbon $to) : Builder
-    {
-        $createdAt = 'created_at';
-        $status    = Attendance::f_Status;
-        $present   = Attendance::STATUS_PRESENT;
-        $break     = Attendance::STATUS_BREAK;
-        $absent    = Attendance::STATUS_ABSENT;
-
-        $query = DB::table(Attendance::getTableName())
-            ->where(Attendance::f_Emp_FK_ID, '=', $employeeId)
-            ->select([
-                DB::raw("EXTRACT(DAY FROM $createdAt)      AS day_number"),
-                DB::raw("DATE_FORMAT($createdAt, '%a')     AS day_name"),
-                DB::raw("CASE
-                    WHEN DATE_FORMAT($createdAt, '%w') IN (0, 6) THEN 'r'
-                    WHEN $createdAt.date > CURDATE() THEN NULL
-                    WHEN $status = '$present' THEN 'p'
-                    WHEN $status = '$break'   THEN 'b'
-                    WHEN $status = '$absent'  THEN 'x'
-                    WHEN l.id IS NOT NULL THEN 'l'
-                    ELSE ''                    
-                END AS status"),
-
-                $this->toShortTimeRaw(Attendance::f_TimeIn,     'am_in'),
-                $this->toShortTimeRaw(Attendance::f_LunchStart, 'am_out'),
-                $this->toShortTimeRaw(Attendance::f_LunchEnd,   'pm_in'),
-                $this->toShortTimeRaw(Attendance::f_TimeOut,    'pm_out'),
-
-                // Unformatted duration strings
-                Attendance::f_Duration  . ' as duration_raw',
-                Attendance::f_OverTime  . ' as overtime_raw',
-                Attendance::f_UnderTime . ' as undertime_raw',
-                Attendance::f_Late      . ' as late_raw',
-
-                // Formatted duration strings
-                Attendance::timeStringToDurationRaw(Attendance::f_Duration),
-                Attendance::timeStringToDurationRaw(Attendance::f_Late, null, 'late'),
-                Attendance::timeStringToDurationRaw(Attendance::f_UnderTime, null, 'undertime'),
-                Attendance::timeStringToDurationRaw(Attendance::f_OverTime, null, 'overtime'),
-                'created_at',
-            ])
-            ->whereBetween($createdAt, [$from, $to])
-            // Order the final result by date series in ascending
-            ->orderBy($createdAt, 'asc');
-
-            error_log($query->toSql());
-            error_log(print_r([$from, $to], true));
-        return $query;
-    }
-
-
-
     // [OBSOLETE]
+    // private function xbuildSelectQuery(int $employeeId, Carbon $from, Carbon $to) : Builder
+    // {
+    //     $createdAt = 'created_at';
+    //     $status    = Attendance::f_Status;
+    //     $present   = Attendance::STATUS_PRESENT;
+    //     $break     = Attendance::STATUS_BREAK;
+    //     $absent    = Attendance::STATUS_ABSENT;
+
+    //     $query = DB::table(Attendance::getTableName())
+    //         ->where(Attendance::f_Emp_FK_ID, '=', $employeeId)
+    //         ->select([
+    //             DB::raw("EXTRACT(DAY FROM $createdAt)      AS day_number"),
+    //             DB::raw("DATE_FORMAT($createdAt, '%a')     AS day_name"),
+    //             DB::raw("CASE
+    //                 WHEN DATE_FORMAT($createdAt, '%w') IN (0, 6) THEN 'r'
+    //                 WHEN $createdAt.date > CURDATE() THEN NULL
+    //                 WHEN $status = '$present' THEN 'p'
+    //                 WHEN $status = '$break'   THEN 'b'
+    //                 WHEN $status = '$absent'  THEN 'x'
+    //                 WHEN l.id IS NOT NULL THEN 'l'
+    //                 ELSE ''                    
+    //             END AS status"),
+
+    //             $this->toShortTimeRaw(Attendance::f_TimeIn,     'am_in'),
+    //             $this->toShortTimeRaw(Attendance::f_LunchStart, 'am_out'),
+    //             $this->toShortTimeRaw(Attendance::f_LunchEnd,   'pm_in'),
+    //             $this->toShortTimeRaw(Attendance::f_TimeOut,    'pm_out'),
+
+    //             // Unformatted duration strings
+    //             Attendance::f_Duration  . ' as duration_raw',
+    //             Attendance::f_OverTime  . ' as overtime_raw',
+    //             Attendance::f_UnderTime . ' as undertime_raw',
+    //             Attendance::f_Late      . ' as late_raw',
+
+    //             // Formatted duration strings
+    //             Attendance::timeStringToDurationRaw(Attendance::f_Duration),
+    //             Attendance::timeStringToDurationRaw(Attendance::f_Late, null, 'late'),
+    //             Attendance::timeStringToDurationRaw(Attendance::f_UnderTime, null, 'undertime'),
+    //             Attendance::timeStringToDurationRaw(Attendance::f_OverTime, null, 'overtime'),
+    //             'created_at',
+    //         ])
+    //         ->whereBetween($createdAt, [$from, $to])
+    //         // Order the final result by date series in ascending
+    //         ->orderBy($createdAt, 'asc');
+
+    //         error_log($query->toSql());
+    //         error_log(print_r([$from, $to], true));
+    //     return $query;
+    // }
+
+
     private function buildSelectQuery(int $employeeId, Carbon $from, Carbon $to) : Builder
     {
         $seriesAlias    = 'dateseries';

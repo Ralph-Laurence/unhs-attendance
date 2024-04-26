@@ -52,10 +52,9 @@
             data-on-cancel="{{ $routes['cancelLeave'] }}"
             id="dataset-table">
             
-            </colgroup>
             <thead class="user-select-none">
                 <tr>
-                    <th style="min-width: 10%;"">#</th>
+                    <th style="min-width: 10%;">#</th>
                     <th style="min-width: 15%">Date From</th>
                     <th style="min-width: 15%">Date To</th>
                     <th style="min-width: 15%">Duration</th>

@@ -18,13 +18,14 @@ Route::middleware('auth:employee')
 
     Route::controller(EmployeeAttendanceController::class)->group(function()
     {
-        Route::get("/attendance", 'index')->name(PortalRouteNames::Employee_Attendance);
+        Route::get("/attendance",      'index')->name(PortalRouteNames::Employee_Attendance);
+        Route::post("/attendance/all", 'getAttendances')->name(PortalRouteNames::Employee_Attendance_Xhr_Get);
     });
 
-    Route::controller(EmployeeHomeController::class)->group(function()
-    {
-        Route::get("/home",       'index')->name( PortalRouteNames::Employee_Home );
-    });
+    // Route::controller(EmployeeHomeController::class)->group(function()
+    // {
+    //     Route::get("/home",       'index')->name( PortalRouteNames::Employee_Home );
+    // });
 
     Route::controller(EmployeeLeaveController::class)->group(function()
     {

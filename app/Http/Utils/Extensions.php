@@ -229,6 +229,19 @@ class Extensions
         return DB::raw("DATE_FORMAT($field, '%h:%i$secs %p') as $alias");
     }
 
+    public static function time_format_hip_join($field = 'created_at', $alias = 'time', $joinAlias = '', $includeSeconds = false)
+    {
+        $secs = ":%s";
+
+        if (!$includeSeconds)
+            $secs = '';
+
+        if (!empty($joinAlias))
+            $field = "$joinAlias.$field";
+        
+        return DB::raw("DATE_FORMAT($field, '%h:%i$secs %p') as $alias");
+    }
+
     /**
      * Returns the time duration in HH:MM:SS format.
      * Expects the duration parameter as a float.

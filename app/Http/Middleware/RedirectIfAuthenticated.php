@@ -31,7 +31,8 @@ class RedirectIfAuthenticated
                 {
                     case AuthGuardNames::Employee:
                         error_log('auth emp @RedirectIfAuthenticated.php');
-                        return redirect( route(PortalRouteNames::Employee_Home) );
+                        //return redirect( route(PortalRouteNames::Employee_Home) );
+                        return redirect( route(PortalRouteNames::Employee_Attendance) );
                         break;
 
                     case AuthGuardNames::Admin:

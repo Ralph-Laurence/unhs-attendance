@@ -7,7 +7,7 @@ $organizationName = Constants::OrganizationName;
 // We will use those for creating breadcrumbs
 $routeSegments = \Request::segments();
 
-// https://mdbootstrap.com/snippets/standard/ascensus/4698476
+// MDB5 layout -> https://mdbootstrap.com/snippets/standard/ascensus/4698476
 @endphp
 
 <!DOCTYPE html>
@@ -116,10 +116,10 @@ $routeSegments = \Request::segments();
                                     </div>
                                     <!-- Left links -->
                                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-14">
-                                        <li class="nav-item">
+                                        {{-- <li class="nav-item">
                                             <a class="nav-link text-white"
                                                 href="{{ route(PortalRouteNames::Employee_Home) }}">Home</a>
-                                        </li>
+                                        </li> --}}
                                         <li class="nav-item">
                                             <a class="nav-link text-white"
                                                 href="{{ route(PortalRouteNames::Employee_Attendance) }}">Attendances</a>
@@ -140,7 +140,7 @@ $routeSegments = \Request::segments();
                                         <i class="fas fa-shopping-cart"></i>
                                     </a> --}}
                                     <div class="h-100 flex-start">
-                                        <h6 class="my-0 mx-2 text-14 text-white">
+                                        <h6 class="my-0 mx-2 text-14 text-white text-capitalize">
                                             {{ auth()->user()->firstname.' '.auth()->user()->lastname }}
                                         </h6>
                                     </div>
@@ -170,7 +170,7 @@ $routeSegments = \Request::segments();
                                         <a class="dropdown-toggle d-flex align-items-center hidden-arrow" href="#"
                                             id="navbarDropdownMenuAvatar" role="button" data-mdb-toggle="dropdown"
                                             aria-expanded="false">
-                                            <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
+                                            <img src="{{ asset('images/internal/placeholders/profile.png') }}"
                                                 class="rounded-circle" height="25"
                                                 alt="Black and White Portrait of a Man" loading="lazy" />
                                         </a>
