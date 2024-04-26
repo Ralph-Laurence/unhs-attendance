@@ -5,15 +5,17 @@ namespace App\Http\Controllers\portal\wrappers;
 use App\Http\Utils\Extensions;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
+use Carbon\Carbon;
 use Hashids\Hashids;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EmployeeLeave 
 {
-    public function getLeaveRequests()
+    public function getLeaveRequests(Request $request)
     {
-        $dataset = $this->buildSelectQuery()->get();
+        $dataset = $this->buildSelectQuery($request->input('requestedOn'))->get();
 
         foreach($dataset as $row)
         {
@@ -30,7 +32,7 @@ class EmployeeLeave
     * Base query builder for retrieving the leave reqyests
     * of the currently logged on Employee
     */
-    private function buildSelectQuery()
+    private function buildSelectQuery($filter = null)
     {
         $model = new LeaveRequest();
 
@@ -54,6 +56,12 @@ class EmployeeLeave
                 ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'l.'.LeaveRequest::f_Emp_FK_ID)
                 ->orderBy('l.created_at', 'desc')
                 ->where('e.id', '=', Auth::id());
+
+        if (!is_null($filter) && $filter == '1')
+        {
+            $monthNumber = Carbon::now()->month;      // This month
+            $query->whereMonth('l.created_at', '=', $monthNumber);
+        }
 
         return $query;
     }

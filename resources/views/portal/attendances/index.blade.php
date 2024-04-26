@@ -30,16 +30,6 @@
             <x-table-length-pager as="table-page-len" />
         </div>
 
-        @push('styles')
-        <style>
-            @media only screen and (min-width: 800px) {
-
-                #dataset-table {
-                    table-layout: fixed;
-                }
-            }
-        </style>
-        @endpush
         {{-- DATASET TABLE --}}
         <div class="w-100 position-relative overflow-hidden">
             <table class="table table-striped table-sm table-hover display dataset-table nowrap" width="100%"
@@ -53,13 +43,6 @@
                         <th>PM In</th>
                         <th>PM Out</th>
                         <th>Remarks</th>
-                        {{-- <th style="min-width: 10%;">#</th>
-                        <th style="min-width: 15%">Date</th>
-                        <th style="min-width: 10%">AM In</th>
-                        <th style="min-width: 10%">AM Out</th>
-                        <th style="min-width: 10%">PM In</th>
-                        <th style="min-width: 10%">PM Out</th>
-                        <th style="min-width: 15%">Remarks</th> --}}
                         <th>Duration</th>
                         <th>Late</th>
                         <th>Undertime</th>

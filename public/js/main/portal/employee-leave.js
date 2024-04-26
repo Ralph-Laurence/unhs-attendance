@@ -15,6 +15,8 @@ let employeeLeave = (function ()
     let tablePageLen;
     let leaveReqModal;
     let leaveReqInputs;
+    let selectedLeaveFilter;
+    let leaveFilter;
 
     let columnDefs = [
         // First Column -> Record Counter
@@ -51,8 +53,10 @@ let employeeLeave = (function ()
         }
     ];
 
-    function __bindTableDataSource()
+    function __bindTableDataSource(requestedOn)
     {
+        selectedLeaveFilter = requestedOn;
+
         let options = {
             'deferRender'   : true,
             'searching'     : false,
@@ -118,9 +122,17 @@ let employeeLeave = (function ()
                 },
                 data : function () 
                 {
-                    return {
+                    let data = {
                         '_token': getCsrfToken(),
+                    };
+
+                    if (selectedLeaveFilter)
+                    {
+                        data['requestedOn'] = selectedLeaveFilter;
+                        selectedLeaveFilter = undefined;
                     }
+
+                    return data;
                 }
             },
             columns: columnDefs
@@ -188,6 +200,8 @@ let employeeLeave = (function ()
             'input-leave-end'   : { label: 'End Date',   input: to_datepicker('#input-leave-end',   false, true) },
             'input-leave-type'  : { label: 'Leave Type', input: to_droplist('#input-leave-type') }
         };
+
+        leaveFilter = to_droplist('#input-leave-filter');
     };
 
     let bindEvents = function() {
@@ -288,6 +302,11 @@ let employeeLeave = (function ()
                 _cancelLeaveRequest(rowKey, selectedRow);
             });
         });
+
+        leaveFilter.changed = () => {
+            selectedLeaveFilter = leaveFilter.getValue();
+            __bindTableDataSource(selectedLeaveFilter);
+        };
     };
 
     function __submitForm(formData)

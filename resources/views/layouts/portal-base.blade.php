@@ -174,12 +174,12 @@ $routeSegments = \Request::segments();
                                                 class="rounded-circle" height="25"
                                                 alt="Black and White Portrait of a Man" loading="lazy" />
                                         </a>
-                                        <ul class="dropdown-menu dropdown-menu-end"
+                                        <ul class="dropdown-menu dropdown-menu-end overflow-hidden"
                                             aria-labelledby="navbarDropdownMenuAvatar">
-                                            <li>
+                                            {{-- <li>
                                                 <a class="dropdown-item" href="#">My profile</a>
                                             </li>
-                                            {{-- <li>
+                                            <li>
                                                 <a class="dropdown-item" href="#">Settings</a>
                                             </li> --}}
                                             <li>

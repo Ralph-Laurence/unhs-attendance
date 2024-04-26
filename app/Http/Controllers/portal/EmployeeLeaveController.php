@@ -30,15 +30,21 @@ class EmployeeLeaveController extends Controller
             'cancelLeave'   => route(PortalRouteNames::Employee_Leaves_Xhr_Cancel)
         ];
 
+        $leaveFilters = [
+            'All'        => Constants::FILTER_VALUE_ALL,
+            'This Month' => 1
+        ];
+
         return view('portal.leave.index')
-            ->with('leaveTypes', LeaveRequest::getLeaveTypes())
-            ->with('routes',     $routes);
+            ->with('leaveTypes',   LeaveRequest::getLeaveTypes())
+            ->with('routes',       $routes)
+            ->with('leaveFilters', $leaveFilters);
     }
 
     public function getLeaves(Request $request)
     {
         $leave = new EmployeeLeave();
-        return $leave->getLeaveRequests();
+        return $leave->getLeaveRequests($request);
     }
 
     public function requestLeave(Request $request)

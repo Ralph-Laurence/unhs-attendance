@@ -17,18 +17,19 @@
         <div class="d-flex align-items-center gap-1">
             <h6 class="card-title me-auto">
                 <span>My Leaves</span>
+                <i class="fas fa-caret-right mx-2 opacity-60"></i>
+                <span class="opacity-90 lbl-leave-range text-14 text-primary-dark"></span>
             </h6>
 
-            {{-- RECORD DATE RANGE FILTERS --}}
-            @include('components.record-range-filters')
-
+            <x-drop-list as="input-leave-filter" text="{{ 'Requested On' }}" default="{{ '0' }}"
+                :items="$leaveFilters" />
+            
             {{-- ADD BUTTON --}}
             <button class="btn btn-primary flat-button shadow-0 d-none d-md-block" id="btn-request-leave"
                 data-mdb-toggle="modal" data-mdb-target="#leaveRequestModal">
                 <i class="fas fa-plus"></i>
                 <span class="ms-1">Request</span>
             </button>
-
         </div>
 
         <div class="page-length-controls">
