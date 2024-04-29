@@ -173,26 +173,53 @@ class DashboardController extends Controller
         return $counts->toArray();
     }
 
+    // private function countLeaveStatusDifference()
+    // {
+    //     $statuses = LeaveRequest::getStatuses();
+    //     $total    = 0;
+
+    //     $counts = collect($statuses)->mapWithKeys(function ($status, $statusId) use(&$total) 
+    //     {
+    //         $count = DB::table(LeaveRequest::getTableName())
+    //             ->where(LeaveRequest::f_LeaveStatus, $statusId)
+    //             ->count();
+
+    //         $total += $count;
+
+    //         return [$status => $count];
+    //     });
+
+    //     $counts['Total'] = $total;
+
+    //     return $counts->toArray();
+    // }
+
     private function countLeaveStatusDifference()
     {
         $statuses = LeaveRequest::getStatuses();
         $total    = 0;
 
-        $counts = collect($statuses)->mapWithKeys(function ($status, $statusId) use(&$total) 
+        $counts = collect($statuses)->mapWithKeys(function ($status, $statusId) use (&$total) 
         {
-            $count = DB::table(LeaveRequest::getTableName())
-                ->where(LeaveRequest::f_LeaveStatus, $statusId)
-                ->count();
-        
+            $query = DB::table(LeaveRequest::getTableName())
+                ->where(LeaveRequest::f_LeaveStatus, $statusId);
+
+            // If the status is "Approved", count only those made today
+            if ($status == 'Approved')
+                $query->whereDate('created_at', Carbon::today());
+
+            $count = $query->count();
+
             $total += $count;
 
             return [$status => $count];
         });
-        
+
         $counts['Total'] = $total;
 
         return $counts->toArray();
     }
+    
 
     public function getAttendanceGraphings(Request $request)
     {
@@ -436,12 +463,16 @@ class DashboardController extends Controller
             LeaveRequest::f_Duration .' as duration'
         ];
 
-        $dataset = DB::table(LeaveRequest::getTableName(), 'l')
+        $sql = DB::table(LeaveRequest::getTableName(), 'l')
             ->leftJoin(Employee::getTableName() . ' as e', 'e.id', '=', 'l.' . LeaveRequest::f_Emp_FK_ID)
             ->select($select)
             ->where($f_leaveStatus, '=', $filter)
-            ->orderBy('l.created_at', 'desc')
-            ->get();
+            ->orderBy('l.created_at', 'desc');
+
+        if ($filter == LeaveRequest::LEAVE_STATUS_APPROVED)
+            $sql->whereDate('l.created_at', Carbon::today());
+
+        $dataset = $sql->get();
 
         $segmentColors = [
             LeaveRequest::LEAVE_STATUS_APPROVED     => '#00D1A4',
