@@ -38,10 +38,11 @@ let attendanceModule = (function ()
                 {
                     let styles = remarkStyles[data];
 
-                    let html = 
-                    `<div class="remark-styles ${styles.style}">
-                        <i class="fas icon"></i>
-                        <span class="label">${styles.label}</span>
+                    let html = `<div class="remarks-container">
+                        <div class="remark-styles ${styles.style}">
+                            <i class="fas icon"></i>
+                            <span class="label">${styles.label}</span>
+                        </div>
                     </div>`;
 
                     return html;

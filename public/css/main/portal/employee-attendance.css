@@ -24,8 +24,8 @@ tr.odd  .td-pm-out {
     color: #5a3e01 !important;
 }
 
-.td-remarks,
-.remark-styles {
+.td-remarks .remarks-container {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -36,6 +36,14 @@ tr.odd  .td-pm-out {
     color: white;
     width: fit-content;
     padding: 2px 8px;
+}
+
+.remark-styles.rem-l {
+    background-color: var(--warning-color);
+}
+
+.remark-styles.rem-l .icon::before {
+    content: '\e22d';
 }
 
 .remark-styles.rem-r {
