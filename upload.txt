@@ -5,10 +5,10 @@ step 2:
 -inside that, create a folder called "laravel"
 
 step 3:
--in the htdocs root folder, upload the project file's "public" folder 
+-go to "laravel" folder then upload all project files except ".git" and "public" folders
 
 step 4:
--go to "laravel" folder then upload all project files except ".git" and "public" folders
+-in the htdocs root folder, upload the project file's "public" folder 
 
 step 5:
 -edit index.php

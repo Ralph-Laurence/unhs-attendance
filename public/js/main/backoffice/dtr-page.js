@@ -402,6 +402,7 @@ function onPrintResponse(response)
 
             $('.printable-content').show().printThis({
 
+                printDelay: 2000,
                 beforePrint: () => {
                     document.title = $('.printable-content').data('export-filename');
                 },

@@ -1,9 +1,9 @@
-<div class="pb-2 pt-2 d-flex flex-column gap-2 text-center">
+<div class="d-flex flex-column gap-2 text-center">
     <div class="row">
-        <div class="col-2 g-0">
-            <img src="{{ asset('images/internal/icons/logo-sm.png') }}" alt="logo" width="60" height="60" />
+        <div class="col-2 g-0 pt-2">
+            <img src="{{ asset('images/internal/icons/logo-sm.png') }}" alt="logo" width="50" height="50" />
         </div>
-        <div class="col g-0 text-sm flex-center flex-column">
+        <div class="col-8 g-0 text-sm flex-center flex-column">
             <p class="m-0 text-uppercase">Uddiawan National High School</p>
             <small>Solano, Nueva Vizcaya</small>
         </div>
@@ -23,8 +23,8 @@
             </tr>
         </thead>
     </table> --}}
-    <h6 class="text-uppercase fw-bold my-1">Daily Time Record</h6>
-    <p class="my-0 text-uppercase text-decoration-underline fw-bold text-14 dtr-empname">Employee Name</p>
+    <h6 class="text-uppercase text-13 fw-bold my-0">Daily Time Record</h6>
+    <p class="my-0 text-uppercase text-decoration-underline fw-bold text-13 dtr-empname">Employee Name</p>
     <p class="my-0">
         <i class="doc-bullet-diams"></i>
         <small class="dtr-month-range">For the month of <span class="month-of"></span></small>
@@ -67,12 +67,12 @@
             <tr>
                 <td></td>
                 <td class="text-center">
-                    <hr class="mt-3 mb-0">
+                    <hr class="mt-2 mb-0">
                     <small>Signature</small>
                 </td>
             </tr>
         </tbody>
     </table>
-    <hr class="mt-3 mb-0">
-    <small class="text-sm">Verified as to the prescribed office hours</small>
+    <hr class="mt-2 mb-0">
+    <small>Verified as to the prescribed office hours</small>
 </div>

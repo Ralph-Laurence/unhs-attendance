@@ -63,25 +63,25 @@
 
 /* PRINTING */
 @page {
-    /* margin: 30px 20px 30px 20px !important; top right bottom left */
-    size: A4;
-    margin: 0 !important;
+    /* margin: 30px 20px 30px 20px !important; top right bottom left 
+    size: A4;*/
+    margin: 10px !important;
 }
-@media print {
+/* @media print {
     html,
     body {
         width: 210mm;
         height: 297mm;
     }
-}
+} */
 .a4-page {
-    width: 210mm;
-    min-height: 297mm;
+    /* width: 210mm;
+    min-height: 297mm; */
     background-color: white;
     font-family: Helvetica, Arial, sans-serif;
 }
 .table-wrapper table {
-    font-size: 13px;
+    font-size: 12px;
     border-collapse: collapse;
     table-layout: fixed;
     text-align: center;
@@ -111,8 +111,11 @@
 .table-wrapper table thead .th-normal th {
     font-weight: normal;
 }
-.agreement {
+.agreement-wrapper {
     font-size: 12px;
+}
+.agreement {
+    font-size: 10px !important;
     line-height: 1.25;
     text-align: justify;
     text-justify: inter-word;
