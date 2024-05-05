@@ -39,6 +39,8 @@ class FacultyConstants extends EmployeeBase
     public const SCHOOL_PRINCIPAL3          = 1025;
     public const SCHOOL_PRINCIPAL4          = 1026;
 
+    public const SUBSTITUTE_TEACHER         = 1027;
+
     // DESCRIPTIVE POSITIONS
     public static function getRanks(bool $flip = false) : array
     {
@@ -75,6 +77,7 @@ class FacultyConstants extends EmployeeBase
             self::SCHOOL_PRINCIPAL2 => 'School Principal-II',
             self::SCHOOL_PRINCIPAL3 => 'School Principal-III',
             self::SCHOOL_PRINCIPAL4 => 'School Principal-IV',
+            self::SUBSTITUTE_TEACHER => 'Substitute Teacher'
         ];
 
         return !$flip ? $ranks : array_flip($ranks);

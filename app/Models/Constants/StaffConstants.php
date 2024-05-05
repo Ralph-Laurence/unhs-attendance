@@ -42,6 +42,9 @@ class StaffConstants extends EmployeeBase
 
     public const SECURITY_GUARD     = 230;
 
+    public const JANITOR            = 231;
+    public const UTILITY1           = 232;
+
     // DESCRIPTIVE POSITIONS
     public static function getRanks(bool $flip = false) : array
     {
@@ -82,7 +85,9 @@ class StaffConstants extends EmployeeBase
             self::ADMIN_OFFICER4    => 'ADOF-IV',//'Administrative Officer IV',
             self::ADMIN_OFFICER5    => 'ADOF-V',//'Administrative Officer V',
 
-            self::SECURITY_GUARD    => 'Security Guard'
+            self::SECURITY_GUARD    => 'Security Guard',
+            self::JANITOR           => 'Janitor',
+            self::UTILITY1          => 'Utility_I' 
         ];
 
         return !$flip ? $ranks : array_flip($ranks);
