@@ -45,24 +45,30 @@ class ScannerController extends Controller
     {
         // The current date
         $currentDate = Carbon::now();
-    
+
         $attendanceFields = Extensions::prefixArray('a.', [
             Attendance::f_TimeIn   . ' as timein',
             Attendance::f_TimeOut  . ' as timeout',
             Attendance::f_Status   . ' as status',
         ]);
-    
+
         $attendanceFields[] = Attendance::timeStringToDurationRaw(Attendance::f_Duration, 'a');
-    
-        $employeeFields = Extensions::prefixArray('e.', [
-            Employee::f_FirstName  . ' as fname',
-            Employee::f_MiddleName . ' as mname',
-            Employee::f_LastName   . ' as lname',
-            Employee::f_Role   . ' as role',
-        ]);
-    
+
+        $fname = Employee::f_FirstName;
+        $mname = Employee::f_MiddleName;
+        $lname = Employee::f_LastName;
+
+        $employeeFields = [ ///Extensions::prefixArray('e.', [
+            // Employee::f_FirstName  . ' as fname',
+            // Employee::f_MiddleName . ' as mname',
+            // Employee::f_LastName   . ' as lname',
+            DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname"),
+            'e.'.Employee::f_Role   . ' as role',
+        ];
+        //]);
+
         $selectFields = array_merge($attendanceFields, $employeeFields);
-    
+
         $dataset = DB::table(Attendance::getTableName() . ' as a')
         ->whereBetween('a.updated_at', 
         [
@@ -75,7 +81,7 @@ class ScannerController extends Controller
         ->orderBy('a.updated_at', 'desc')
         ->limit(10)
         ->get();
-        
+
         return json_encode([
             'data'  => $dataset->toArray(),
             'icon' => Attendance::getIconClasses()

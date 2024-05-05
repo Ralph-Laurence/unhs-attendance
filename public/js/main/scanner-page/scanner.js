@@ -324,15 +324,15 @@ function bindDatatableData()
         },
         columns: [
             {
-                className: 'text-truncate',
+                className: 'text-truncate text-capitalize',
                 //width: '250px',
-                data: null,
+                data: 'empname',
                 render: function (data, type, row) 
                 {  
                     // remove all empty strings from the array and then concatenate the remaining elements with a single space.
-                    let str = [data.fname, data.mname, data.lname].filter(e => e.length).join(' ');
+                    //let str = [data.fname, data.mname, data.lname].filter(e => e.length).join(' ');
                     
-                    return `<span class="text-darker">${str}</span>`;
+                    return `<span class="text-darker">${data}</span>`;
                 },
                 defaultContent: ''
             },
