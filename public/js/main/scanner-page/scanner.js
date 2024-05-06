@@ -21,7 +21,8 @@ let pinAuthFab;
 let btnScannerStop;
 const tableWrapperSelector  = '.attendance-table-wrapper';
 const attendanceTable       = '.attendance-table';
-const refractoryPeriod      = 10000; //ms
+const refractoryPeriod      = 1800000; // 30mins
+//10000; //ms
 
 const inactivityTime = 30000; // ms
 let inactivityTimer;
