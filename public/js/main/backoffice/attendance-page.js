@@ -40,6 +40,8 @@ function initialize()
     lblAttendanceRange = $('.card-title .lbl-attendance-range');
 
     bindTableDataSource(RANGE_TODAY);
+
+    to_tablesearcher("#finder-search", ".dataTables_filter input");
 }
 //
 // Handle events here
@@ -105,7 +107,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
 
     let options = {
         "deferRender"  : true,
-        'searching'    : false,
+        'searching'    : true,
         'ordering'     : false,
         'bAutoWidth'   : false,
         // 'responsive'   : true,
@@ -195,7 +197,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
             // First Column -> Record Counter
             {
                 width: '50px',
-                className: 'record-counter text-truncate opacity-45',
+                className: 'record-counter text-truncate',
                 data: null,
                 render: function(data, type, row, meta) {
                     return meta.row + 1;
@@ -241,7 +243,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
             },
             // Fourth Column -> Employee Name
             {
-                className: 'td-employee-name text-truncate',
+                className: 'td-employee-name text-truncate text-capitalize',
                 // width: '280px',
                 name: 'empname',
                 data: 'empname',

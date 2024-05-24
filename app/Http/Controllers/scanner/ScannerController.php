@@ -58,14 +58,10 @@ class ScannerController extends Controller
         $mname = Employee::f_MiddleName;
         $lname = Employee::f_LastName;
 
-        $employeeFields = [ ///Extensions::prefixArray('e.', [
-            // Employee::f_FirstName  . ' as fname',
-            // Employee::f_MiddleName . ' as mname',
-            // Employee::f_LastName   . ' as lname',
+        $employeeFields = [
             DB::raw("CONCAT_WS(' ', e.$fname, NULLIF(e.$mname, ''), e.$lname) as empname"),
             'e.'.Employee::f_Role   . ' as role',
         ];
-        //]);
 
         $selectFields = array_merge($attendanceFields, $employeeFields);
 
@@ -157,7 +153,76 @@ class ScannerController extends Controller
         if (!$employee)
             return Extensions::encodeFailMessage(Messages::QR_CODE_NOT_RECOGNIZED);
 
+        if ($employee->getAttribute(Employee::f_Role) == Employee::RoleGuard)
+            return $this->handleGuardAttendance($employee);
+        // else
+        //     return Extensions::encodeSuccessMessage("This is an employee");
+
         return $this->handleAttendance($employee);
+    }
+
+    public function handleGuardAttendance(Employee $employee)
+    {
+        $empId = $employee->id;
+
+        // Check if there's an existing attendance record for the guard today
+        $attendance = Attendance::where(Attendance::f_Emp_FK_ID, $empId)
+        ->latest()
+        //->whereDate('created_at', Carbon::today())
+        ->first();
+        
+        $now = Carbon::now();
+
+        // If there's no existing model record, insert a new one
+        // or if there is an existing model, but was already timed out,
+        // and is not the same date as today, create a new attendance
+        if (!$attendance || 
+            (
+                $attendance && 
+                $attendance->time_out && 
+                $now->gt(Carbon::parse($attendance->created_at))
+            )
+        )
+        {
+            return $this->insertNewAttendance($empId, true);
+        }
+        else 
+        {
+            if ($attendance->time_out)
+                return;
+
+            // Check if the created_at date is within 2 days
+            $created_at = Carbon::parse($attendance->created_at);
+            
+            //$now = Carbon::now();
+            //$diffInDays = $created_at->diffInDays($now);
+
+            //if ($diffInDays <= 2) 
+            //{
+                // Update the attendance "clockout" to current date
+                // $attendance->setAttribute(Attendance::f_TimeOut, $now);
+                // $attendance->save();
+
+                
+            //}
+            $timeOut = Carbon::now();
+
+            // Then calculate the duration, undertime and so on
+            $workHours  = Carbon::parse($attendance->time_in)->diffInSeconds($timeOut) / 3600;
+            $duration   = Extensions::durationToTimeString($workHours);
+
+            $attendance->update([
+                Attendance::f_TimeOut    => $timeOut,
+                Attendance::f_Status     => Attendance::STATUS_PRESENT, //$status,
+                Attendance::f_Duration   => $duration,
+                Attendance::f_UnderTime  => Constants::ZERO_DURATION,
+                Attendance::f_OverTime   => Constants::ZERO_DURATION,
+                Attendance::f_LunchStart => Constants::ZERO_DURATION,
+                Attendance::f_LunchEnd   => Constants::ZERO_DURATION
+            ]);
+
+            return Extensions::encodeSuccessMessage('Clocked out');
+        }
     }
 
     public function handleAttendance(Employee $employee)
@@ -198,29 +263,29 @@ class ScannerController extends Controller
             else 
             {
                 // Guards only need time in and time out
-                if ($employee->getAttribute(Employee::f_Rank) == StaffConstants::SECURITY_GUARD) 
-                {
-                    if ($attendance->time_out)
-                        return;
+                // if ($employee->getAttribute(Employee::f_Rank) == StaffConstants::SECURITY_GUARD) 
+                // {
+                //     if ($attendance->time_out)
+                //         return;
 
-                    $timeOut = Carbon::now();
+                //     $timeOut = Carbon::now();
 
-                    // Then calculate the duration, undertime and so on
-                    $workHours  = Carbon::parse($attendance->time_in)->diffInSeconds($timeOut) / 3600;
-                    $duration   = Extensions::durationToTimeString($workHours);
+                //     // Then calculate the duration, undertime and so on
+                //     $workHours  = Carbon::parse($attendance->time_in)->diffInSeconds($timeOut) / 3600;
+                //     $duration   = Extensions::durationToTimeString($workHours);
 
-                    $attendance->update([
-                        Attendance::f_TimeOut    => $timeOut,
-                        Attendance::f_Status     => Attendance::STATUS_PRESENT, //$status,
-                        Attendance::f_Duration   => $duration,
-                        Attendance::f_UnderTime  => Constants::ZERO_DURATION,
-                        Attendance::f_OverTime   => Constants::ZERO_DURATION,
-                        Attendance::f_LunchStart => Constants::ZERO_DURATION,
-                        Attendance::f_LunchEnd   => Constants::ZERO_DURATION
-                    ]);
+                //     $attendance->update([
+                //         Attendance::f_TimeOut    => $timeOut,
+                //         Attendance::f_Status     => Attendance::STATUS_PRESENT, //$status,
+                //         Attendance::f_Duration   => $duration,
+                //         Attendance::f_UnderTime  => Constants::ZERO_DURATION,
+                //         Attendance::f_OverTime   => Constants::ZERO_DURATION,
+                //         Attendance::f_LunchStart => Constants::ZERO_DURATION,
+                //         Attendance::f_LunchEnd   => Constants::ZERO_DURATION
+                //     ]);
 
-                    return Extensions::encodeSuccessMessage('Clocked out');
-                }
+                //     return Extensions::encodeSuccessMessage('Clocked out');
+                // }
 
                 // Process Lunch Start only if there is an existing Time In 
                 if ($attendance->time_in && !$attendance->lunch_start) 
@@ -281,18 +346,6 @@ class ScannerController extends Controller
 
         return Extensions::encodeSuccessMessage('Out for lunch...', ['status'  => $status]);
     }
-
-    // private function updateLunchEnd(Attendance $attendance)
-    // {
-    //     $status = Attendance::STATUS_PRESENT;
-
-    //     $attendance->update([
-    //         Attendance::f_LunchEnd  => Carbon::now(),
-    //         Attendance::f_Status    => $status,
-    //     ]);
-
-    //     return Extensions::encodeSuccessMessage('Welcome Back!', ['status'  => $status]);
-    // }
 
     private function updateLunchEnd(Attendance $attendance)
     {

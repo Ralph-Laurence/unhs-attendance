@@ -54,6 +54,7 @@ class LeaveRequest extends Model implements Auditable
     public const LEAVE_TYPE_SOLO_PARENT       = 6;
     public const LEAVE_TYPE_SPECIAL           = 7;
     public const LEAVE_TYPE_VAWC              = 8;
+    public const LEAVE_TYPE_EXCUSED           = 9;
 
     public const LEAVE_SICK        = 'Sick Leave';
     public const LEAVE_VACATION    = 'Vacation Leave';
@@ -63,6 +64,7 @@ class LeaveRequest extends Model implements Auditable
     public const LEAVE_SOLO_PARENT = 'Parental Leave for Solo Parents';
     public const LEAVE_SPECIAL     = 'Special Leave Benefit for Women';
     public const LEAVE_VAWC        = 'Violence Against Women Leave';
+    public const LEAVE_EXCUSED     = 'Excused';
 
     public const LEAVE_PENDING     = 'Pending';
     public const LEAVE_APPROVED    = 'Approved';
@@ -101,6 +103,7 @@ class LeaveRequest extends Model implements Auditable
             self::LEAVE_SOLO_PARENT => self::LEAVE_TYPE_SOLO_PARENT,
             self::LEAVE_SPECIAL     => self::LEAVE_TYPE_SPECIAL,
             self::LEAVE_VAWC        => self::LEAVE_TYPE_VAWC,
+            self::LEAVE_EXCUSED     => self::LEAVE_TYPE_EXCUSED
         ];
 
         if ($onlyValues)
@@ -120,6 +123,7 @@ class LeaveRequest extends Model implements Auditable
             self::LEAVE_TYPE_SOLO_PARENT        => self::LEAVE_SOLO_PARENT ,
             self::LEAVE_TYPE_SPECIAL            => self::LEAVE_SPECIAL     ,
             self::LEAVE_TYPE_VAWC               => self::LEAVE_VAWC        ,
+            self::LEAVE_TYPE_EXCUSED            => self::LEAVE_EXCUSED
         ];
 
         if ($onlyValues)

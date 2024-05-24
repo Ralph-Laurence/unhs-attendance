@@ -151,6 +151,9 @@ class Attendance extends Model
 
         $currentDate = Carbon::now();
 
+        if ($currentDate->isWeekend())
+            return;
+        
         $employees = DB::table(Employee::getTableName() . ' as e')
             ->leftJoin("$tblAttendance as a", function ($join) use ($currentDate) 
             {

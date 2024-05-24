@@ -172,3 +172,7 @@ table tr.even td.sticky-cell {
     0%   {background-color: #7D73EC;} /* make the row flash with color i.e. FF9C9C */
     100% {background-color: initial;} /* This will revert to the default background color */
 }
+
+.dataTables_filter {
+    display: none !important;
+}

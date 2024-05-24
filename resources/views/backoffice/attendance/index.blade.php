@@ -7,7 +7,8 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/main/shared/attendance-common-styles.css') }}" />
 <link rel="stylesheet" href="{{ asset('css/main/backoffice/attendance-page.css') }}" />
-{{-- <link rel="stylesheet" href="{{ asset('css/lib/datatables/responsive.dataTables.css') }}"> --}}
+{{--
+<link rel="stylesheet" href="{{ asset('css/lib/datatables/responsive.dataTables.css') }}"> --}}
 @endpush
 
 @section('content')
@@ -37,6 +38,7 @@
                     <li><a class="dropdown-item selected-option" role="button" data-role="All">All</a></li>
                 </ul>
             </div> --}}
+            <x-table-searcher as="finder-search"/>
 
             {{-- RECORD DATE RANGE FILTERS --}}
             @include('components.record-range-filters')
@@ -76,11 +78,11 @@
         </div>
 
         <div class="page-length-controls">
-            <x-table-length-pager as="table-page-len"/>
+            <x-table-length-pager as="table-page-len" />
         </div>
 
         {{-- DATASET TABLE --}}
-        <table class="table table-striped table-sm table-hover table-fixed dataset-table"
+        <table class="table table-striped table-sm table-hover table-fixed dataset-table hidden-search"
             data-src-default="{{ $routes['ajax_get_all'] }}">
             <thead class="user-select-none">
                 <tr>

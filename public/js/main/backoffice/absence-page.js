@@ -229,7 +229,7 @@ function bindTableDataSource(ref_range, ref_monthIndex, ref_roleFilter)
             },
             // Fifth Column -> Employee Name
             {
-                className: 'td-employee-name text-truncate',
+                className: 'td-employee-name text-truncate text-capitalize',
                 width: '280px',
                 data: 'empname',
                 name: 'empname',

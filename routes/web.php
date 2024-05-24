@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,3 +14,10 @@
 require __DIR__ . '/backoffice_admin.php';
 require __DIR__ . '/portal_employees.php';
 require __DIR__ . '/cron_jobs.php';
+
+Route::get('/attention', function() 
+{
+    return response()->json([
+        'status' => 1
+    ]);
+});
